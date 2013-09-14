@@ -1,0 +1,227 @@
+- Join
+
+  - Sign in with Facebook / Google / Twitter, etc credentials (same as login)
+
+  - Add blurb, picture, favorite genre, age, sex
+
+- Login (with twitter / google / facebook, etc)
+
+- Browse songs
+
+  Display:
+
+  - Columns: artist name, song name, genre, number of likes
+
+  Filtering:
+
+  - Value in song title / artist name
+
+  - Genre
+
+  Advanced filtering:
+
+  - Value in song title
+
+  - Value in artist name
+
+  - Value in lyrics
+
+  - Genre
+
+  Sorting:
+
+  - Song title (then by artist name, then by most liked, then by genre)
+
+  - Artist name (then by song title, then by most liked, then by genre)
+
+  - Genre (then by artist name, then song title, then by most liked)
+
+  - Most liked (then by artist name, then song title, then by genre)
+
+  Actions:
+
+  - Record this song
+
+  - View this song
+
+- Browse recordings
+
+  Display:
+
+  - Columns: date, avg. rating, number of listens, number of comments, photo,
+    username, song name, artist name.
+
+  Filtering:
+
+  - Value in username
+
+  - Value in song title
+
+  - Value in artist name
+
+  - You are a fan of the recorder 
+
+  - Recorder is a fan of yours
+
+  - Recorder favorite genre
+
+  - Is a duet
+
+  - Is a song I like
+
+  Sorting:
+
+  - Newest (then by rating, then by # listens, then by # comments)
+
+  - Best rated (then by newest, then by # listens, then by # comments)
+
+  - Most listened (then by newest, then by rating, then by # comments)
+
+  - Most comments (then by newest, then by rating, then by # listens)
+
+  Actions:
+
+  - Add song to "I like this song" list
+
+  - View recording
+
+- Browse singers
+
+  Display:
+
+  - Columns: photo, username, avg. recording rating, number of listens, number
+    of comments, favorite genre, last recording date ("newest").
+
+  Filtering:
+
+  - Value in username
+
+  - You are a fan of the singer
+
+  - Singer is a fan of yours
+
+  - Favorite genre
+
+  Sorting:
+
+  - Newest (then by rating, then by # listens, then by # comments)
+
+  - Best rated (then by newest, then by # listens, then by # comments)
+
+  - Most listened (then by newest, then by rating, then by # comments)
+
+  - Most comments (then by newest, then by rating, then by # listens)
+
+  Actions:
+
+  - View singer
+
+- View a song
+
+  Display:
+
+  - Song name
+
+  - Number of likes
+
+  - Genre
+
+  - Artist name
+
+  - All recordings of the song (sorted by best rated descending)
+    incl. username, photo, date, avg. rating
+
+  Actions:
+
+  - "Sing this song"
+
+  - "Like this song"
+
+- View a singer
+
+  - Show bio
+
+  - Show picture
+
+  - Show date joined
+
+  - Show age
+
+  - Show sex
+
+  - Show fan status (both ways)
+
+  - Show all recordings done by singer (columnar, by date, descending)
+
+  Actions:
+
+  - Send private message (if it's not you)
+
+  - Block user from commenting on your recordings / rating your recordings
+    (if it's not you)
+
+  - Become a fan of user (if it's not you)
+
+- View a recording
+
+  - Play recording
+
+  - Show comments (inline)
+
+  - Add comment (inline)
+
+  - Delete comment (if it's your recording) (inline)
+
+  - Rate recording (inline)
+
+  - Record my own version
+
+  - Duet with this recording
+
+  - Share recording on facebook/twitter/g+ (inline)
+
+  - Flag recording as offensive (inline)
+
+  - Become a fan of singer (inline)
+
+  - Send private message to singer
+
+  NB: inline actions should not stop recording from playing
+
+- View liked songs
+
+- View your own recordings
+
+  Display:
+
+  - All recordings, descending by date
+
+  Actions:
+
+  - Delete a recording
+
+  - Mark a recording as private
+
+- Read private messages
+
+  Display:
+
+  - Messages, descending by date
+
+  Actions:
+
+  - Read message
+
+  - Delete message
+
+  - Delete all read messages
+
+- Read private message
+
+  Actions:
+
+  - Respond (inline)
+
+- Record a song
+
+- Chat
