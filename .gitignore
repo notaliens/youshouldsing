@@ -2,7 +2,6 @@
 *.pyc
 .installed.cfg
 .mr.developer.cfg
-Makefile
 bin/
 develop-eggs/
 eggs/
@@ -19,4 +18,6 @@ src/sddci/
 src/sdexternaledit/
 src/substanced/
 src/wxpython/
+src/lesswatcher/
+src/bootswatch/
 var
