@@ -1,9 +1,25 @@
 <!DOCTYPE html>
 <html>
   <head>
+    
+    <more tal:omit-tag="" metal:define-slot="head-first"></more>
+    <meta charset="utf-8"/>
     <title>${layout.page_title}</title>
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0"/>
     <link rel="stylesheet" href="${layout.static('bootstrap.css')}" 
           media="screen"/>
+    <!-- Fav icons -->
+    <link rel="shortcut icon" href="${layout.static('yss.ico')}"/>
+    
+    <!-- Scripts -->
+    <script src="${layout.static('substanced.sdi:static/js/jquery-2.0.3.js')}"
+            type="text/javascript"></script>
+    <script src="${layout.static('substanced.sdi:static/js/bootstrap.js')}"
+            type="text/javascript"></script>
+    
+    <more tal:omit-tag="" metal:define-slot="head-more"></more>
+
   </head>
   <body metal:define-slot="body">
     <div class="navbar navbar-default navbar-fixed-top">

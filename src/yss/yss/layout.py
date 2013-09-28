@@ -10,4 +10,6 @@ class MainLayout(object):
         self.request = request
 
     def static(self, path):
-        return self.request.static_url("yss:static/" + path)
+        if not ':' in path:
+            path = 'yss:static/' + path
+        return self.request.static_url(path)
