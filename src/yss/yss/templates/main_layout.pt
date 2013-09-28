@@ -58,7 +58,7 @@
                 <a href="/logout">Log Out</a>
               </li>
               <li tal:condition="request.user">
-                <a href="#">My Account</a>
+                <a href="${request.resource_path(request.user)}">My Account</a>
               </li>
             </ul>
 
@@ -110,7 +110,7 @@
       <div class="container">
         <p class="text-muted credit">
        A <a href="http://pylonsproject.org">Pylons Project</a> Jaunt by the 
-          <a href="#">Definitely Not Built By Aliens</a> Team.
+          <a href="http://wsgiwar.com/teams/c2/definitely-not-built-by-aliens/">Definitely Not Built By Aliens</a> Team.
         </p>
       </div>
     </div>
