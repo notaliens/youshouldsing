@@ -8,7 +8,11 @@
 <head>
 </head>
 <body>
-  <h1 tal:condition="ok"> Logged in via ${provider_name} <h1>
-  <h1 tal:condition="not ok"> Log-in via ${provider_name} Denied <h1>
+  <div tal:condition="ok">
+   <h1> Logged in via ${provider_name} <h1>
+  </div>
+  <div tal:condition="not ok">
+   <h1> Log-in via ${provider_name} Denied <h1>
+  </div>
 </body>
 </html>

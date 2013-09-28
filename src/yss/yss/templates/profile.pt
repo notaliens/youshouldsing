@@ -4,6 +4,7 @@
 
     <div class="col-md-12">
 
+      ${structure:form}
 
     </div>
 
