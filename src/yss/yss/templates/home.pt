@@ -1,10 +1,6 @@
-<div metal:use-macro="request.sdiapi.get_macro('yss:templates/tempmaster.pt')">
-  <div metal:fill-slot="main">
-    <ul class="nav nav-tabs">
-      <li class="active"><a href="#">Home</a></li>
-      <li><a href="#">Profile</a></li>
-      <li><a href="#">Messages</a></li>
-    </ul>
+<div metal:use-macro="main_template">
+
+  <div metal:fill-slot="main_content">
 
     <div class="col-md-12">
 
