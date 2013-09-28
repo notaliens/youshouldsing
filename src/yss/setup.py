@@ -14,6 +14,7 @@ requires = [
     'substanced',
     'pyramid_tm',
     'velruse',
+    'PyBrowserID',
     ]
 
 setup(name='yss',
