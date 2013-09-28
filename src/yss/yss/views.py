@@ -37,7 +37,6 @@ def generate_performance_id(performances):
     renderer='templates/logged_in.pt',
 )
 def login_complete_view(context, request):
-    import pdb; pdb.set_trace()
     return {
         'ok': True,
         'provider_type': context.provider_type,
@@ -51,7 +50,6 @@ def login_complete_view(context, request):
     renderer='templates/logged_in.pt',
 )
 def login_denied_view(context, request):
-    import pdb; pdb.set_trace()
     return {
         'ok': False,
         'provider_name': context.provider_name,
