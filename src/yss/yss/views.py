@@ -2,14 +2,18 @@ import os
 import random
 import shutil
 
+from browserid.errors import TrustError
 import colander
 import deform
+from pyramid.httpexceptions import HTTPBadRequest
 from pyramid.httpexceptions import HTTPFound
+from pyramid.session import check_csrf_token
 from pyramid.view import view_config
 from pyramid.security import (
+    authenticated_userid,
     remember,
     forget,
-    )
+)
 from substanced.db import root_factory
 from substanced.interfaces import IUser
 from substanced.interfaces import IUserLocator
@@ -110,6 +114,131 @@ def velruse_login_denied_view(context, request):
         'reason': context.reason,
     }
 
+# Persona integration
+
+SIGNIN_HTML = (
+    '<img src="https://login.persona.org/i/persona_sign_in_blue.png" '
+          'id="signin" alt="sign-in button" />')
+
+SIGNOUT_HTML = '<button id="signout">logout</button>'
+
+PERSONA_JS = """
+$(function() {
+    $('#signin').click(function() {
+        navigator.id.request(%(request_params)s);
+        return false;
+    });
+
+    $('#signout').click(function() {
+        navigator.id.logout();
+        return false;
+    });
+
+    var currentUser = %(user)s;
+
+    navigator.id.watch({
+        loggedInUser: currentUser,
+        onlogin: function(assertion) {
+            $.ajax({
+                type: 'POST',
+                url: '%(login)s',
+                data: {
+                    assertion: assertion,
+                    came_from: '%(came_from)s',
+                    csrf_token: '%(csrf_token)s'
+                },
+                dataType: 'json',
+                success: function(res, status, xhr) {
+                    if(!res['success'])
+                        navigator.id.logout();
+                    window.location = res['redirect'];
+                },
+                error: function(xhr, status, err) {
+                    navigator.id.logout();
+                    alert("Login failure: " + err);
+                }
+            });
+        },
+        onlogout: function() {
+            $.ajax({
+                type: 'POST',
+                url: '%(logout)s',
+                data:{
+                    came_from: '%(came_from)s',
+                    csrf_token: '%(csrf_token)s'
+                },
+                dataType: 'json',
+                success: function(res, status, xhr) {
+                    window.location = res['redirect'];
+                },
+                error: function(xhr, status, err) {
+                    alert("Logout failure: " + err);
+                }
+            });
+        }
+    });
+});
+"""
+
+def persona_button(request):
+    """Return login button if the user is logged in, else the login button.
+    """
+    if not authenticated_userid(request):
+        return SIGNIN_HTML
+    else:
+        return SIGNOUT_HTML
+
+
+def persona_js(request):
+    """Return the javascript needed to run persona.
+    """
+    userid = authenticated_userid(request)
+    data = {
+        'user': "'%s'" % userid if userid else "null",
+        'login': '/persona/login',
+        'logout': '/persona/logout',
+        'csrf_token': request.session.get_csrf_token(),
+        'came_from': request.url,
+        'request_params': request.registry['persona.request_params'],
+    }
+    return PERSONA_JS % data
+
+def verify_persona_assertion(request):
+    """Verify the assertion and the csrf token in the given request.
+
+    Return the email of the user if everything is valid.
+
+    otherwise raise HTTPBadRequest.
+    """
+    verifier = request.registry['persona.verifier']
+    try:
+        data = verifier.verify(request.POST['assertion'])
+    except (ValueError, TrustError) as e:
+        raise HTTPBadRequest('Invalid assertion')
+    return data['email']
+
+@view_config(
+    name='login',
+    route_name='persona',
+    renderer='json',
+    )
+def persona_login(context, request):
+    check_csrf_token(request)
+    email = verify_persona_assertion(request)
+    adapter = request.registry.queryMultiAdapter(
+        (context, request), IUserLocator)
+    if adapter is None:
+        adapter = DefaultUserLocator(context, request)
+    user = adapter.get_user_by_email(email)
+    if user is None:
+        headers = remember(request, 'persona:%s' % email)
+        location = request.route_url('persona', 'unknown_user.html',
+                                     traverse=())
+    else:
+        headers = remember(request, get_oid(user))
+        location = request.POST['came_from']
+    request.response.headers.extend(headers)
+    return {'redirect': location, 'success': True}
 
 @view_config(
     context=IUser,
