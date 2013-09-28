@@ -1,0 +1,15 @@
+<div metal:use-macro="main_template">
+
+  <div metal:fill-slot="main_content">
+
+   <script type="text/javascript">
+    navigator.id.logout();
+   </script>
+
+   <div class="alert alert-info">
+    Logged out:  you will be redirected shortly to
+    <a href="${location}">${location}</a>.
+   </div>
+
+  </div>
+</div>

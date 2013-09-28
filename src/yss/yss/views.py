@@ -96,11 +96,16 @@ def velruse_login_complete_view(context, request):
     headers = remember(request, get_oid(user))
     return HTTPFound(location, headers=headers)
 
-@view_config(name='logout')
+@view_config(name='logout',
+             renderer='templates/persona_logout.pt',
+)
 def logout(request):
     headers = forget(request)
-    return HTTPFound(location=request.resource_url(request.virtual_root),
-                     headers=headers)
+    try:
+        del request.user
+    except AttributeError:
+        pass
+    return {'location': request.resource_url(request.virtual_root)}
 
 
 @view_config(
@@ -116,15 +121,15 @@ def velruse_login_denied_view(context, request):
 
 # Persona integration
 
-SIGNIN_HTML = (
+_PERSONA_SIGNIN_HTML = (
     '<img src="https://login.persona.org/i/persona_sign_in_blue.png" '
-          'id="signin" alt="sign-in button" />')
+          'id="persona-signin" alt="sign-in button" />')
 
-SIGNOUT_HTML = '<button id="signout">logout</button>'
+_PERSONA_SIGNOUT_HTML = '<button id="signout">logout</button>'
 
 PERSONA_JS = """
 $(function() {
-    $('#signin').click(function() {
+    $('#persona-signin').click(function() {
         navigator.id.request(%(request_params)s);
         return false;
     });
@@ -172,7 +177,7 @@ $(function() {
                     window.location = res['redirect'];
                 },
                 error: function(xhr, status, err) {
-                    alert("Logout failure: " + err);
+                    //alert("Logout failure: " + err);
                 }
             });
         }
@@ -184,9 +189,9 @@ def persona_button(request):
     """Return login button if the user is logged in, else the login button.
     """
     if not authenticated_userid(request):
-        return SIGNIN_HTML
+        return _PERSONA_SIGNIN_HTML
     else:
-        return SIGNOUT_HTML
+        return _PERSONA_SIGNOUT_HTML
 
 
 def persona_js(request):
@@ -225,20 +230,41 @@ def verify_persona_assertion(request):
 def persona_login(context, request):
     check_csrf_token(request)
     email = verify_persona_assertion(request)
+    root = root_factory(request)
     adapter = request.registry.queryMultiAdapter(
-        (context, request), IUserLocator)
+        (root, request), IUserLocator)
     if adapter is None:
-        adapter = DefaultUserLocator(context, request)
+        adapter = DefaultUserLocator(root, request)
     user = adapter.get_user_by_email(email)
     if user is None:
-        headers = remember(request, 'persona:%s' % email)
-        location = request.route_url('persona', 'unknown_user.html',
-                                     traverse=())
+        username = 'persona:%s' % email
+        principals = find_service(root, 'principals')
+        user = principals.add_user(username, registry=request.registry)
+        user.display_name = email
+        user.email = email
+        user.photo_url = None
+        user.age = colander.null
+        user.sex = user.favorite_genre = None
+        location = request.resource_url(user, 'edit.html')
     else:
-        headers = remember(request, get_oid(user))
-        location = request.POST['came_from']
+        location = request.resource_url(user)
+    headers = remember(request, get_oid(user))
     request.response.headers.extend(headers)
     return {'redirect': location, 'success': True}
+
+
+@view_config(
+    name='logout',
+    route_name='persona',
+    renderer='json',
+    )
+def persona_logout(context, request):
+    """View to forget the user
+    """
+    request.response.headers.extend(forget(request))
+    return {'redirect': request.POST['came_from']}
+
+# Retail profile views
 
 @view_config(
     context=IUser,
