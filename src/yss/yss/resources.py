@@ -8,6 +8,7 @@ from substanced.objectmap import multireference_source_property
 from substanced.objectmap import multireference_sourceid_property
 from substanced.principal import UserPropertySheet
 from substanced.principal import UserGroupsPropertySheet
+from substanced.property import PropertySheet
 from substanced.schema import Schema
 from substanced.util import renamer
 from zope.interface import implementer
@@ -65,6 +66,9 @@ class YSSProfileSchema(Schema):
         widget=deform.widget.SelectWidget(values=_genre_choices),
     )
 
+class YSSProfilePropertySheet(PropertySheet):
+    schema = YSSProfileSchema()
+
 @content(
     'User',
     icon='glyphicon glyphicon-user',
@@ -73,6 +77,7 @@ class YSSProfileSchema(Schema):
     propertysheets = (
         ('Preferences', UserPropertySheet),
         ('Groups', UserGroupsPropertySheet),
+        ('Profile', YSSProfilePropertySheet),
         )
     )
 @implementer(IUser)
