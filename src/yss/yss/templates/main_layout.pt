@@ -19,6 +19,9 @@
             type="text/javascript"></script>
     <script src="${layout.static('js/bootstrap.js')}"
             type="text/javascript"></script>
+    <script type="text/javascript"
+            src="https://login.persona.org/include.js"></script>
+    <script type="text/javascript">${structure:request.persona_js}</script>
     
     <more tal:omit-tag="" metal:define-slot="head-more"></more>
 
@@ -41,24 +44,36 @@
             </button>
           </div>
           <div class="navbar-collapse collapse" id="navbar-main">
-            <ul class="nav navbar-nav pull-right">
+            <ul class="nav navbar-nav pull-right"
+                style="padding-top: 8px">
               <li tal:condition="not request.user">
                 <span>Login</span>
+              </li>
+              <li tal:condition="not request.user">
                 <form action="${layout.twitter_login_url}" method="post">
                   <button type="submit"
                           style="background: transparent; 
                                  border: none; 
                                  cursor: pointer;">
                     <img src="${layout.static('twitter.png')}" 
-                         alt="Log in with Twitter"/>
+                         alt="Log in with Twitter"
+                         title="Log in with Twitter"
+                         />
                   </button>
                 </form>
+              </li>
+              <li tal:condition="not request.user">
+               <img src="${layout.static('persona.png')}"
+                    id="persona-signin"
+                    alt="Log in with Persona"
+                    title="Log in with Persona"
+                    />
               </li>
               <li tal:condition="request.user">
                 <a href="/logout">Log Out</a>
               </li>
               <li tal:condition="request.user">
-                <a href="#">My Account</a>
+                <a href="${request.resource_path(request.user)}">My Account</a>
               </li>
             </ul>
 
@@ -110,7 +125,7 @@
       <div class="container">
         <p class="text-muted credit">
        A <a href="http://pylonsproject.org">Pylons Project</a> Jaunt by the 
-          <a href="#">Definitely Not Built By Aliens</a> Team.
+          <a href="http://wsgiwar.com/teams/c2/definitely-not-built-by-aliens/">Definitely Not Built By Aliens</a> Team.
         </p>
       </div>
     </div>
