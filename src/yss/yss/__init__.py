@@ -5,11 +5,16 @@ from pyramid.config import ConfigurationError
 from pyramid.settings import aslist
 from substanced import root_factory
 
-from .views import persona_button
+from .authpolicy import YSSAuthenticationPolicy
 from .views import persona_js
 
 def main(global_config, **settings):
-    config = Configurator(settings=settings, root_factory=root_factory)
+    secret = settings['substanced.secret']
+    authn_policy = YSSAuthenticationPolicy(secret)
+    config = Configurator(settings=settings,
+                          root_factory=root_factory,
+                          authentication_policy=authn_policy,
+                         )
     config.include('substanced')
     config.include('pyramid_layout')
     config.include('velruse.providers.twitter')
@@ -42,9 +47,6 @@ def main(global_config, **settings):
     verifier = settings.get('persona.verifier', 'browserid.RemoteVerifier')
     verifier_factory = config.maybe_dotted(verifier)
     config.registry['persona.verifier'] = verifier_factory(audiences)
-
-    # Quick access to the login button
-    config.add_request_method(persona_button, 'persona_button', reify=True)
 
     # The javascript needed by persona
     config.add_request_method(persona_js, 'persona_js', reify=True)
