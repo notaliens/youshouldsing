@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  </head>
+  <body metal:define-slot="body">
+    <h1>${layout.page_title}</h1>
+    <metal:slot define-slot="main_content">
+      Sing here.
+    </metal:slot>
+  </body>
+</html>
