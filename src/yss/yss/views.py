@@ -30,3 +30,30 @@ def generate_performance_id(performances):
         if id not in performances:
             break
     return id
+
+
+@view_config(
+    context='velruse.AuthenticationComplete',
+    renderer='templates/logged_in.pt',
+)
+def login_complete_view(context, request):
+    import pdb; pdb.set_trace()
+    return {
+        'ok': True,
+        'provider_type': context.provider_type,
+        'provider_name': context.provider_name,
+        'profile': context.profile,
+        'credentials': context.credentials,
+    }
+
+@view_config(
+    context='velruse.AuthenticationDenied',
+    renderer='templates/logged_in.pt',
+)
+def login_denied_view(context, request):
+    import pdb; pdb.set_trace()
+    return {
+        'ok': False,
+        'provider_name': context.provider_name,
+        'reason': context.reason,
+    }
