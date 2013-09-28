@@ -47,7 +47,7 @@ def generate_performance_id(performances):
 @view_config(
     context='velruse.AuthenticationComplete',
 )
-def login_complete_view(context, request):
+def velruse_login_complete_view(context, request):
     provider = context.provider_name
     profile = context.profile
     username = profile['accounts'][0]['username']
@@ -78,9 +78,9 @@ def login_complete_view(context, request):
 
 @view_config(
     context='velruse.AuthenticationDenied',
-    renderer='templates/logged_in.pt',
+    renderer='templates/login_denied.pt',
 )
-def login_denied_view(context, request):
+def velruse_login_denied_view(context, request):
     return {
         'ok': False,
         'provider_name': context.provider_name,
