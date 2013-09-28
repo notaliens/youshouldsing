@@ -1,19 +1,7 @@
 <!DOCTYPE html>
-<html
-        xmlns="http://www.w3.org/1999/xhtml"
-        xmlns:tal="http://xml.zope.org/namespaces/tal"
-        xmlns:metal="http://xml.zope.org/namespaces/metal"
-        metal:define-macro="main"
-        >
-<head>
-</head>
-<body>
- <metal:slot metal:define-slot="whole-bodY">
-  <h1> You Should Sing! </h1>
-
-  <form action="${twitter_login_url}" method="post">
-   <input type="submit" value="Login with Twitter" />
+<html metal:use-macro="main_template">
+  <form metal:fill-slot="main_content" 
+        action="${twitter_login_url}" method="post">
+    <input type="submit" value="Login with Twitter" />
   </form>
- </metal:slot>
-</body>
 </html>
