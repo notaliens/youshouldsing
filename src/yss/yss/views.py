@@ -11,8 +11,9 @@ from pyramid.session import check_csrf_token
 from pyramid.view import view_config
 from pyramid.security import (
     authenticated_userid,
-    remember,
     forget,
+    remember,
+    unauthenticated_userid,
 )
 from substanced.db import root_factory
 from substanced.interfaces import IUser
@@ -197,9 +198,13 @@ def persona_button(request):
 def persona_js(request):
     """Return the javascript needed to run persona.
     """
-    userid = authenticated_userid(request)
+    user = request.user
+    if user is None:
+        userid = 'null'
+    else:
+        userid = user.email
     data = {
-        'user': "'%s'" % userid if userid else "null",
+        'user': "'%s'" % userid,
         'login': '/persona/login',
         'logout': '/persona/logout',
         'csrf_token': request.session.get_csrf_token(),
