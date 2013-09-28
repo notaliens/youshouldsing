@@ -8,5 +8,5 @@ def main(global_config, **settings):
     config.include('velruse.providers.twitter')
     config.add_twitter_login_from_settings(prefix='velruse.twitter.')
     config.scan()
-    config.add_static_view('static_yss', 'yss:static')
+    config.add_static_view('static', 'yss:static')
     return config.make_wsgi_app()
