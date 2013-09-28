@@ -13,6 +13,7 @@ def main(global_config, **settings):
     config.include('substanced')
     config.include('pyramid_layout')
     config.include('velruse.providers.twitter')
+    config.include('.evolve')
     config.add_twitter_login_from_settings(prefix='velruse.twitter.')
     config.add_static_view('static', 'yss:static')
     settings = config.get_settings()
