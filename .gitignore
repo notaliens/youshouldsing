@@ -1,0 +1,16 @@
+.installed.cfg
+.mr.developer.cfg
+Makefile
+bin/
+develop-eggs/
+eggs/
+include/
+lib/
+src/deform/
+src/pygame/
+src/pykaraoke/
+src/pyramid/
+src/sddav/
+src/sddci/
+src/sdexternaledit/
+src/substanced/
