@@ -12,6 +12,12 @@ from substanced.schema import Schema
 from substanced.util import renamer
 from zope.interface import implementer
 
+from .interfaces import (
+    ISongs,
+    IPerformers,
+    IRecordings,
+    )
+
 _sex_choices = (('', '- Select -'),
                 ('female', 'Female'),
                 ('male', 'Male')
@@ -75,3 +81,27 @@ class User(Folder):
     groupids = multireference_sourceid_property(UserToGroup)
     groups = multireference_source_property(UserToGroup)
     name = renamer()
+
+@content(
+    'Songs',
+    icon='glyphicon glyphicon-music',
+    )
+@implementer(ISongs)
+class Songs(Folder):
+    pass
+
+@content(
+    'Performers',
+    icon='glyphicon glyphicon-bullhorn',
+    )
+@implementer(IPerformers)
+class Performers(Folder):
+    pass
+
+@content(
+    'Recordings',
+    icon='glyphicon glyphicon-record',
+    )
+@implementer(IRecordings)
+class Recordings(Folder):
+    pass

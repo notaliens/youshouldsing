@@ -69,13 +69,15 @@
       <div class="container">
         <div class="row">
           <div class="col-md-12">
-            <ul class="nav nav-pills">
-              <li class="active"><a href="#">Home</a></li>
-              <li><a href="#">Songs</a></li>
-              <li><a href="#">Singers</a></li>
-              <li><a href="#">Recordings</a></li>
-              <li><a href="#">Accounts</a></li>
+            <ul class="nav nav-pills"
+                tal:define="tabs layout.tabs()"
+                tal:condition="tabs">
+              <li tal:repeat="tab_data tabs"
+                  tal:attributes="class tab_data['class']">
+                <a href="${tab_data['url']}">${tab_data['title']}</a>
+              </li>
             </ul>
+
           </div>
         </div>
 

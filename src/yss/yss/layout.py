@@ -1,7 +1,15 @@
 from pyramid_layout.layout import layout_config
 from pyramid.decorator import reify
+from pyramid.location import inside
+from pyramid.traversal import find_interface
+
 from velruse import login_url
 
+from .interfaces import (
+    ISongs,
+    IPerformers,
+    IRecordings,
+    )
 
 @layout_config(template="templates/main_layout.pt")
 class MainLayout(object):
@@ -18,4 +26,28 @@ class MainLayout(object):
     @reify
     def twitter_login_url(self):
         return login_url(self.request, 'twitter')
-        
+
+    def tabs(self):
+        root = self.request.virtual_root
+        home_data = {
+            'url':self.request.resource_url(root),
+            'title':'Home',
+            'class':self.context is root and 'active' or None
+            }
+        tab_data = [ home_data ]
+        songs = root.get('songs')
+        performers = root.get('performers')
+        recordings = root.get('recordings')
+        for (title, section) in (
+            ('Songs', songs),
+            ('Performers', performers),
+            ('Recordings', recordings),
+            ):
+            if section is not None:
+                d = {}
+                d['url'] = self.request.resource_url(section)
+                d['title'] = title
+                d['class'] = inside(self.context, section) and 'active' or None
+                tab_data.append(d)
+        return tab_data
+            
