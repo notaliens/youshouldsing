@@ -6,6 +6,8 @@ develop-eggs/
 eggs/
 include/
 lib/
+parts/
+share/
 src/deform/
 src/pygame/
 src/pykaraoke/
@@ -14,3 +16,4 @@ src/sddav/
 src/sddci/
 src/sdexternaledit/
 src/substanced/
+src/wxpython/
