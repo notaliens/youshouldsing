@@ -1,7 +1,0 @@
-<!DOCTYPE html>
-<html metal:use-macro="main_template">
-  <form metal:fill-slot="main_content" 
-        action="${twitter_login_url}" method="post">
-    <input type="submit" value="Login with Twitter" />
-  </form>
-</html>
