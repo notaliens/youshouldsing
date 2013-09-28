@@ -1,15 +1,8 @@
 from pyramid_layout.layout import layout_config
 from pyramid.decorator import reify
 from pyramid.location import inside
-from pyramid.traversal import find_interface
 
 from velruse import login_url
-
-from .interfaces import (
-    ISongs,
-    IPerformers,
-    IRecordings,
-    )
 
 @layout_config(template="templates/main_layout.pt")
 class MainLayout(object):
