@@ -1,5 +1,6 @@
-import base64
-import uuid
+import os
+import random
+import shutil
 
 import colander
 import deform
@@ -18,6 +19,8 @@ from substanced.util import get_oid
 
 from .resources import YSSProfileSchema
 
+random.seed()
+
 @view_config(renderer="templates/home.pt")
 def home(request):
     return {}
@@ -31,14 +34,28 @@ def recording_app(request):
     }
 
 
-@view_config(name="record", xhr=True)
+@view_config(name="record", xhr=True, renderer='string')
 def save_recording(request):
-    pass
+    f = request.params['data'].file
+    id = request.params['id']
+    fname = request.params['filename']
+    tmpdir = '/tmp/' + id
+    if not os.path.exists(tmpdir):
+        os.mkdir(tmpdir)
+    with open('%s/%s' % (tmpdir, fname), 'wb') as output:
+        shutil.copyfileobj(f, output)
+    return 'OK'
+
+
+idchars = (
+    map(chr, range(ord('a'), ord('z') + 1)) +
+    map(chr, range(ord('A'), ord('Z') + 1)) +
+    map(chr, range(ord('0'), ord('9') + 1)))
 
 
 def generate_performance_id(performances):
     while True:
-        id = base64.b64encode(uuid.uuid4().bytes).rstrip("==")[-8:]
+        id = ''.join([random.choice(idchars) for _ in range(8)])
         if id not in performances:
             break
     return id
