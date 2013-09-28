@@ -4,12 +4,6 @@
 
     <div class="col-md-12">
 
-      <form action="${twitter_login_url}" method="post">
-        <button type="submit"
-                style="background: transparent; border: none; cursor: pointer">
-         <img src="/static/twitter.png" alt="Log in with Twitter"/>
-        </button>
-      </form>
 
     </div>
 

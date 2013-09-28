@@ -4,7 +4,7 @@
     
     <more tal:omit-tag="" metal:define-slot="head-first"></more>
     <meta charset="utf-8"/>
-    <title>${layout.page_title}</title>
+    <title>${page_title|layout.page_title|'You Should Sing'}</title>
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0"/>
     <link rel="stylesheet" href="${layout.static('css/bootstrap.css')}" 
@@ -32,7 +32,7 @@
         <div class="container">
           <div class="navbar-header">
             <a class="navbar-brand" href="/"><i 
-              class="glyphicon glyphicon-volume-up"> </i>You should sing!</a>
+              class="glyphicon glyphicon-volume-up"> </i> You should sing!</a>
             <button class="navbar-toggle" type="button" data-toggle="collapse" 
                     data-target="#navbar-main">
               <span class="icon-bar"></span>
@@ -41,9 +41,18 @@
             </button>
           </div>
           <div class="navbar-collapse collapse" id="navbar-main">
-            <ul class="nav navbar-nav">
-              <li><a href="#">Join</a></li>
-              <li><a href="#">Log In</a></li>
+            <ul class="nav navbar-nav pull-right">
+              <li>
+                <form action="${layout.twitter_login_url}" method="post">
+                  <button type="submit"
+                          style="background: transparent; 
+                                 border: none; 
+                                 cursor: pointer;
+                                 margin-top: 10px;">
+                    <img src="${layout.static('twitter.png')}" alt="Log in with Twitter"/>
+                  </button>
+                </form>
+              </li>
               <li><a href="#">My Account</a></li>
             </ul>
 
@@ -80,10 +89,12 @@
         
         <div id="main_content">
           <metal:slot define-slot="main_content">
-          Sing here.
+            Sing here.
+          </metal:slot>
+          <metal:slot define-slot="tail">
+            <!-- For scripts and such -->
           </metal:slot>
         </div>
-
       </div>
     </div>
 
