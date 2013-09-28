@@ -2,7 +2,7 @@
 
 build:
 	virtualenv -ppython2.7 .
-	pip install --upgrade setuptools
+	bin/pip install --upgrade setuptools
 	bin/python bootstrap.py
 	bin/buildout
 
