@@ -77,7 +77,7 @@ def login_complete_view(context, request):
 
 @view_config(name='logout')
 def logout(request):
-    headers = forget(request, get_oid(request.user))
+    headers = forget(request)
     return HTTPFound(location=request.resource_url(request.virtual_root),
                      headers=headers)
 
