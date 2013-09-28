@@ -80,6 +80,9 @@
       <metal:slot define-slot="main_content">
           Sing here.
       </metal:slot>
+      <metal:slot define-slot="tail">
+        <!-- For scripts and such -->
+      </metal:slot>
     </div>
   </body>
 </html>

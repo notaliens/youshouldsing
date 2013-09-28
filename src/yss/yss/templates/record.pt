@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html metal:use-macro="main_template">
+  <h1>Make a recording!</h1>
+  <div metal:fill-slot="main_content">
+    <button id="record-me">Record<!--⚫--></button>
+    <button id="stop-me" disabled>◼</button>
+    <video autoplay>Your browser doesn't support video.</video>
+  </div>
+  <div metal:fill-slot="tail">
+    <script src="${layout.static('whammy.js')}"></script>
+    <script src="${layout.static('recorder.js')}"></script>
+    <script>
+      (function(exports) {
+        exports.URL = exports.URL || exports.webkitURL;
+
+        exports.requestAnimationFrame = exports.requestAnimationFrame ||
+            exports.webkitRequestAnimationFrame || 
+            exports.mozRequestAnimationFrame ||
+            exports.msRequestAnimationFrame || 
+            exports.oRequestAnimationFrame;
+
+        exports.cancelAnimationFrame = exports.cancelAnimationFrame ||
+            exports.webkitCancelAnimationFrame || 
+            exports.mozCancelAnimationFrame ||
+            exports.msCancelAnimationFrame || 
+            exports.oCancelAnimationFrame;
+
+        navigator.getUserMedia = navigator.getUserMedia ||
+            navigator.webkitGetUserMedia || 
+            navigator.mozGetUserMedia ||
+            navigator.msGetUserMedia;
+
+        window.AudioContext = window.AudioContext || window.webkitAudioContext;
+        navigator.getUserMedia = navigator.getUserMedia || 
+            navigator.webkitGetUserMedia;
+        window.URL = window.URL || window.webkitURL;
+
+        var CANVAS_WIDTH = 320;
+        var CANVAS_HEIGHT = 240;
+        var video = $('video')[0];
+        video.width = CANVAS_WIDTH;
+        video.height = CANVAS_HEIGHT;
+        var canvas = document.createElement('canvas'); // offscreen canvas.
+        canvas.width = CANVAS_WIDTH;
+        canvas.height = CANVAS_HEIGHT;
+        var rafId = null;
+        var startTime = null;
+        var endTime = null;
+        var audio_context;
+        var recorder;
+        var theStream;
+        var tagTime = Date.now();
+        var whammy = new Whammy.Video(10, 0.6);
+        var performance_id = "${id}";
+        var recording = false;
+
+        function toggleActivateRecordButton() {
+          var b = $('#record-me')[0];
+          b.textContent = b.disabled ? 'Record' : 'Recording...';
+          b.classList.toggle('recording');
+          b.disabled = !b.disabled;
+        }
+
+        function turnOnCamera() {
+          video.controls = false;
+
+          // audio setup
+          audio_context = new AudioContext;
+          try {
+            console.log('Audio context set up.');
+            console.log(
+              'navigator.getUserMedia ' + 
+              (navigator.getUserMedia ? 'available.' : 'not present!'));
+          } catch (e) {
+            console.log('No web audio support in this browser!');
+          }
+
+          var finishVideoSetup_ = function() {
+            // Note: video.onloadedmetadata doesn't fire in Chrome when using 
+            // getUserMedia so we have to use setTimeout. See crbug.com/110938.
+            setTimeout(function() {
+              video.width = 320;//video.clientWidth;
+              video.height = 240;// video.clientHeight;
+              // Canvas is 1/2 for performance. Otherwise, getImageData() readback is
+              // awful 100ms+ as 640x480.
+              canvas.width = video.width;
+              canvas.height = video.height;
+            }, 1000);
+          };
+
+          navigator.webkitGetUserMedia(
+            {"video": {
+               "mandatory": {
+                 "minWidth": "320",
+                 "minHeight": "240",
+                 "minFrameRate": "10",
+                 "maxWidth": "320",
+                 "maxHeight": "240",
+                 "maxFrameRate": "10"}
+             },
+             audio: true}, 
+             function(stream) {
+               theStream = stream;
+               video.src = window.URL.createObjectURL(stream);
+
+               var input = audio_context.createMediaStreamSource(stream);
+
+               modulatorInput = audio_context.createGainNode();
+
+               modulatorGain = audio_context.createGainNode();
+               modulatorGain.gain.value = 4.0;
+               modulatorGain.connect( modulatorInput );
+
+               input.connect(modulatorGain);
+               recorder = new Recorder(input);
+
+               finishVideoSetup_();},
+             function(e) {
+               alert('something went wrong');
+             });
+        };
+
+        function record() {
+          var elapsedTime = $('#elasped-time')[0];
+          var ctx = canvas.getContext('2d');
+          var CANVAS_HEIGHT = canvas.height;
+          var CANVAS_WIDTH = canvas.width;
+
+          recording = true;
+          startTime = Date.now();
+
+          toggleActivateRecordButton();
+          $('#stop-me')[0].disabled = false;
+
+          recorder.record(); 
+          var lastFrameTime;
+
+          function drawVideoFrame_(time) {
+            if (recording) {
+              rafId = requestAnimationFrame(drawVideoFrame_);
+            }
+
+            if (typeof lastFrameTime === undefined) { lastFrameTime = time; }
+
+            if (time - lastFrameTime < 90) { return; } // ~10 fps
+
+            ctx.drawImage(video, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+            try {
+              whammy.add(canvas); //, time - lastFrameTime);
+            } catch (e) {
+              console.log("error: ", e);
+            }
+
+            //console.log("fps: ", 1000 / (time - lastFrameTime));
+            lastFrameTime = time;
+          };
+
+          rafId = requestAnimationFrame(drawVideoFrame_);
+        };
+
+        function stop() {
+          theStream.stop();
+          recorder.stop();
+          endTime = Date.now();
+          recording = false;
+          $('#stop-me')[0].disabled = true;
+
+          toggleActivateRecordButton();
+
+          console.log('frames captured: ' + whammy.frames.length + ' => ' +
+                      ((endTime - startTime) / 1000) + 's video');
+
+          embedVideoPreview();
+        };
+
+        function embedVideoPreview(opt_url) {
+          recorder.exportWAV(function(blob) {
+            var fd = new FormData();
+            fd.append('id', performance_id);
+            fd.append('data', blob);
+            fd.append('filename', "audio.wav");
+            jQuery.ajax({
+              type: 'POST',
+              url: window.location,
+              data: fd,
+              processData: false,
+              contentType: false
+            }).done(function(data) {
+              console.log(data);
+            });
+          });
+
+          var webmBlob = whammy.compile();
+          var fd = new FormData();
+          fd.append('id', performance_id);
+          fd.append('data', webmBlob);
+          fd.append('filename', 'video.webm');
+          jQuery.ajax({
+            type: 'POST',
+            url: window.location,
+            data: fd,
+            processData: false,
+            contentType: false
+          }).done(function(data) {
+               console.log(data);
+          });
+        }
+
+        function initEvents() {
+          $('#record-me')[0].addEventListener('click', record);
+          $('#stop-me')[0].addEventListener('click', stop);
+        }
+
+        initEvents();
+        turnOnCamera();
+      })(window);
+    </script>
+  </div>
+</html>
