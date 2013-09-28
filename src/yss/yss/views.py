@@ -1,6 +1,8 @@
 from pyramid.view import view_config
-from pyramid.response import Response
+from velruse import login_url
 
-@view_config()
+@view_config(renderer="templates/splash.pt"
+            )
 def itworks(request):
-    return Response('It works!')
+    return {'twitter_login_url': login_url(request, 'twitter'),
+           }
