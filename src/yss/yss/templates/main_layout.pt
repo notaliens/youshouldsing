@@ -93,7 +93,7 @@
           </div>
         </div>
         
-        <div id="main_content">
+        <div id="main_content" style="margin-top: 15px;">
           <metal:slot define-slot="main_content">
             Sing here.
           </metal:slot>
