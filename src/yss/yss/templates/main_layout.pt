@@ -41,9 +41,18 @@
             </button>
           </div>
           <div class="navbar-collapse collapse" id="navbar-main">
-            <ul class="nav navbar-nav">
-              <li><a href="#">Join</a></li>
-              <li><a href="#">Log In</a></li>
+            <ul class="nav navbar-nav pull-right">
+              <li>
+                <form action="${layout.twitter_login_url}" method="post">
+                  <button type="submit"
+                          style="background: transparent; 
+                                 border: none; 
+                                 cursor: pointer;
+                                 margin-top: 10px;">
+                    <img src="${layout.static('twitter.png')}" alt="Log in with Twitter"/>
+                  </button>
+                </form>
+              </li>
               <li><a href="#">My Account</a></li>
             </ul>
 

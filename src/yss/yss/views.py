@@ -5,22 +5,22 @@ import colander
 import deform
 from pyramid.httpexceptions import HTTPFound
 from pyramid.view import view_config
-from pyramid.security import remember
+from pyramid.security import (
+    remember,
+    forget,
+    )
 from substanced.db import root_factory
 from substanced.interfaces import IUser
 from substanced.interfaces import IUserLocator
 from substanced.principal import DefaultUserLocator
 from substanced.util import find_service
 from substanced.util import get_oid
-from velruse import login_url
 
 from .resources import YSSProfileSchema
 
 @view_config(renderer="templates/home.pt")
 def home(request):
-    return {
-        'twitter_login_url': login_url(request, 'twitter'),
-        }
+    return {}
 
 @view_config(name="record",
              renderer="templates/record.pt")
@@ -74,6 +74,12 @@ def login_complete_view(context, request):
         location = request.resource_url(user)
     headers = remember(request, get_oid(user))
     return HTTPFound(location, headers=headers)
+
+@view_config(name='logout')
+def logout(request):
+    headers = forget(request, get_oid(request.user))
+    return HTTPFound(location=request.resource_url(request.virtual_root),
+                     headers=headers)
 
 
 @view_config(
