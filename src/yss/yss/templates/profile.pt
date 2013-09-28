@@ -1,0 +1,12 @@
+<div metal:use-macro="main_template">
+
+  <div metal:fill-slot="main_content">
+
+    <div class="col-md-12">
+
+      ${structure:form}
+
+    </div>
+
+  </div>
+</div>
