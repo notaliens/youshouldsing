@@ -1,4 +1,4 @@
-<div metal:use-macro="request.sdiapi.get_macro('yss:templates/main_layout.pt')">
+<div metal:use-macro="main_template">
 
   <div metal:fill-slot="main_content">
 
