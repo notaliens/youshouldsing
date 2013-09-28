@@ -1,10 +1,12 @@
 import base64
 import uuid
 
+import colander
 import deform
 from pyramid.httpexceptions import HTTPFound
 from pyramid.view import view_config
 from pyramid.security import remember
+from substanced.db import root_factory
 from substanced.interfaces import IUser
 from substanced.interfaces import IUserLocator
 from substanced.principal import DefaultUserLocator
@@ -49,14 +51,14 @@ def login_complete_view(context, request):
     provider = context.provider_name
     profile = context.profile
     username = profile['accounts'][0]['username']
-    root = request.virtual_root
+    root = root_factory(request)
     adapter = request.registry.queryMultiAdapter(
         (root, request), IUserLocator)
     if adapter is None:
         adapter = DefaultUserLocator(root, request)
     user = adapter.get_user_by_login(username)
     if user is None:
-        principals = find_service(request.virtual_root, 'principals')
+        principals = find_service(root, 'principals')
         user = principals.add_user(username, registry=request.registry)
         user.display_name = profile['displayName']
         addresses = profile.get('addresses')
@@ -65,7 +67,8 @@ def login_complete_view(context, request):
         photos = profile.get('photos')
         if photos:
             user.photo_url = photos[0]['value']
-        user.age = user.sex = user.favorite_genre = None
+        user.age = colander.null
+        user.sex = user.favorite_genre = None
         location = request.resource_url(user, 'edit.html')
     else:
         location = request.resource_url(user)
@@ -95,7 +98,7 @@ def profile_view(context, request):
         'display_name': getattr(context, 'display_name', ''),
         'email': getattr(context, 'email', ''),
         'photo_url': getattr(context, 'photo_url', ''),
-        'age': getattr(context, 'age', 50),
+        'age': getattr(context, 'age', colander.null),
         'sex': getattr(context, 'sex', None),
         'favorite_genre': getattr(context, 'favorite_genre', None),
     }
@@ -117,7 +120,7 @@ def profile_edit(context, request):
         'display_name': getattr(context, 'display_name', ''),
         'email': getattr(context, 'email', ''),
         'photo_url': getattr(context, 'photo_url', ''),
-        'age': getattr(context, 'age', 50),
+        'age': getattr(context, 'age', colander.null),
         'sex': getattr(context, 'sex', None),
         'favorite_genre': getattr(context, 'favorite_genre', None),
     }
