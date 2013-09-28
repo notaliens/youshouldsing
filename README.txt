@@ -3,6 +3,8 @@ Prep
 
 On Ubuntu 12.04:
 
+sudo apt-get install timidity
+sudo apt-get install lame
 sudo apt-get build-dep libwxgtk2.8-0
 sudo apt-get build-dep python-pygame
 sudo apt-get install

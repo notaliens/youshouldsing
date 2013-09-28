@@ -40,6 +40,8 @@ setup(name='yss',
       entry_points="""\
       [paste.app_factory]
       main = yss:main
+      [console_scripts]
+      yss_midi_to_mp3 = yss.scripts.midi_to_mp3:main
       """,
       )
 
