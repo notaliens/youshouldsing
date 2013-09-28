@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html
+        xmlns="http://www.w3.org/1999/xhtml"
+        xmlns:tal="http://xml.zope.org/namespaces/tal"
+        xmlns:metal="http://xml.zope.org/namespaces/metal"
+        metal:define-macro="main"
+        >
+<head>
+</head>
+<body>
+  <h1 tal:condition="ok"> Logged in via ${provider_name} <h1>
+  <h1 tal:condition="not ok"> Log-in via ${provider_name} Denied <h1>
+</body>
+</html>
