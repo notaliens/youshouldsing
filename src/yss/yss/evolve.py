@@ -1,4 +1,6 @@
+import pkg_resources
 from pyramid.threadlocal import get_current_registry
+
 
 def add_sections(root):
     registry = get_current_registry()
@@ -6,6 +8,19 @@ def add_sections(root):
     root['performers'] = registry.content.create('Performers')
     root['recordings'] = registry.content.create('Recordings')
 
+
+def add_test_song(root):
+    # Workaround
+    if 'songs' not in root:
+        add_sections(root)
+    registry = get_current_registry()
+    song = registry.content.create(
+        'Song', 'Blackbird', 'The Beatles',
+        pkg_resources.resource_string('yss', 'blackbird.json'),
+        pkg_resources.resource_stream('yss', 'blackbird.mp3'))
+    root['songs']['blackbird'] = song
+
+
 def includeme(config):
     config.add_evolution_step(add_sections)
-    
+    config.add_evolution_step(add_test_song, after=add_sections)

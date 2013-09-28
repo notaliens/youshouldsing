@@ -25,6 +25,7 @@ random.seed()
 def home(request):
     return {}
 
+
 @view_config(name="record",
              renderer="templates/record.pt")
 def recording_app(request):

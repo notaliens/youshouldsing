@@ -11,6 +11,7 @@ requires = [
     'pyramid_debugtoolbar',
     'pyramid_layout',
     'waitress',
+    'slug',
     'substanced',
     'pyramid_tm',
     'velruse',
