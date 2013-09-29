@@ -268,20 +268,21 @@
         };
 
         function embedVideoPreview(opt_url) {
-          var audioDeferred, videoDeferred;
+          var audioDeferred = jQuery.Deferred();
 
           recorder.exportWAV(function(blob) {
             var fd = new FormData();
             fd.append('id', recording_id);
             fd.append('data', blob);
             fd.append('filename', "audio.wav");
-            audioDeferred = jQuery.ajax({
+            jQuery.ajax({
               type: 'POST',
               url: window.location,
               data: fd,
               processData: false,
               contentType: false
             }).done(function(data) {
+              audioDeferred.resolve();
               console.log(data);
             });
           });
@@ -291,7 +292,7 @@
           fd.append('id', recording_id);
           fd.append('data', webmBlob);
           fd.append('filename', 'video.webm');
-          videoDeferred = jQuery.ajax({
+          var videoDeferred = jQuery.ajax({
             type: 'POST',
             url: window.location,
             data: fd,
@@ -300,7 +301,7 @@
           }).done(function(data) {
                console.log(data);
           });
-          jQuery.when(audioDeferred, videoDeferred).done(function(a1, a2) {
+          jQuery.when(audioDeferred, videoDeferred).then(function(a1, a2) {
             var fd = new FormData();
             fd.append('id', recording_id);
             fd.append('finished', '1');
