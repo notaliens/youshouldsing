@@ -5,7 +5,6 @@ import subprocess
 import sys
 import tempfile
 import transaction
-import pykar
 import json
 
 from pyramid.paster import (
@@ -90,6 +89,8 @@ def main(argv=sys.argv):
             shutil.rmtree(outdir, ignore_errors=True)
 
 def get_timings(input_filename):
+    # Avoid needing this during venusian scan
+    import pykar
     def errback(msg):
         print msg
     kardata = open(input_filename, 'rb').read()
