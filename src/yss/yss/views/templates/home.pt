@@ -2,8 +2,43 @@
 
   <div metal:fill-slot="main_content">
 
-    <div class="col-md-12">
+    <div class="col-md-6">
 
+      <div class="panel panel-primary">
+        <div class="panel-heading">
+          Featured Recordings
+        </div>
+        <div class="panel-body">
+          <table class="table table-striped">
+            <tbody>
+              <tr>
+                <td>A recording</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+
+    </div>
+
+    <div class="col-md-6">
+
+      <div class="panel panel-info">
+        <div class="panel-heading">
+          Latest Recordings
+        </div>
+        <div class="panel-body">
+          <table class="table table-striped">
+            <tbody>
+              <tr>
+                <td>A recording</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
 
     </div>
 
