@@ -32,3 +32,6 @@ class RecordingToPerformer(ReferenceType):
 
 class RecordingToSong(ReferenceType):
     pass
+
+class LikerToSong(ReferenceType):
+    pass

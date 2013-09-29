@@ -8,6 +8,7 @@ from substanced.folder import Folder
 from substanced.objectmap import reference_sourceid_property
 from substanced.objectmap import reference_source_property
 from substanced.objectmap import reference_target_property
+from substanced.objectmap import multireference_target_property
 from substanced.principal import User as BaseUser
 from substanced.principal import UserPropertySheet
 from substanced.principal import UserGroupsPropertySheet
@@ -19,6 +20,7 @@ from zope.interface import implementer
 
 from .interfaces import (
     CreatorToSong,
+    LikerToSong,
     IPerformer,
     IPerformers,
     IRecording,
@@ -157,6 +159,8 @@ class Song(persistent.Persistent):
 
     creator_id = reference_sourceid_property(CreatorToSong)
     creator = reference_source_property(CreatorToSong)
+    liked_by = multireference_target_property(LikerToSong)
+
     genre = None
     likes = 0
 

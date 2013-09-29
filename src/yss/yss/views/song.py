@@ -10,7 +10,10 @@ from substanced.util import (
 from substanced.folder.views import generate_text_filter_terms
 from substanced.sdi import mgmt_view
 
-from yss.interfaces import ISongs
+from yss.interfaces import (
+    ISongs,
+    ISong,
+    )
 
 @mgmt_view(context=ISongs, name='preview')
 def preview_songs(context, request):
@@ -109,3 +112,20 @@ class SongsView(object):
             icon
             )
 
+class SongView(object):
+    def __init__(self, context, request):
+        self.context = context
+        self.request = request
+
+    @view_config(context=ISong, renderer='templates/song.pt')
+    def __call__(self):
+        song = self.context
+        return {
+            'title':song.title,
+            'artist':song.artist,
+            'likes':len(song.liked_by),
+            'recordings':[],
+            }
+
+        
+    
