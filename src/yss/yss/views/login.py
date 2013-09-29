@@ -195,9 +195,9 @@ def persona_js(request):
     if user is None:
         userid = 'null'
     else:
-        userid = user.email
+        userid = "'%s'" % user.email
     data = {
-        'user': "'%s'" % userid,
+        'user': userid,
         'login': '/persona/login',
         'logout': '/persona/logout',
         'csrf_token': request.session.get_csrf_token(),
