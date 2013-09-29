@@ -47,4 +47,6 @@ def content_added(event):
     creator_id = get_oid(getattr(request, 'user', None), None)
     event.object.creator_id = creator_id
     catalog = find_catalog(event.object, 'yss')
-    catalog['creator_id'].reindex_resource(event.object)
+    index = catalog.get('creator_id')
+    if index:
+        index.reindex_resource(event.object)
