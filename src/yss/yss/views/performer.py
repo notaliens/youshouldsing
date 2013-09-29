@@ -21,12 +21,12 @@ from ..resources import PerformerProfileSchema
 def profile_view(context, request):
     return {
         'username': context.__name__,
-        'display_name': getattr(context, 'display_name', ''),
+        'title': getattr(context, 'title', ''),
         'email': getattr(context, 'email', ''),
         'photo_url': getattr(context, 'photo_url', ''),
         'age': getattr(context, 'age', colander.null),
         'sex': getattr(context, 'sex', None),
-        'favorite_genre': getattr(context, 'favorite_genre', None),
+        'genre': getattr(context, 'genre', None),
         'form': None
     }
     form = deform.Form(PerformerProfileSchema(), buttons=('Save',))
@@ -48,22 +48,22 @@ def profile_edit_form(context, request):
         except deform.ValidationFailure as e:
             rendered = e.render()
         else:
-            context.display_name = appstruct['display_name']
+            context.title = appstruct['title']
             context.email = appstruct['email']
             context.photo_url = appstruct['photo_url']
             context.age = appstruct['age']
             context.sex = appstruct['sex']
-            context.favorite_genre = appstruct['favorite_genre']
+            context.genre = appstruct['genre']
     else:
         appstruct = {
             'csrf_token': request.session.get_csrf_token(),
             'username': context.__name__,
-            'display_name': getattr(context, 'display_name', ''),
+            'title': getattr(context, 'title', ''),
             'email': getattr(context, 'email', ''),
             'photo_url': getattr(context, 'photo_url', ''),
             'age': getattr(context, 'age', colander.null),
             'sex': getattr(context, 'sex', None),
-            'favorite_genre': getattr(context, 'favorite_genre', None),
+            'genre': getattr(context, 'genre', None),
         }
     if rendered is None:
         rendered = form.render(appstruct, readonly=False)

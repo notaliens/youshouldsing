@@ -40,15 +40,15 @@
                     <td>
                      <a href="${request.resource_url(item)}"
                      ><img src="${item.photo_url}" width="24" height="24"
-                       />&nbsp;&nbsp;${item.display_name}</a>
+                       />&nbsp;&nbsp;${item.title}</a>
                     </td>
-                    <td>${item.favorite_genre or 'Unknown'}</td>
+                    <td>${item.genre or 'Unknown'}</td>
                     <td>${item.likes}</td>
                   </tr>
                 </tbody>
               </table>
               <div style="padding-top: 10px;" tal:condition="not batch">
-                No songs found.
+                No performers found.
               </div>
             </form>
           </div>

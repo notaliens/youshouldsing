@@ -42,8 +42,9 @@ _genre_choices = (('', '- Select -'),
 class PerformerProfileSchema(Schema):
     """ Property schema for :class:`substanced.principal.User` objects.
     """
-    display_name = colander.SchemaNode(
+    title = colander.SchemaNode(
         colander.String(),
+        title='Display Name',
     )
     email = colander.SchemaNode(
         colander.String(),
@@ -67,7 +68,7 @@ class PerformerProfileSchema(Schema):
         title='Sex',
         widget=deform.widget.SelectWidget(values=_sex_choices),
     )
-    favorite_genre = colander.SchemaNode(
+    genre = colander.SchemaNode(
         colander.String(),
         title='Favorite Genre',
         widget=deform.widget.SelectWidget(values=_genre_choices),

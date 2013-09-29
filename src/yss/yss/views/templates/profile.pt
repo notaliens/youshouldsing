@@ -6,11 +6,12 @@
       <div class="panel panel-default">
         <tal:if tal:condition="not form">
          <div class="panel-heading">
-           Profile Information
+           <p style="float: right"><a href="edit.html">Edit</a></p>
+           <p>Profile Information</p>
          </div>
          <div class="panel-body">
            <img align="right" src="${photo_url}" />
-           <h1>${display_name}</h1>
+           <h1>${title}</h1>
 
            <p tal:condition="email">
               E-mail: <a href="mailto:${email}">${email}</a></p>
@@ -19,8 +20,8 @@
 
            <p tal:condition="sex">Sex: ${sex}</p>
 
-           <p tal:condition="favorite_genre">
-            Favorite Genre: ${favorite_genre}</p>
+           <p tal:condition="genre">
+            Favorite Genre: ${genre}</p>
 
          </div>
         </tal:if>
