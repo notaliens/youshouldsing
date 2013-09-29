@@ -51,16 +51,17 @@ class User(BaseUser):
     performer = reference_target_property(PerformerToUser)
 
 _sex_choices = (('', '- Select -'),
-                ('female', 'Female'),
-                ('male', 'Male')
+                ('Female', 'Female'),
+                ('Male', 'Male')
                )
 
 _genre_choices = (('', '- Select -'),
-                  ('rock', 'Rock'),
-                  ('pop', 'Pop'),
-                  ('country', 'Country'),
-                  ('jazz', 'Jazz'),
-                  ('blues', 'Blues'),
+                  ('Unknown', 'Unknown'),
+                  ('Rock', 'Rock'),
+                  ('Pop', 'Pop'),
+                  ('Country', 'Country'),
+                  ('Jazz', 'Jazz'),
+                  ('Blues', 'Blues'),
                  )
 
 def performers_choices(context, request):
@@ -154,7 +155,14 @@ class Performer(Folder):
 class SongSchema(Schema):
     title = colander.SchemaNode(colander.String())
     artist = colander.SchemaNode(colander.String())
-    timing = colander.SchemaNode(colander.String())
+    genre = colander.SchemaNode(
+        colander.String(),
+        widget=deform.widget.SelectWidget(values=_genre_choices),
+    )
+    timings = colander.SchemaNode(
+        colander.String(),
+        widget=deform.widget.TextAreaWidget(style="height: 200px;"),
+        )
 
 
 class SongPropertySheet(PropertySheet):
@@ -181,7 +189,7 @@ class Songs(Folder):
 @implementer(ISong)
 class Song(persistent.Persistent):
 
-    genre = None
+    genre = 'Unknown'
     recordings = multireference_target_property(RecordingToSong)
     liked_by = multireference_target_property(PerformerLikesSong)
     liked_by_ids = multireference_targetid_property(PerformerLikesSong)
@@ -225,10 +233,11 @@ class Recording(persistent.Persistent):
 
     @property
     def title(self):
-        '%s by %s' % (
-            getattr(self.song, 'title', 'Unknown'),
-            getattr(self.performer, 'title', 'Unknown')
-            )
+        return getattr(self.song, 'title', 'Unknown')
+
+    @property
+    def genre(self):
+        return getattr(self.song, 'genre', 'Unknown')
 
     @property
     def likes(self):

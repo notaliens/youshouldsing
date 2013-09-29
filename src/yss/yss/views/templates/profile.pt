@@ -59,7 +59,7 @@
                  </td>
                  <td>${item.song.genre or 'Unknown'}</td>
                  <td>${item.likes}</td>
-                 <td>${item.created.iso()}</td>
+                 <td>${item.created.isoformat()}</td>
                </tr>
              </tbody>
            </table>

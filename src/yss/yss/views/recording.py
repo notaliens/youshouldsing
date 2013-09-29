@@ -1,3 +1,4 @@
+import base64
 import os
 import random
 import shutil
@@ -5,8 +6,21 @@ import shutil
 from pyramid.response import FileResponse
 from pyramid.traversal import resource_path
 from pyramid.view import view_config
+from pyramid.settings import asbool
+
+from substanced.util import (
+    find_index,
+    Batch,
+    )
+
+from substanced.folder.views import generate_text_filter_terms
 
 from ..utils import get_redis
+
+from ..interfaces import (
+    IRecording,
+    IRecordings,
+    )
 
 
 random.seed()
@@ -25,7 +39,7 @@ def recording_app(song, request):
 
 
 @view_config(content_type='Song', name="record", xhr=True, renderer='string')
-def save_recording(song, request):
+def save_audio(song, request):
     f = request.params['data'].file
     id = request.params['id']
     fname = request.params['filename']
@@ -34,6 +48,21 @@ def save_recording(song, request):
         os.mkdir(tmpdir)
     with open('%s/%s' % (tmpdir, fname), 'wb') as output:
         shutil.copyfileobj(f, output)
+    return 'OK'
+
+
+@view_config(content_type='Song', name="record", xhr=True, renderer='string',
+             request_param='framedata')
+def save_video(song, request):
+    id = request.params['id']
+    tmpdir = '/tmp/' + id
+    fname = os.path.join(tmpdir, 'frame%d.png')
+    for i, data in enumerate(request.params.getall('framedata')):
+        preamble = 'data:image/png;base64,'
+        assert data.startswith(preamble), data
+        data = base64.b64decode(data[len(preamble):])
+        with open(fname % i, 'wb') as fp:
+            fp.write(data)
     return 'OK'
 
 
@@ -77,3 +106,113 @@ def stream_mp3(song, request):
     return FileResponse(
         song.blob.committed(),
         content_type='audio/mpeg')
+
+
+class RecordingView(object):
+    def __init__(self, context, request):
+        self.context = context
+        self.request = request
+
+    @view_config(context=IRecording, renderer='templates/recording.pt')
+    def __call__(self):
+        recording = self.context
+        return {
+            'title':recording.title,
+            'performer':recording.performer,
+            'likes':len(recording.liked_by),
+            'recordings':[],
+            }
+
+class RecordingsView(object):
+    default_sort = 'performer'
+    def __init__(self, context, request):
+        self.context = context
+        self.request = request
+
+    def query(self):
+        request = self.request
+        context = self.context
+        q = find_index(context, 'system', 'content_type').eq('Recording')
+        q = q & find_index(context, 'system', 'allowed').allows(
+            request, 'view')
+        filter_text = request.params.get('filter_text')
+        if filter_text:
+            terms = generate_text_filter_terms(filter_text)
+            text = find_index(context, 'system', 'text')
+            for term in terms:
+                if text.check_query(term):
+                    q = q & text.eq(term)
+        filter_genre = request.params.get('filter_genre')
+        if filter_genre:
+            q = q & find_index(context, 'yss', 'genre').eq(filter_genre)
+        resultset = q.execute()
+        sorting = request.params.get('sorting')
+        reverse = request.params.get('reverse')
+        if reverse == 'false':
+            reverse = False
+        reverse = bool(reverse)
+        if sorting:
+            resultset = self.sort_by(resultset, sorting, reverse)
+        else:
+            resultset = self.sort_by(resultset, self.default_sort, False)
+        return resultset
+
+    def sort_by(self, rs, token, reverse):
+        context = self.context
+        title = find_index(context, 'yss', 'title')
+        performer = find_index(context, 'yss', 'performer')
+        likes = find_index(context, 'yss', 'likes')
+        genre = find_index(context, 'yss', 'genre')
+        created = find_index(context, 'yss', 'created')
+        sorting = {
+            'date':(created, likes, title, performer, genre),
+            'title':(title, performer, likes, genre, created),
+            'performer':(performer, title, likes, genre, created),
+            'genre':(genre, performer, title, likes, created),
+            'likes':(likes, performer, title, genre, created),
+            }
+        indexes = sorting.get(token, sorting[self.default_sort])
+        for idx in indexes[1:]:
+            rs = rs.sort(idx)
+        first = indexes[0]
+        rs = rs.sort(first, reverse=reverse)
+        return rs
+
+    @view_config(context=IRecordings, renderer='templates/recordings.pt')
+    def contents(self):
+        request = self.request
+        resultset = self.query()
+        batch = Batch(resultset, self.request, seqlen=len(resultset),
+                      default_size=100)
+        return {
+            'batch':batch,
+            'filter_text':request.params.get('filter_text'),
+            'reverse':request.params.get('reverse', 'false')
+            }
+
+    def sort_tag(self, token):
+        request = self.request
+        context = self.context
+        reverse = request.params.get('reverse', 'false')
+        reverse = asbool(reverse)
+        sorting = request.params.get('sorting')
+        if sorting == token or (not sorting and token == self.default_sort):
+            if reverse:
+                icon = 'glyphicon glyphicon-chevron-up'
+            else:
+                icon = 'glyphicon glyphicon-chevron-down'
+            reverse = reverse and 'false' or 'true'
+        else:
+            icon = ''
+            reverse = 'false'
+
+        url = request.resource_url(
+            context, query=(
+                ('sorting', token), ('reverse', reverse)
+                )
+            )
+        return '<a href="%s">%s <i class="%s"> </i></a>' % (
+            url,
+            token.capitalize(),
+            icon
+            )

@@ -5,6 +5,8 @@ from substanced.catalog import (
     Field
     )
 
+from yss.interfaces import IRecording
+
 @catalog_factory('yss')
 class Indexes(object):
     genre = Field()
@@ -13,6 +15,7 @@ class Indexes(object):
     likes = Field()
     creator_id = Field()
     created = Field()
+    performer = Field()
 
 class IndexViews(object):
     def __init__(self, resource):
@@ -34,6 +37,11 @@ class IndexViews(object):
     def artist(self, default):
         artist = getattr(self.resource, 'artist', default)
         return self.tolower(artist, default)
+
+    def performer(self, default):
+        performer = getattr(self.resource, 'performer', default)
+        performer_title = getattr(performer, 'title', default)
+        return self.tolower(performer_title, default)
 
     def likes(self, default):
         return getattr(self.resource, 'likes', default)
@@ -92,4 +100,11 @@ def includeme(config):  # pragma: no cover
         catalog_name='yss',
         index_name='created',
         attr='created',
+        )
+    config.add_indexview(
+        IndexViews,
+        catalog_name='yss',
+        index_name='performer',
+        attr='performer',
+        context = IRecording,
         )
