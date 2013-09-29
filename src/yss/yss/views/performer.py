@@ -14,6 +14,14 @@ from ..interfaces import IPerformer
 from ..interfaces import IPerformers
 from ..resources import PerformerProfileSchema
 
+def recent_recordings(context, request, limit=10):
+    q = find_index(context, 'system', 'content_type').eq('Recording')
+    q = q & find_index(context, 'system', 'allowed').allows(
+        request, 'view')
+    created = find_index(context, 'yss', 'created')
+    resultset = q.execute()
+    return resultset.sort(created, reverse=True, limit=limit)
+
 @view_config(
     context=IPerformer,
     renderer='templates/profile.pt',
@@ -27,7 +35,8 @@ def profile_view(context, request):
         'age': getattr(context, 'age', colander.null),
         'sex': getattr(context, 'sex', None),
         'genre': getattr(context, 'genre', None),
-        'form': None
+        'form': None,
+        'recent_recordings': recent_recordings(context, request),
     }
     form = deform.Form(PerformerProfileSchema(), buttons=('Save',))
 
