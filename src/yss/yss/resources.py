@@ -7,6 +7,10 @@ from substanced.content import content
 from substanced.folder import Folder
 from substanced.objectmap import reference_sourceid_property
 from substanced.objectmap import reference_source_property
+from substanced.objectmap import reference_target_property
+from substanced.principal import User as BaseUser
+from substanced.principal import UserPropertySheet
+from substanced.principal import UserGroupsPropertySheet
 from substanced.property import PropertySheet
 from substanced.schema import Schema
 from substanced.util import renamer
@@ -25,6 +29,20 @@ from .interfaces import (
     RecordingToPerformer,
     RecordingToSong,
     )
+
+
+@content(
+    'User',
+    icon='glyphicon glyphicon-user',
+    add_view='add_user',
+    tab_order=('properties',),
+    propertysheets = (
+        ('Preferences', UserPropertySheet),
+        ('Groups', UserGroupsPropertySheet),
+        )
+    )
+class User(BaseUser):
+    performer = reference_target_property(PerformerToUser)
 
 _sex_choices = (('', '- Select -'),
                 ('female', 'Female'),
@@ -97,7 +115,7 @@ class Performers(Folder):
 @implementer(IPerformer)
 class Performer(Folder):
     name = renamer()
-    performer = reference_source_property(PerformerToUser)
+    user = reference_source_property(PerformerToUser)
     likes = 0
 
 
