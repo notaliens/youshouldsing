@@ -185,6 +185,7 @@ class Recordings(Folder):
 class Recording(persistent.Persistent):
     performer = reference_source_property(RecordingToPerformer)
     song = reference_source_property(RecordingToSong)
+    likes = 0
 
     def __init__(self, tmpfolder):
         self.blob = None
