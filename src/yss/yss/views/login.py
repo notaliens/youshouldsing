@@ -22,13 +22,14 @@ from substanced.principal import DefaultUserLocator
 from substanced.util import find_service
 from substanced.util import get_oid
 
-from .resources import YSSProfileSchema
+from ..resources import YSSProfileSchema
 
 random.seed()
 
 @view_config(renderer="templates/home.pt")
 def home(request):
     return {}
+
 
 @view_config(name="record",
              renderer="templates/record.pt")

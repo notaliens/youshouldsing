@@ -6,7 +6,7 @@ from pyramid.settings import aslist
 from substanced import root_factory
 
 from .authpolicy import YSSAuthenticationPolicy
-from .views import persona_js
+from .views.login import persona_js
 
 def main(global_config, **settings):
     secret = settings['substanced.secret']

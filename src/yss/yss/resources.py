@@ -1,20 +1,26 @@
 import colander
 import deform
+import persistent
+import shutil
+
 from substanced.content import content
 from substanced.folder import Folder
 from substanced.interfaces import IUser
 from substanced.interfaces import UserToGroup
 from substanced.objectmap import multireference_source_property
 from substanced.objectmap import multireference_sourceid_property
+from substanced.principal import User as BaseUser
 from substanced.principal import UserPropertySheet
 from substanced.principal import UserGroupsPropertySheet
 from substanced.property import PropertySheet
 from substanced.schema import Schema
 from substanced.util import renamer
+from ZODB.blob import Blob
 from zope.interface import implementer
 
 from .interfaces import (
     ISongs,
+    ISong,
     IPerformers,
     IRecordings,
     )
@@ -75,17 +81,26 @@ class YSSProfilePropertySheet(PropertySheet):
     add_view='add_user',
     tab_order=('properties',),
     propertysheets = (
-        ('Preferences', UserPropertySheet),
+       ('Preferences', UserPropertySheet),
         ('Groups', UserGroupsPropertySheet),
         ('Profile', YSSProfilePropertySheet),
         )
     )
 @implementer(IUser)
-class User(Folder):
+class User(BaseUser):
     tzname = 'UTC' # backwards compatibility default
     groupids = multireference_sourceid_property(UserToGroup)
     groups = multireference_source_property(UserToGroup)
     name = renamer()
+
+class SongSchema(Schema):
+    title = colander.SchemaNode(colander.String())
+    artist = colander.SchemaNode(colander.String())
+    timing = colander.SchemaNode(colander.String())
+
+
+class SongPropertySheet(PropertySheet):
+    schema = SongSchema()
 
 @content(
     'Songs',
@@ -94,6 +109,24 @@ class User(Folder):
 @implementer(ISongs)
 class Songs(Folder):
     pass
+
+
+@content(
+    'Song',
+    icon='glyphicon glyphicon-music',
+    propertysheets=(('Basic', SongPropertySheet),),
+    add_view='add_song'
+    )
+@implementer(ISong)
+class Song(persistent.Persistent):
+
+    def __init__(self, title='', artist='', timing='', stream=None):
+        self.title = title
+        self.artist = artist
+        self.timing = timing
+        self.blob = Blob()
+        with self.blob.open("w") as fp:
+            shutil.copyfileobj(stream, fp)
 
 @content(
     'Performers',
