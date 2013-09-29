@@ -8,8 +8,14 @@
         <div class="panel-heading">
           ${title} by ${performer.title}
         </div>
-        <div class="panel-body">
+       <div class="panel-body">
           <div class="container">
+            <video tal:condition="processed" width="320" height="240" controls>
+              <source src="${video_url}" type="video/ogg"/>
+            </video>
+            <p tal:condition="not processed">
+              Processing... reload in a bit.
+            </p>
               Likes: <span id="like-count">${likes}</span>
               <tal:if tal:condition="layout.can_like(context)">
                 &nbsp;&nbsp;

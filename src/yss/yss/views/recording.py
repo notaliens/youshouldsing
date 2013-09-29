@@ -126,7 +126,18 @@ class RecordingView(object):
             'likes':len(recording.liked_by),
             'liked_by': recording.liked_by,
             'recordings':[],
+            'video_url': self.request.resource_url(recording, 'movie'),
+            'processed': bool(recording.blob),
             }
+
+@view_config(
+    content_type='Recording',
+    name='movie')
+def stream_movie(recording, request):
+    return FileResponse(
+        recording.blob.committed(),
+        content_type='video/ogg')
+
 
 class RecordingsView(object):
     default_sort = 'performer'
