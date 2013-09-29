@@ -48,3 +48,7 @@ class RecordingToSong(ReferenceType):
     """ Map a recording to the corresponding song.
     """
     source_ordered = True
+
+class CreatorToSong(ReferenceType):
+    """ XXX kept around to unpickle old instances """
+

@@ -41,13 +41,3 @@ def root_added(event):
 def content_will_be_added(event):
     event.object.created = datetime.datetime.utcnow()
     
-@subscribe_added()
-def content_added(event):
-    request = get_current_request()
-    creator_id = get_oid(getattr(request, 'user', None), None)
-    event.object.creator_id = creator_id
-    catalog = find_catalog(event.object, 'yss')
-    if catalog:
-        index = catalog.get('creator_id')
-        if index:
-            index.reindex_resource(event.object)

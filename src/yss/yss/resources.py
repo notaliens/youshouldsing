@@ -193,6 +193,13 @@ class Recording(persistent.Persistent):
     liked_by = multireference_target_property(PerformerLikesRecording)
 
     @property
+    def title(self):
+        '%s by %s' % (
+            getattr(self.song, 'title', 'Unknown'),
+            getattr(self.performer, 'title', 'Unknown')
+            )
+
+    @property
     def likes(self):
         return len(self.liked_by)
 
