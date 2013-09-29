@@ -41,7 +41,9 @@
                 <tbody>
                   <tr tal:repeat="item batch">
                     <td>${item.artist}</td>
-                    <td>${item.title}</td>
+                    <td>
+                     <a href="${request.resource_url(item)}">${item.title}</a>
+                    </td>
                     <td>${item.genre or 'Unknown'}</td>
                     <td>${item.likes}</td>
                   </tr>
