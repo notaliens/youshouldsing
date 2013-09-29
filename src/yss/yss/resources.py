@@ -9,7 +9,6 @@ from substanced.objectmap import multireference_source_property
 from substanced.objectmap import multireference_target_property
 from substanced.objectmap import reference_source_property
 from substanced.objectmap import reference_target_property
-from substanced.objectmap import multireference_target_property
 from substanced.principal import User as BaseUser
 from substanced.principal import UserPropertySheet
 from substanced.principal import UserGroupsPropertySheet
