@@ -1,5 +1,6 @@
 from pyramid.view import view_config
 from pyramid.settings import asbool
+from pyramid.httpexceptions import HTTPFound
 
 from substanced.util import (
     Batch,
@@ -7,8 +8,13 @@ from substanced.util import (
     )
 
 from substanced.folder.views import generate_text_filter_terms
+from substanced.sdi import mgmt_view
 
 from yss.interfaces import ISongs
+
+@mgmt_view(context=ISongs, name='preview')
+def preview_songs(context, request):
+    return HTTPFound(location=request.resource_url(context))
 
 class SongsView(object):
     def __init__(self, context, request):
@@ -58,10 +64,10 @@ class SongsView(object):
             'likes':(likes, artist, title, genre, created),
             }
         indexes = sorting.get(token, sorting['artist'])
-        first = indexes[0]
-        rs = rs.sort(first, reverse=reverse)
         for idx in indexes[1:]:
             rs = rs.sort(idx)
+        first = indexes[0]
+        rs = rs.sort(first, reverse=reverse)
         return rs
 
     @view_config(context=ISongs, renderer='templates/songs.pt')
@@ -76,35 +82,30 @@ class SongsView(object):
             'reverse':request.params.get('reverse', 'false')
             }
 
-    def sort_url(self, token):
+    def sort_tag(self, token):
         request = self.request
         context = self.context
         reverse = request.params.get('reverse', 'false')
         reverse = asbool(reverse)
-        reverse = reverse and 'false' or 'true'
-        return request.resource_url(
-            context, query=(
-                ('sorting', token), ('reverse', reverse)
-                )
-            )
-
-    def sort_icon(self, token):
-        request = self.request
         sorting = request.params.get('sorting')
-        reverse = request.params.get('reverse', 'false')
-        reverse = asbool(reverse)
-        icon = ''
-        if sorting == token:
+        if sorting == token or (not sorting and token == 'artist'):
             if reverse:
                 icon = 'glyphicon glyphicon-chevron-up'
             else:
                 icon = 'glyphicon glyphicon-chevron-down'
-        return icon
+            reverse = reverse and 'false' or 'true'
+        else:
+            icon = ''
+            reverse = 'false'
 
-def sort_by_indexes(resultset, indexes, reverse=False):
-    first = indexes[0]
-    resultset = resultset.sort(first, reverse=reverse)
-    return resultset
-    for index in indexes[1:]:
-        resultset = resultset.sort(index)
-    return resultset
+        url = request.resource_url(
+            context, query=(
+                ('sorting', token), ('reverse', reverse)
+                )
+            )
+        return '<a href="%s">%s <i class="%s"> </i></a>' % (
+            url,
+            token.capitalize(),
+            icon
+            )
+

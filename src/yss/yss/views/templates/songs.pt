@@ -23,25 +23,25 @@
 
                 <thead>
                   <tr>
-                    <th width="35%">
-                      <a href="${view.sort_url('title')}">Title <i class="${view.sort_icon('title')}"> </i></a>
+                    <th width="30%">
+                      ${structure:view.sort_tag('artist')}
                     </th>
-                    <th width="35%">
-                      <a href="${view.sort_url('artist')}">Artist <i class="${view.sort_icon('artist')}"> </i></a>
-                    </th>
-                    <th width="20%">
-                      <a href="${view.sort_url('genre')}">Genre <i class="${view.sort_icon('genre')}"> </i></a>
+                    <th width="30%">
+                      ${structure:view.sort_tag('title')}
                     </th>
                     <th width="20%">
-                      <a href="${view.sort_url('likes')}">Genre <i class="${view.sort_icon('likes')}"> </i></a>
+                      ${structure:view.sort_tag('genre')}
+                    </th>
+                    <th width="20%">
+                      ${structure:view.sort_tag('likes')}
                     </th>
                   </tr>
                 </thead>
                 
                 <tbody>
                   <tr tal:repeat="item batch">
-                    <td>${item.title}</td>
                     <td>${item.artist}</td>
+                    <td>${item.title}</td>
                     <td>${item.genre or 'Unknown'}</td>
                     <td>${item.likes}</td>
                   </tr>

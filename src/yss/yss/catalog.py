@@ -18,17 +18,22 @@ class IndexViews(object):
     def __init__(self, resource):
         self.resource = resource
 
+    def tolower(self, val, default):
+        if val in (default, None):
+            return val
+        return val.lower()
+
     def title(self, default):
         title = getattr(self.resource, 'title', default)
-        if title is default:
-            return default
-        return title.lower()
+        return self.tolower(title, default)
 
     def genre(self, default):
-        return getattr(self.resource, 'genre', default)
+        genre = getattr(self.resource, 'genre', default)
+        return self.tolower(genre, default)
         
     def artist(self, default):
-        return getattr(self.resource, 'artist', default)
+        artist = getattr(self.resource, 'artist', default)
+        return self.tolower(artist, default)
 
     def likes(self, default):
         return getattr(self.resource, 'likes', default)
