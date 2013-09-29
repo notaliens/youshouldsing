@@ -5,6 +5,8 @@ import subprocess
 import sys
 import tempfile
 import transaction
+import pykar
+import json
 
 from pyramid.paster import (
     setup_logging,
@@ -52,6 +54,9 @@ def main(argv=sys.argv):
             if basename in songs:
                 if not overwrite:
                     continue
+            def errback(msg):
+                print msg
+            timings = get_timings(input_filename)
             wav_filename = basename + '.wav'
             output_filename = os.path.join(outdir, wav_filename)
             command = ['timidity', '-Ow', '-o%s' % output_filename,
@@ -66,14 +71,13 @@ def main(argv=sys.argv):
             except KeyError:
                 pass
             stream = open(mp3_filename, 'rb')
-            timing = ''
-            title = basename
             artist = basename
+            title = basename
             song = registry.content.create(
                 'Song',
                 title=title,
                 artist=artist,
-                timing=timing,
+                timings=timings,
                 stream=stream
                 )
             songs[basename] = song
@@ -81,3 +85,47 @@ def main(argv=sys.argv):
     finally:
         if not opts.directory:
             shutil.rmtree(outdir, ignore_errors=True)
+
+def get_timings(input_filename):
+    def errback(msg):
+        print msg
+    kardata = open(input_filename, 'rb').read()
+    midifile = pykar.midiParseData(
+        kardata,
+        errback,
+        ''
+        )
+    lyrics_list = midifile.lyrics.list
+    timings = []
+    last_line = lyrics_list[0].line
+    first_ms = lyrics_list[0].ms
+    current_line = []
+    for i, lyric in enumerate(lyrics_list):
+        current_line.append([float(lyric.ms-first_ms)/1000, lyric.text])
+        try:
+            next_lyric = lyrics_list[i+1]
+        except IndexError:
+            next_lyric = None
+        if lyric.line != last_line:
+            last_ms = lyric.ms
+            timings.append(
+                (
+                    float(first_ms)/1000,
+                    float(last_ms)/1000,
+                    current_line,
+                )
+            )
+            last_line = lyric.line
+            current_line = []
+            if next_lyric:
+                first_ms = next_lyric.ms
+            else:
+                first_ms = last_ms
+    timings.append(
+        (
+            float(first_ms)/1000,
+            float(lyrics_list[-1].ms)/1000,
+            current_line,
+            )
+        )
+    return json.dumps(timings, indent=2)
