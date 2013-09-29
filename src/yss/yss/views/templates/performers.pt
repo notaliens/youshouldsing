@@ -23,13 +23,13 @@
 
                 <thead>
                   <tr>
-                    <th width="30%">
+                    <th width="50%">
                       ${structure:view.sort_tag('title')}
                     </th>
-                    <th width="30%">
+                    <th width="25%">
                       ${structure:view.sort_tag('genre')}
                     </th>
-                    <th width="30%">
+                    <th width="25%">
                       ${structure:view.sort_tag('likes')}
                     </th>
                   </tr>
@@ -37,7 +37,11 @@
                 
                 <tbody>
                   <tr tal:repeat="item batch">
-                    <td>${item.display_name}</td>
+                    <td>
+                     <a href="${request.resource_url(item)}"
+                     ><img src="${item.photo_url}" width="24" height="24"
+                       />&nbsp;&nbsp;${item.display_name}</a>
+                    </td>
                     <td>${item.favorite_genre or 'Unknown'}</td>
                     <td>${item.likes}</td>
                   </tr>
