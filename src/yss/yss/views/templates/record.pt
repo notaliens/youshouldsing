@@ -223,6 +223,7 @@
         };
 
         function record() {
+          if (recorder === undefined) { return; }
           var elapsedTime = $('#elasped-time')[0];
           var ctx = canvas.getContext('2d');
           var CANVAS_HEIGHT = canvas.height;
@@ -249,6 +250,7 @@
         };
 
         function stop() {
+          if (recorder === undefined) { return; }
           theStream.stop();
           recorder.stop();
           endTime = Date.now();
@@ -316,7 +318,7 @@
 
         function initEvents() {
           $('#record-me')[0].addEventListener('click', record);
-          $('#stop-me')[0].addEventListener('click', stop);
+          $('#stop-me')[0].addEventListener('click', function () { document.location = document.location });
         }
 
         initEvents();

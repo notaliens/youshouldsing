@@ -1,7 +1,12 @@
 import optparse
+import os
+import shutil
 import sys
 import time
 import transaction
+
+from sh import ffmpeg, sox
+from ZODB.blob import Blob
 
 from pyramid.paster import (
     setup_logging,
@@ -33,4 +38,30 @@ def main(argv=sys.argv):
         time.sleep(1)
         transaction.abort()
         recording = find_resource(root, path)
-        print "Got it!", path, recording
+        try:
+            postprocess(recording)
+        except:
+            redis.rpush('yss.new-recorings', path)
+            raise
+
+
+def postprocess(recording):
+    tmpdir = recording.tmpfolder
+    curdir = os.getcwd()
+    try:
+        os.chdir(tmpdir)
+        sox("-m", "audio.wav", "-t", "mp3", "-v", "0.15",
+            recording.song.blob.committed(), "mixed.wav")
+        ffmpeg("-i", "mixed.wav",
+               "-f", "image2", "-r", "1", "-i", "frame%d.png",
+               "video.ogg")
+        recording.blob = Blob()
+        with recording.blob.open("w") as saveto:
+            with open("video.ogg") as savefrom:
+                shutil.copyfileobj(savefrom, saveto)
+        print "%s/%s" % (tmpdir, "video.ogg")
+        #shutil.rmtree(tmpdir)
+    finally:
+        os.chdir(curdir)
+
+

@@ -16,6 +16,7 @@ sudo apt-get install libsdl-image1.2-dev
 sudo apt-get install libsmpeg-dev
 sudo apt-get install libv4l-dev
 sudo apt-get install redis-server
+sudo apt-get install sox
 cd /usr/include/linux
 sudo ln -s ../libv4l1-videodev.h videodev.h
 

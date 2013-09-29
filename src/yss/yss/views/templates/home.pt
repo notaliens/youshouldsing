@@ -13,8 +13,8 @@
             <tbody>
               <tr tal:repeat="item featured_recordings">
                 <td>
-                  <a href="${request.resource_url(item)"
-                  >${item.title}</a>
+                  <a href="${request.resource_url(item)}"
+                  >${item.title}</a> by <a href="${request.resource_url(item.performer or item)}">${getattr(item.performer, 'title', 'Unknown')}</a>
                 </td>
               </tr>
             </tbody>
@@ -36,8 +36,8 @@
             <tbody>
               <tr tal:repeat="item recent_recordings">
                 <td>
-                  <a href="${request.resource_url(item)"
-                  >${item.title}</a>
+                  <a href="${request.resource_url(item)}"
+                  >${item.title}</a> by <a href="${request.resource_url(item.performer or item)}">${getattr(item.performer, 'title', 'Unknown')}</a>
                 </td>
               </tr>
             </tbody>
