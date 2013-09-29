@@ -102,7 +102,7 @@ def velruse_login_complete_view(context, request):
         principals = find_service(root, 'principals')
         user = principals.add_user(username, registry=registry)
         performer = registry.content.create('Performer')
-        performer.display_name = performer.title = profile['displayName']
+        performer.title = profile['displayName']
         addresses = profile.get('addresses')
         if addresses:
             user.email = performer.email = addresses[0]['formatted']
@@ -273,7 +273,7 @@ def persona_login(context, request):
         root['performers'][username] = performer
         performer.user = user
         location = request.resource_url(performer, 'edit.html')
-        performer.display_name = email
+        performer.title = email
         performer.email = email
         performer.photo_url = persona_gravatar_photo(request, email)
         performer.age = colander.null
