@@ -136,7 +136,7 @@
              </tbody>
            </table>
            <div style="padding-top: 10px;"
-                tal:condition="not likes_songs">
+                tal:condition="not form and not likes_songs">
              No songs liked.
            </div>
          </div>
