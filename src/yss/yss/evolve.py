@@ -1,6 +1,9 @@
 import pkg_resources
 from pyramid.threadlocal import get_current_registry
-
+from pyramid.security import (
+    Allow,
+    Everyone,
+    )
 
 def add_sections(root):
     registry = get_current_registry()
@@ -22,6 +25,11 @@ def add_test_song(root):
 def change_site_title(root):
     root.title = root.sdi_title = 'You Should Sing'
 
+def add_view_permission(root):
+    acl = list(root.__acl__)
+    acl.append((Allow, Everyone, 'view'))
+    root.__acl__ = acl
+    
 def add_yss_catalog(root):
     root['catalogs'].add_catalog('yss')
 
@@ -30,4 +38,5 @@ def includeme(config):
     config.add_evolution_step(add_test_song)
     config.add_evolution_step(change_site_title)
     config.add_evolution_step(add_yss_catalog)
+    config.add_evolution_step(add_view_permission)
     

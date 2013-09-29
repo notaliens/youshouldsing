@@ -1,0 +1,61 @@
+<div metal:use-macro="main_template">
+
+  <div metal:fill-slot="main_content">
+
+    <div class="container">
+
+      <div class="row">
+        <div tal:condition="batch"
+             metal:use-macro="request.sdiapi.get_macro('yss.views:templates/batching.pt', 'batching')"/>
+      </div>
+
+      <div class="row">
+
+        <div class="panel panel-default">
+          <div class="panel-heading">Songs</div>
+          <div class="panel-body">
+
+            <form action="${request.resource_url(context)}" method="GET">
+              <label for="filter_text">Search</label>
+              <input class="form-control" name="filter_text" value="${filter_text|''}"/>
+              <table tal:condition="batch|None" 
+                     class="table table-striped table-condensed">
+
+                <thead>
+                  <tr>
+                    <th width="35%">
+                      <a href="${view.sort_url('title')}">Title <i class="${view.sort_icon('title')}"> </i></a>
+                    </th>
+                    <th width="35%">
+                      <a href="${view.sort_url('artist')}">Artist <i class="${view.sort_icon('artist')}"> </i></a>
+                    </th>
+                    <th width="20%">
+                      <a href="${view.sort_url('genre')}">Genre <i class="${view.sort_icon('genre')}"> </i></a>
+                    </th>
+                    <th width="20%">
+                      <a href="${view.sort_url('likes')}">Genre <i class="${view.sort_icon('likes')}"> </i></a>
+                    </th>
+                  </tr>
+                </thead>
+                
+                <tbody>
+                  <tr tal:repeat="item batch">
+                    <td>${item.title}</td>
+                    <td>${item.artist}</td>
+                    <td>${item.genre or 'Unknown'}</td>
+                    <td>${item.likes}</td>
+                  </tr>
+                </tbody>
+              </table>
+              <div style="padding-top: 10px;" tal:condition="not batch">
+                No songs found.
+              </div>
+            </form>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</div>
