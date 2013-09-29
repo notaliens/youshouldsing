@@ -55,7 +55,11 @@ def main(argv=sys.argv):
                     continue
             def errback(msg):
                 print msg
-            timings = get_timings(input_filename)
+            try:
+                timings = get_timings(input_filename)
+            except UnicodeError:
+                print 'Could not get timings for %s' % input_filename
+                continue
             wav_filename = basename + '.wav'
             output_filename = os.path.join(outdir, wav_filename)
             command = ['timidity', '-Ow', '-o%s' % output_filename,

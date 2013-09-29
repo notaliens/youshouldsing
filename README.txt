@@ -11,7 +11,11 @@ sudo apt-get install
 sudo apt-get install python-wxgtk2.8
 sudo apt-get install libwxgtk2.8-dev
 sudo apt-get install libsdl1.2-dev
+sudo apt-get install libsdl-mixer1.2-dev
+sudo apt-get install libsdl-image1.2-dev
+sudo apt-get install libsmpeg-dev
 sudo apt-get install libv4l-dev
+sudo apt-get install redis-server
 cd /usr/include/linux
 sudo ln -s ../libv4l1-videodev.h videodev.h
 
