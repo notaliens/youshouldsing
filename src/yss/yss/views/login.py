@@ -1,6 +1,8 @@
+import hashlib
 import os
 import random
 import shutil
+import urllib
 
 from browserid.errors import TrustError
 import colander
@@ -222,6 +224,14 @@ def verify_persona_assertion(request):
         raise HTTPBadRequest('Invalid assertion')
     return data['email']
 
+def persona_gravatar_photo(request, email):
+    default = request.static_url('yss:static/persona.png')
+    return ("//www.gravatar.com/avatar/" +
+            hashlib.md5(email.lower()).hexdigest() +
+            "?" +
+            urllib.urlencode({'d':default, 's': '40'})
+           )
+
 @view_config(
     name='login',
     route_name='persona',
@@ -242,7 +252,7 @@ def persona_login(context, request):
         user = principals.add_user(username, registry=request.registry)
         user.display_name = email
         user.email = email
-        user.photo_url = None
+        user.photo_url = persona_gravatar_photo(request, email)
         user.age = colander.null
         user.sex = user.favorite_genre = None
         location = request.resource_url(user, 'edit.html')
