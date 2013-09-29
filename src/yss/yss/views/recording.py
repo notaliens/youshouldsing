@@ -1,3 +1,4 @@
+import base64
 import os
 import random
 import shutil
@@ -25,7 +26,7 @@ def recording_app(song, request):
 
 
 @view_config(content_type='Song', name="record", xhr=True, renderer='string')
-def save_recording(song, request):
+def save_audio(song, request):
     f = request.params['data'].file
     id = request.params['id']
     fname = request.params['filename']
@@ -34,6 +35,21 @@ def save_recording(song, request):
         os.mkdir(tmpdir)
     with open('%s/%s' % (tmpdir, fname), 'wb') as output:
         shutil.copyfileobj(f, output)
+    return 'OK'
+
+
+@view_config(content_type='Song', name="record", xhr=True, renderer='string',
+             request_param='framedata')
+def save_video(song, request):
+    id = request.params['id']
+    tmpdir = '/tmp/' + id
+    fname = os.path.join(tmpdir, 'frame%d.png')
+    for i, data in enumerate(request.params.getall('framedata')):
+        preamble = 'data:image/png;base64,'
+        assert data.startswith(preamble), data
+        data = base64.b64decode(data[len(preamble):])
+        with open(fname % i, 'wb') as fp:
+            fp.write(data)
     return 'OK'
 
 
