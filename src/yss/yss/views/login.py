@@ -34,9 +34,9 @@ def home(request):
              name="record",
              renderer="templates/record.pt")
 def recording_app(song, request):
-    performance_id = generate_performance_id({})
+    recording_id = generate_recording_id({})
     return {
-        "id": performance_id,
+        "id": recording_id,
         "mp3_url": request.resource_url(song, 'mp3'),
         "timings": song.timings,
     }
@@ -61,10 +61,10 @@ idchars = (
     map(chr, range(ord('0'), ord('9') + 1)))
 
 
-def generate_performance_id(performances):
+def generate_recording_id(recordings):
     while True:
         id = ''.join([random.choice(idchars) for _ in range(8)])
-        if id not in performances:
+        if id not in recordings:
             break
     return id
 
