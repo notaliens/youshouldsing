@@ -14,7 +14,6 @@
   </div>
 
   <div metal:fill-slot="tail">
-    <script src="${layout.static('whammy.js')}"></script>
     <script src="${layout.static('recorder.js')}"></script>
     <script type="text/javascript" src="${layout.static('ricekaraoke.js')}"></script>
     <script type="text/javascript" src="${layout.static('simplekaraokedisplay.js')}"></script>
@@ -143,9 +142,10 @@
         var recorder;
         var theStream;
         var tagTime = Date.now();
-        var whammy = new Whammy.Video(10, 0.6);
         var recording_id = "${id}";
         var recording = false;
+        var framerate = 10;
+        var video_frames; 
 
         function toggleActivateRecordButton() {
           var b = $('#record-me')[0];
@@ -227,29 +227,16 @@
           $('#stop-me')[0].disabled = false;
 
           recorder.record(); 
-          var lastFrameTime;
-
-          function drawVideoFrame_(time) {
+          video_frames = [];
+          function captureFrame() {
             if (recording) {
-              rafId = requestAnimationFrame(drawVideoFrame_);
+              window.setTimeout(captureFrame, 1000 / framerate);
             }
-
-            if (typeof lastFrameTime === undefined) { lastFrameTime = time; }
-
-            if (time - lastFrameTime < 90) { return; } // ~10 fps
 
             ctx.drawImage(video, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-            try {
-              whammy.add(canvas); //, time - lastFrameTime);
-            } catch (e) {
-              console.log("error: ", e);
-            }
-
-            //console.log("fps: ", 1000 / (time - lastFrameTime));
-            lastFrameTime = time;
+            video_frames.push(canvas.toDataURL('image/png'));
           };
-
-          rafId = requestAnimationFrame(drawVideoFrame_);
+          captureFrame();
         };
 
         function stop() {
@@ -261,8 +248,8 @@
 
           toggleActivateRecordButton();
 
-          console.log('frames captured: ' + whammy.frames.length + ' => ' +
-                      ((endTime - startTime) / 1000) + 's video');
+          console.log('frames captured: ' + video_frames.length + ' => ' +
+                      (video_frames.length / framerate) + 's video');
 
           embedVideoPreview();
         };
@@ -287,11 +274,12 @@
             });
           });
 
-          var webmBlob = whammy.compile();
           var fd = new FormData();
           fd.append('id', recording_id);
-          fd.append('data', webmBlob);
-          fd.append('filename', 'video.webm');
+          for (var i in video_frames) {
+            fd.append('framedata', video_frames[i]);
+          }
+          
           var videoDeferred = jQuery.ajax({
             type: 'POST',
             url: window.location,
