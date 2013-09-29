@@ -6,6 +6,7 @@ import shutil
 from substanced.content import content
 from substanced.folder import Folder
 from substanced.interfaces import IUser
+from substanced.interfaces import ReferenceType
 from substanced.interfaces import UserToGroup
 from substanced.objectmap import multireference_source_property
 from substanced.objectmap import multireference_sourceid_property
@@ -25,6 +26,7 @@ from .interfaces import (
     ISong,
     IPerformers,
     IRecordings,
+    IRecording,
     CreatorToSong,
     )
 
@@ -137,7 +139,7 @@ class Song(persistent.Persistent):
     creator = reference_source_property(CreatorToSong)
     genre = None
     likes = 0
-    
+
     def __init__(self, title='', artist='', timings='', stream=None):
         self.title = title
         self.artist = artist
@@ -161,3 +163,25 @@ class Performers(Folder):
 @implementer(IRecordings)
 class Recordings(Folder):
     pass
+
+
+class RecordingToPerformer(ReferenceType):
+    pass
+
+
+class RecordingToSong(ReferenceType):
+    pass
+
+
+@content(
+    'Recording',
+    icon='glyphicon glyphicon-record',
+)
+@implementer(IRecording)
+class Recording(persistent.Persistent):
+    performer = reference_source_property(RecordingToPerformer)
+    song = reference_source_property(RecordingToSong)
+
+    def __init__(self, tmpfolder):
+        self.blob = None
+        self.tmpfolder = tmpfolder
