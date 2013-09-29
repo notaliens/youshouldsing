@@ -57,6 +57,8 @@ def save_audio(song, request):
 def save_video(song, request):
     id = request.params['id']
     tmpdir = '/tmp/' + id
+    if not os.path.exists(tmpdir):
+        os.mkdir(tmpdir)
     fname = os.path.join(tmpdir, 'frame%d.png')
     for i, data in enumerate(request.params.getall('framedata')):
         preamble = 'data:image/png;base64,'

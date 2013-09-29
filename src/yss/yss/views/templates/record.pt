@@ -66,13 +66,8 @@
             'karaoke-display', numDisplayLines);
           show = karaoke.createShow(renderer, numDisplayLines);
 
-          //player.addEventListener(
-          //  'canplay', updateControls, false);
           player.addEventListener(
-            'error', function() { alert('Failed to play!') }, false);
-          //player.addEventListener('suspend', updateControls, false)
-          //player.addEventListener('pause', updateControls, false)
-          //player.addEventListener('playing', updateControls, false)
+            'error', function(e) { alert('Failed to play! ' + e) }, false);
           player.addEventListener('ended', function() { 
             // AFAICT this isn't called
             player.pause();
@@ -144,7 +139,7 @@
         var tagTime = Date.now();
         var recording_id = "${id}";
         var recording = false;
-        var framerate = 10;
+        var framerate = 1;
         var video_frames; 
 
         function toggleActivateRecordButton() {
