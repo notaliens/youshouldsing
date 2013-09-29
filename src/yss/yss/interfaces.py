@@ -1,5 +1,7 @@
 from zope.interface import Interface
 
+from substanced.interfaces import ReferenceType
+
 class ISongs(Interface):
     """ Marker interface for the songs folder """
 
@@ -14,3 +16,7 @@ class IRecording(Interface):
 
 class IPerformers(Interface):
     """ Marker interface for the performers folder """
+
+class CreatorToSong(ReferenceType):
+    """ A reference type which maps creator to song """
+    

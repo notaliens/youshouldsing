@@ -4,12 +4,34 @@
 
     <div class="col-md-12">
       <div class="panel panel-default">
-        <div class="panel-heading">
-          Account settings
-        </div>
-        <div class="panel-body">
-          ${structure:form}
-        </div>
+        <tal:if tal:condition="not form">
+         <div class="panel-heading">
+           Profile Information
+         </div>
+         <div class="panel-body">
+           <img align="right" src="${photo_url}" />
+           <h1>${display_name}</h1>
+
+           <p tal:condition="email">
+              E-mail: <a href="mailto:${email}">${email}</a></p>
+
+           <p tal:condition="age">Age: ${age}</p>
+
+           <p tal:condition="sex">Sex: ${sex}</p>
+
+           <p tal:condition="favorite_genre">
+            Favorite Genre: ${favorite_genre}</p>
+
+         </div>
+        </tal:if>
+        <tal:if tal:condition="form">
+         <div class="panel-heading">
+           Account settings
+         </div>
+         <div class="panel-body">
+           ${structure:form}
+         </div>
+        </tal:if>
       </div>
 
     </div>

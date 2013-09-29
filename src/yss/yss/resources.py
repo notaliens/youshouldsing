@@ -10,6 +10,7 @@ from substanced.interfaces import ReferenceType
 from substanced.interfaces import UserToGroup
 from substanced.objectmap import multireference_source_property
 from substanced.objectmap import multireference_sourceid_property
+from substanced.objectmap import reference_sourceid_property
 from substanced.objectmap import reference_source_property
 from substanced.principal import User as BaseUser
 from substanced.principal import UserPropertySheet
@@ -26,6 +27,7 @@ from .interfaces import (
     IPerformers,
     IRecordings,
     IRecording,
+    CreatorToSong,
     )
 
 _sex_choices = (('', '- Select -'),
@@ -132,6 +134,11 @@ class Songs(Folder):
     )
 @implementer(ISong)
 class Song(persistent.Persistent):
+
+    creator_id = reference_sourceid_property(CreatorToSong)
+    creator = reference_source_property(CreatorToSong)
+    genre = None
+    likes = 0
 
     def __init__(self, title='', artist='', timings='', stream=None):
         self.title = title
