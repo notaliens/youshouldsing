@@ -81,7 +81,7 @@
               </li>
               <li tal:condition="request.user and request.user.performer">
                 <a href="${request.resource_path(request.user.performer)}"
-                >My Account</a>
+                >My Profile</a>
               </li>
             </ul>
 

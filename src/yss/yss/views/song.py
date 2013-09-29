@@ -125,7 +125,8 @@ class SongView(object):
             'title':song.title,
             'artist':song.artist,
             'likes':song.likes,
-            'recordings':[],
+            'liked_by': song.liked_by,
+            'recordings':song.recordings,
             }
 
     @view_config(context=ISong,

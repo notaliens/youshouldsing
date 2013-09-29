@@ -1,16 +1,30 @@
 <!DOCTYPE html>
 <html metal:use-macro="main_template">
   <div metal:fill-slot="main_content">
-    <h1>Sing, you!</h1>
-    <button id="record-me">Record<!--⚫--></button>
-    <button id="stop-me" disabled>◼</button>
-    <video autoplay>Your browser doesn't support video.</video>
-    <div id="player" style="display: none">
-      <div id="karaoke-wrapper">
-        <div id="karaoke-display"></div>
+    <div class="container">
+
+      <div class="row" style="padding-bottom: 10px;">
+        <div class="col-md-12 pull-right">
+          <button id="record-me">Record</button>
+          <button id="stop-me" disabled>◼</button>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-4" style="padding-left: 0px; padding-right: 0px;">
+          <video autoplay>Your browser doesn't support video.</video>
+        </div>
+
+        <div class="col-md-8">
+          <div id="player" style="display: none">
+            <div id="karaoke-wrapper">
+              <div id="karaoke-display"></div>
+            </div>
+          </div>
+          <div id="status">0:00</div>
+        </div>
       </div>
     </div>
-    <div id="status">0:00</div>
   </div>
 
   <div metal:fill-slot="tail">
@@ -19,7 +33,7 @@
     <script type="text/javascript" src="${layout.static('simplekaraokedisplay.js')}"></script>
     <script>
       var karaoke = (function() {
-        var numDisplayLines = 2; // Number of lines to do the karaoke with
+        var numDisplayLines = 4; // Number of lines to do the karaoke with
         var timings = ${timings};
         var wasPaused = false;
         var show = null;
@@ -209,6 +223,7 @@
         };
 
         function record() {
+          if (recorder === undefined) { return; }
           var elapsedTime = $('#elasped-time')[0];
           var ctx = canvas.getContext('2d');
           var CANVAS_HEIGHT = canvas.height;
@@ -235,11 +250,13 @@
         };
 
         function stop() {
+          if (recorder === undefined) { return; }
           theStream.stop();
           recorder.stop();
           endTime = Date.now();
           recording = false;
           $('#stop-me')[0].disabled = true;
+          document.location = document.location;
 
           toggleActivateRecordButton();
 
