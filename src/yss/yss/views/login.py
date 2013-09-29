@@ -11,9 +11,8 @@ from pyramid.response import FileResponse
 from pyramid.session import check_csrf_token
 from pyramid.view import view_config
 from pyramid.security import (
-    authenticated_userid,
-    remember,
     forget,
+    remember,
 )
 from substanced.db import root_factory
 from substanced.interfaces import IUser
@@ -22,7 +21,7 @@ from substanced.principal import DefaultUserLocator
 from substanced.util import find_service
 from substanced.util import get_oid
 
-from .resources import YSSProfileSchema
+from ..resources import YSSProfileSchema
 
 random.seed()
 
@@ -101,16 +100,16 @@ def velruse_login_complete_view(context, request):
     headers = remember(request, get_oid(user))
     return HTTPFound(location, headers=headers)
 
-@view_config(name='logout',
-             renderer='templates/persona_logout.pt',
-)
-def logout(request):
+@view_config(name='logout')
+def velruse_logout(request):
     headers = forget(request)
     try:
         del request.user
     except AttributeError:
         pass
-    return {'location': request.resource_url(request.virtual_root)}
+    return HTTPFound(location=request.resource_url(request.virtual_root),
+                     headers=headers,
+                    )
 
 
 @view_config(
@@ -130,7 +129,7 @@ _PERSONA_SIGNIN_HTML = (
     '<img src="https://login.persona.org/i/persona_sign_in_blue.png" '
           'id="persona-signin" alt="sign-in button" />')
 
-_PERSONA_SIGNOUT_HTML = '<button id="signout">logout</button>'
+_PERSONA_SIGNOUT_HTML = '<button id="persona-signout">logout</button>'
 
 PERSONA_JS = """
 $(function() {
@@ -139,7 +138,7 @@ $(function() {
         return false;
     });
 
-    $('#signout').click(function() {
+    $('#persona-signout').click(function() {
         navigator.id.logout();
         return false;
     });
@@ -182,7 +181,7 @@ $(function() {
                     window.location = res['redirect'];
                 },
                 error: function(xhr, status, err) {
-                    //alert("Logout failure: " + err);
+                    alert("Logout failure: " + err);
                 }
             });
         }
@@ -190,21 +189,17 @@ $(function() {
 });
 """
 
-def persona_button(request):
-    """Return login button if the user is logged in, else the login button.
-    """
-    if not authenticated_userid(request):
-        return _PERSONA_SIGNIN_HTML
-    else:
-        return _PERSONA_SIGNOUT_HTML
-
 
 def persona_js(request):
     """Return the javascript needed to run persona.
     """
-    userid = authenticated_userid(request)
+    user = request.user
+    if user is None:
+        userid = 'null'
+    else:
+        userid = "'%s'" % user.email
     data = {
-        'user': "'%s'" % userid if userid else "null",
+        'user': userid,
         'login': '/persona/login',
         'logout': '/persona/logout',
         'csrf_token': request.session.get_csrf_token(),
@@ -267,7 +262,14 @@ def persona_logout(context, request):
     """View to forget the user
     """
     request.response.headers.extend(forget(request))
-    return {'redirect': request.POST['came_from']}
+    return {'redirect': request.resource_url(request.virtual_root)}
+
+
+def authentication_type(request):
+    if request.user is not None:
+        if request.user.__name__.startswith('persona:'):
+            return 'persona'
+        return 'twitter'
 
 # Retail profile views
 

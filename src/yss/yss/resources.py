@@ -82,6 +82,8 @@ class SongSchema(Schema):
 class SongPropertySheet(PropertySheet):
     schema = SongSchema()
 
+class YSSProfilePropertySheet(PropertySheet):
+    schema = YSSProfileSchema()
 
 @content(
     'User',
@@ -91,6 +93,7 @@ class SongPropertySheet(PropertySheet):
     propertysheets = (
        ('Preferences', UserPropertySheet),
         ('Groups', UserGroupsPropertySheet),
+        ('Profile', YSSProfilePropertySheet),
         )
     )
 @implementer(IUser)
@@ -99,6 +102,15 @@ class User(BaseUser):
     groupids = multireference_sourceid_property(UserToGroup)
     groups = multireference_source_property(UserToGroup)
     name = renamer()
+
+class SongSchema(Schema):
+    title = colander.SchemaNode(colander.String())
+    artist = colander.SchemaNode(colander.String())
+    timing = colander.SchemaNode(colander.String())
+
+
+class SongPropertySheet(PropertySheet):
+    schema = SongSchema()
 
 @content(
     'Songs',
