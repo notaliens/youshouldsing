@@ -72,6 +72,7 @@ def finish_recording(song, request):
     recording.song = song
 
     redis = get_redis(request)
+    print "finished", tmpdir, resource_path(recording)
     redis.rpush("yss.new-recordings", resource_path(recording))
     return request.resource_url(recording)
 

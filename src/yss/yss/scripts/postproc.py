@@ -1,5 +1,7 @@
 import optparse
 import sys
+import time
+import transaction
 
 from pyramid.paster import (
     setup_logging,
@@ -27,6 +29,8 @@ def main(argv=sys.argv):
     root = env['root']
     redis = get_redis(env['request'])
     while True:
-        path = redis.blpop('yss.new-recordings')
+        path = redis.blpop('yss.new-recordings', 0)[1]
+        time.sleep(1)
+        transaction.abort()
         recording = find_resource(root, path)
-        print 'Got it!', path, recording
+        print "Got it!", path, recording
