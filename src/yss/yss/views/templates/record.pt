@@ -256,7 +256,6 @@
           endTime = Date.now();
           recording = false;
           $('#stop-me')[0].disabled = true;
-          document.location = document.location;
 
           toggleActivateRecordButton();
 
@@ -319,7 +318,7 @@
 
         function initEvents() {
           $('#record-me')[0].addEventListener('click', record);
-          $('#stop-me')[0].addEventListener('click', stop);
+          $('#stop-me')[0].addEventListener('click', function () { document.location = document.location });
         }
 
         initEvents();
