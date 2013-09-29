@@ -7,13 +7,16 @@ from substanced.content import content
 from substanced.folder import Folder
 from substanced.objectmap import multireference_source_property
 from substanced.objectmap import multireference_target_property
+from substanced.objectmap import multireference_targetid_property
 from substanced.objectmap import reference_source_property
 from substanced.objectmap import reference_target_property
 from substanced.principal import User as BaseUser
 from substanced.principal import UserPropertySheet
 from substanced.principal import UserGroupsPropertySheet
 from substanced.property import PropertySheet
+from substanced.schema import MultireferenceIdSchemaNode
 from substanced.schema import Schema
+from substanced.util import get_oid
 from substanced.util import renamer
 from ZODB.blob import Blob
 from zope.interface import implementer
@@ -59,6 +62,23 @@ _genre_choices = (('', '- Select -'),
                   ('jazz', 'Jazz'),
                   ('blues', 'Blues'),
                  )
+
+def performers_choices(context, request):
+    performers = request.virtual_root.get('performers')
+    if performers is None:
+        return () # fbo dump/load
+    values = [(get_oid(performer), name) for name, performer in 
+                performers.items()]
+    return values
+
+class RelatedSchema(Schema):
+    liked_by_ids = MultireferenceIdSchemaNode(
+        choices_getter=performers_choices,
+        title='Liked By',
+        )
+
+class RelatedPropertySheet(PropertySheet):
+    schema = RelatedSchema()
 
 class PerformerProfileSchema(Schema):
     """ Property schema for :class:`substanced.principal.User` objects.
@@ -113,6 +133,7 @@ class Performers(Folder):
     tab_order=('properties',),
     propertysheets = (
         ('Profile', PerformerProfilePropertySheet),
+        ('Related', RelatedPropertySheet),
         )
     )
 @implementer(IPerformer)
@@ -121,6 +142,7 @@ class Performer(Folder):
     user = reference_source_property(PerformerToUser)
     recordings = multireference_target_property(RecordingToPerformer)
     liked_by = multireference_target_property(PerformerLikesPerformer)
+    liked_by_ids = multireference_targetid_property(PerformerLikesPerformer)
     likes_performers = multireference_source_property(PerformerLikesPerformer)
     likes_songs = multireference_source_property(PerformerLikesSong)
     likes_recordings = multireference_source_property(PerformerLikesRecording)
@@ -150,7 +172,10 @@ class Songs(Folder):
 @content(
     'Song',
     icon='glyphicon glyphicon-music',
-    propertysheets=(('Basic', SongPropertySheet),),
+    propertysheets=(
+        ('Basic', SongPropertySheet),
+        ('Related', RelatedPropertySheet),
+    ),
     add_view='add_song'
     )
 @implementer(ISong)
@@ -159,6 +184,7 @@ class Song(persistent.Persistent):
     genre = None
     recordings = multireference_target_property(RecordingToSong)
     liked_by = multireference_target_property(PerformerLikesSong)
+    liked_by_ids = multireference_targetid_property(PerformerLikesSong)
 
     @property
     def likes(self):
@@ -184,12 +210,18 @@ class Recordings(Folder):
 @content(
     'Recording',
     icon='glyphicon glyphicon-record',
+    propertysheets=(
+    #   ('Basic', RecordingPropertySheet),
+        ('Related', RelatedPropertySheet),
+    ),
+    add_view='add_recording'
 )
 @implementer(IRecording)
 class Recording(persistent.Persistent):
     performer = reference_source_property(RecordingToPerformer)
     song = reference_source_property(RecordingToSong)
     liked_by = multireference_target_property(PerformerLikesRecording)
+    liked_by_ids = multireference_targetid_property(PerformerLikesRecording)
 
     @property
     def title(self):
