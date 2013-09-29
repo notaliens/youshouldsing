@@ -21,7 +21,7 @@ def preview_songs(context, request):
     return HTTPFound(location=request.resource_url(context))
 
 class SongsView(object):
-    default_sort = 'artist'
+    default_sort = 'title'
     def __init__(self, context, request):
         self.context = context
         self.request = request
