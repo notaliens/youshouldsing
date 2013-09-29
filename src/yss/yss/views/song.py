@@ -1,3 +1,4 @@
+from pyramid.httpexceptions import HTTPBadRequest
 from pyramid.view import view_config
 from pyramid.settings import asbool
 from pyramid.httpexceptions import HTTPFound
@@ -123,9 +124,19 @@ class SongView(object):
         return {
             'title':song.title,
             'artist':song.artist,
-            'likes':len(song.liked_by),
+            'likes':song.likes,
             'recordings':[],
             }
 
-        
-    
+    @view_config(context=ISong,
+                 name='like',
+                 renderer='json',
+                )
+    def like(self):
+        performer = self.request.user.performer
+        if performer in self.context.liked_by:
+            raise HTTPBadRequest("Already")
+        self.context.liked_by.connect([performer])
+        return {'ok': True,
+                'likes': self.context.likes,
+               }

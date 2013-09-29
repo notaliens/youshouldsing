@@ -43,4 +43,12 @@ class MainLayout(object):
                 d['class'] = inside(self.context, section) and 'active' or None
                 tab_data.append(d)
         return tab_data
-            
+
+    def can_like(self, target=None):
+        user = self.request.user
+        if user is not None:
+            performer = user.performer
+            if performer is not None:
+                if target is None:
+                    target = self.context
+                return performer not in target.liked_by
