@@ -18,6 +18,7 @@ requires = [
     'PyBrowserID',
     'redis',
     'sh',
+    'beautifulsoup4'
     ]
 
 setup(name='yss',

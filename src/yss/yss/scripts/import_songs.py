@@ -66,13 +66,15 @@ def main(argv=sys.argv):
             command2 = ['lame', output_filename, mp3_filename ]
             subprocess.check_call(command2)
             os.remove(output_filename)
+            name = basename.replace('_NifterDotCom', '')
+            name = name.replace('_karaoke_songs', '')
             try:
-                del songs[basename]
+                del songs[name]
             except KeyError:
                 pass
             stream = open(mp3_filename, 'rb')
-            artist = basename
-            title = basename
+            artist = ''
+            title = ' '.join([x.capitalize() for x in name.split('_')])
             song = registry.content.create(
                 'Song',
                 title=title,
@@ -80,8 +82,9 @@ def main(argv=sys.argv):
                 timings=timings,
                 stream=stream
                 )
-            songs[basename] = song
+            songs[name] = song
             transaction.commit()
+            songs._p_jar.sync()
     finally:
         if not opts.directory:
             shutil.rmtree(outdir, ignore_errors=True)
