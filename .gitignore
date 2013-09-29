@@ -22,3 +22,4 @@ src/lesswatcher/
 src/bootswatch/
 var/
 tmp/
+etc/supervisord.conf
