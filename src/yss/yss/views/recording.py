@@ -3,6 +3,7 @@ import os
 import random
 import shutil
 
+from pyramid.httpexceptions import HTTPBadRequest
 from pyramid.response import FileResponse
 from pyramid.traversal import resource_path
 from pyramid.view import view_config
@@ -216,3 +217,17 @@ class RecordingsView(object):
             token.capitalize(),
             icon
             )
+
+@view_config(
+    context=IRecording,
+    name='like',
+    renderer='json',
+)
+def like_recording(context, request):
+    performer = request.user.performer
+    if performer in context.liked_by:
+        raise HTTPBadRequest("Already")
+    context.liked_by.connect([performer])
+    return {'ok': True,
+            'likes': context.likes,
+            }

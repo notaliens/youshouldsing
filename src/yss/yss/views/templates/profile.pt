@@ -6,22 +6,44 @@
       <div class="panel panel-default">
         <tal:if tal:condition="not form">
          <div class="panel-heading">
-           <p style="float: right"><a href="edit.html">Edit</a></p>
-           <p>Profile Information</p>
+           <div style="float:right">
+            <img src="${photo_url}" />
+            <p><a href="@@edit.html">Edit</a></p>
+           </div>
+           <p style="float: right; padding-right: 2em">
+              <tal:if tal:condition="email">
+               <a href="mailto:${email}">${email}</a><br/>
+              <tal:if>
+              <span tal:condition="age">${age} - </span>
+
+              <span tal:condition="sex">${sex} - </span>
+
+              <span tal:condition="genre">${genre}</span>
+           </p>
+           <h3>${title}</h3>
          </div>
          <div class="panel-body">
-           <img align="right" src="${photo_url}" />
-           <h1>${title}</h1>
-
-           <p tal:condition="email">
-              E-mail: <a href="mailto:${email}">${email}</a></p>
-
-           <p tal:condition="age">Age: ${age}</p>
-
-           <p tal:condition="sex">Sex: ${sex}</p>
-
-           <p tal:condition="genre">
-            Favorite Genre: ${genre}</p>
+              Likes: <span id="like-count">${likes}</span>
+              <tal:if tal:condition="layout.can_like(context)">
+                &nbsp;&nbsp;
+                <a id="like-button" href="@@like"
+                 ><i class="glyphicon glyphicon-thumbs-up"> </i></a>
+                <script type="text/javascript">
+                 $("#like-button").click(function () {
+                    $.ajax('@@like')
+                    .success(function(data) {
+                        var counter = $('#like-count'),
+                            thumb = $('#like-button');
+                        counter.text(data['likes']);
+                        thumb.hide();
+                    })
+                    .fail(function() {
+                        alert('Failed to add like');
+                    });
+                    return false;
+                 });
+                </script>
+              </tal:if>
 
          </div>
          <div class="panel-heading">

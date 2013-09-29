@@ -2,6 +2,7 @@
 import colander
 import deform
 
+from pyramid.httpexceptions import HTTPBadRequest
 from pyramid.settings import asbool
 from pyramid.view import view_config
 from substanced.folder.views import generate_text_filter_terms
@@ -37,8 +38,23 @@ def profile_view(context, request):
         'genre': getattr(context, 'genre', None),
         'form': None,
         'recent_recordings': recent_recordings(context, request),
+        'likes': context.likes,
     }
     form = deform.Form(PerformerProfileSchema(), buttons=('Save',))
+
+@view_config(
+    context=IPerformer,
+    name='like',
+    renderer='json',
+)
+def like_profile(context, request):
+    performer = request.user.performer
+    if performer in context.liked_by:
+        raise HTTPBadRequest("Already")
+    context.liked_by.connect([performer])
+    return {'ok': True,
+            'likes': context.likes,
+            }
 
 @view_config(
     context=IPerformer,
