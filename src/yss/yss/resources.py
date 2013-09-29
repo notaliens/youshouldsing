@@ -97,6 +97,7 @@ class Performers(Folder):
 class Performer(Folder):
     name = renamer()
     performer = reference_source_property(PerformerToUser)
+    likes = 0
 
 
 class SongSchema(Schema):
