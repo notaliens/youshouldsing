@@ -20,18 +20,31 @@ class IPerformers(Interface):
 class IPerformer(Interface):
     """ Marker interface for an individual performer folder """
 
-class CreatorToSong(ReferenceType):
-    """ A reference type which maps creator to song """
+class PerformerLikesPerformer(ReferenceType):
+    """ Map a "like" from a performer to another performer.
+    """
+    target_ordered = True
+
+class PerformerLikesRecording(ReferenceType):
+    """ Map a "like" from a performer to a recording.
+    """
+    target_ordered = True
+
+class PerformerLikesSong(ReferenceType):
+    """ Map a "like" from a performer to a song.
+    """
+    target_ordered = True
 
 class PerformerToUser(ReferenceType):
     """ Map a performer to the corresponding user object.
     """
 
 class RecordingToPerformer(ReferenceType):
-    pass
+    """ Map a recording to the corresponding performer.
+    """
+    source_ordered = True
 
 class RecordingToSong(ReferenceType):
-    pass
-
-class LikerToSong(ReferenceType):
-    pass
+    """ Map a recording to the corresponding song.
+    """
+    source_ordered = True

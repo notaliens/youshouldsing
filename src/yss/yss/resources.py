@@ -5,7 +5,8 @@ import shutil
 
 from substanced.content import content
 from substanced.folder import Folder
-from substanced.objectmap import reference_sourceid_property
+from substanced.objectmap import multireference_source_property
+from substanced.objectmap import multireference_target_property
 from substanced.objectmap import reference_source_property
 from substanced.objectmap import reference_target_property
 from substanced.objectmap import multireference_target_property
@@ -19,14 +20,15 @@ from ZODB.blob import Blob
 from zope.interface import implementer
 
 from .interfaces import (
-    CreatorToSong,
-    LikerToSong,
     IPerformer,
     IPerformers,
     IRecording,
     IRecordings,
     ISong,
     ISongs,
+    PerformerLikesPerformer,
+    PerformerLikesRecording,
+    PerformerLikesSong,
     PerformerToUser,
     RecordingToPerformer,
     RecordingToSong,
@@ -118,17 +120,15 @@ class Performers(Folder):
 class Performer(Folder):
     name = renamer()
     user = reference_source_property(PerformerToUser)
-    likes = 0
+    recordings = multireference_target_property(RecordingToPerformer)
+    liked_by = multireference_target_property(PerformerLikesPerformer)
+    likes_performers = multireference_source_property(PerformerLikesPerformer)
+    likes_songs = multireference_source_property(PerformerLikesSong)
+    likes_recordings = multireference_source_property(PerformerLikesRecording)
 
-
-class SongSchema(Schema):
-    title = colander.SchemaNode(colander.String())
-    artist = colander.SchemaNode(colander.String())
-    timings = colander.SchemaNode(colander.String())
-
-
-class SongPropertySheet(PropertySheet):
-    schema = SongSchema()
+    @property
+    def likes(self):
+        return len(self.liked_by)
 
 class SongSchema(Schema):
     title = colander.SchemaNode(colander.String())
@@ -157,12 +157,13 @@ class Songs(Folder):
 @implementer(ISong)
 class Song(persistent.Persistent):
 
-    creator_id = reference_sourceid_property(CreatorToSong)
-    creator = reference_source_property(CreatorToSong)
-    liked_by = multireference_target_property(LikerToSong)
-
     genre = None
-    likes = 0
+    recordings = multireference_target_property(RecordingToSong)
+    liked_by = multireference_target_property(PerformerLikesSong)
+
+    @property
+    def likes(self):
+        return len(self.liked_by)
 
     def __init__(self, title='', artist='', timings='', stream=None):
         self.title = title
@@ -189,7 +190,11 @@ class Recordings(Folder):
 class Recording(persistent.Persistent):
     performer = reference_source_property(RecordingToPerformer)
     song = reference_source_property(RecordingToSong)
-    likes = 0
+    liked_by = multireference_target_property(PerformerLikesRecording)
+
+    @property
+    def likes(self):
+        return len(self.liked_by)
 
     def __init__(self, tmpfolder):
         self.blob = None
