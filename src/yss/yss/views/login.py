@@ -96,16 +96,16 @@ def velruse_login_complete_view(context, request):
     headers = remember(request, get_oid(user))
     return HTTPFound(location, headers=headers)
 
-@view_config(name='logout',
-             renderer='templates/persona_logout.pt',
-)
-def logout(request):
+@view_config(name='logout')
+def velruse_logout(request):
     headers = forget(request)
     try:
         del request.user
     except AttributeError:
         pass
-    return {'location': request.resource_url(request.virtual_root)}
+    return HTTPFound(location=request.resource_url(request.virtual_root),
+                     headers=headers,
+                    )
 
 
 @view_config(
@@ -259,6 +259,13 @@ def persona_logout(context, request):
     """
     request.response.headers.extend(forget(request))
     return {'redirect': request.resource_url(request.virtual_root)}
+
+
+def authentication_type(request):
+    if request.user is not None:
+        if request.user.__name__.startswith('persona:'):
+            return 'persona'
+        return 'twitter'
 
 # Retail profile views
 

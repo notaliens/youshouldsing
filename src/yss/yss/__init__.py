@@ -6,6 +6,7 @@ from pyramid.settings import aslist
 from substanced import root_factory
 
 from .authpolicy import YSSAuthenticationPolicy
+from .views.login import authentication_type
 from .views.login import persona_js
 
 def main(global_config, **settings):
@@ -49,6 +50,8 @@ def main(global_config, **settings):
     config.registry['persona.verifier'] = verifier_factory(audiences)
 
     # The javascript needed by persona
+    config.add_request_method(authentication_type, 'authentication_type',
+                              reify=True)
     config.add_request_method(persona_js, 'persona_js', reify=True)
 
     # Route for Persona callback views
