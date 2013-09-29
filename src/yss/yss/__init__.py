@@ -5,8 +5,8 @@ from pyramid.config import ConfigurationError
 from pyramid.settings import aslist
 from substanced import root_factory
 
-from .views import persona_button
-from .views import persona_js
+from .views.login import persona_button
+from .views.login import persona_js
 
 def main(global_config, **settings):
     config = Configurator(settings=settings, root_factory=root_factory)

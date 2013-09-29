@@ -21,7 +21,7 @@ from substanced.principal import DefaultUserLocator
 from substanced.util import find_service
 from substanced.util import get_oid
 
-from .resources import YSSProfileSchema
+from ..resources import YSSProfileSchema
 
 random.seed()
 
