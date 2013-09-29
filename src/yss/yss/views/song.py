@@ -21,6 +21,7 @@ def preview_songs(context, request):
     return HTTPFound(location=request.resource_url(context))
 
 class SongsView(object):
+    default_sort = 'artist'
     def __init__(self, context, request):
         self.context = context
         self.request = request
@@ -50,7 +51,7 @@ class SongsView(object):
         if sorting:
             resultset = self.sort_by(resultset, sorting, reverse)
         else:
-            resultset = self.sort_by(resultset, 'artist', False)
+            resultset = self.sort_by(resultset, self.default_sort, False)
         return resultset
 
     def sort_by(self, rs, token, reverse):
@@ -67,7 +68,7 @@ class SongsView(object):
             'genre':(genre, artist, title, likes, created),
             'likes':(likes, artist, title, genre, created),
             }
-        indexes = sorting.get(token, sorting['artist'])
+        indexes = sorting.get(token, sorting[self.default_sort])
         for idx in indexes[1:]:
             rs = rs.sort(idx)
         first = indexes[0]
@@ -92,7 +93,7 @@ class SongsView(object):
         reverse = request.params.get('reverse', 'false')
         reverse = asbool(reverse)
         sorting = request.params.get('sorting')
-        if sorting == token or (not sorting and token == 'artist'):
+        if sorting == token or (not sorting and token == self.default_sort):
             if reverse:
                 icon = 'glyphicon glyphicon-chevron-up'
             else:

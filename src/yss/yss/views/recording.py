@@ -77,6 +77,7 @@ def finish_recording(song, request):
     recordings = request.root['recordings']
     name = generate_recording_id(recordings)
     recordings[name] = recording
+    print request.user.performer
     recording.performer = request.user.performer
     recording.song = song
 
