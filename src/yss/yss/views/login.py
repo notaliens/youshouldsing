@@ -27,10 +27,6 @@ from ..utils import get_redis
 
 random.seed()
 
-@view_config(renderer="templates/home.pt")
-def home(request):
-    return {}
-
 
 @view_config(content_type='Song',
              name="record",
