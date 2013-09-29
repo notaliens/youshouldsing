@@ -10,10 +10,8 @@ from pyramid.httpexceptions import HTTPFound
 from pyramid.session import check_csrf_token
 from pyramid.view import view_config
 from pyramid.security import (
-    authenticated_userid,
     forget,
     remember,
-    unauthenticated_userid,
 )
 from substanced.db import root_factory
 from substanced.interfaces import IUser
