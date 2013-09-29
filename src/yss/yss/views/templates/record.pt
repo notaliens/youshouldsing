@@ -223,6 +223,7 @@
         };
 
         function record() {
+          if (recorder === undefined) { return; }
           var elapsedTime = $('#elasped-time')[0];
           var ctx = canvas.getContext('2d');
           var CANVAS_HEIGHT = canvas.height;
@@ -249,11 +250,13 @@
         };
 
         function stop() {
+          if (recorder === undefined) { return; }
           theStream.stop();
           recorder.stop();
           endTime = Date.now();
           recording = false;
           $('#stop-me')[0].disabled = true;
+          document.location = document.location;
 
           toggleActivateRecordButton();
 
