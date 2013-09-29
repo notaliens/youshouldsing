@@ -102,8 +102,7 @@ def velruse_login_complete_view(context, request):
         principals = find_service(root, 'principals')
         user = principals.add_user(username, registry=registry)
         performer = registry.content.create('Performer')
-        performer.user = user
-        performer.display_name = profile['displayName']
+        performer.display_name = performer.title = profile['displayName']
         addresses = profile.get('addresses')
         if addresses:
             user.email = performer.email = addresses[0]['formatted']
@@ -113,6 +112,7 @@ def velruse_login_complete_view(context, request):
         performer.age = colander.null
         performer.sex = user.favorite_genre = None
         root['performers'][username] = performer
+        performer.user = user
         location = request.resource_url(performer, 'edit.html')
     else:
         location = request.resource_url(root['performers'][username])

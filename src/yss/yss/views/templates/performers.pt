@@ -26,12 +26,6 @@
                     <th width="50%">
                       ${structure:view.sort_tag('title')}
                     </th>
-                    <th width="25%">
-                      ${structure:view.sort_tag('genre')}
-                    </th>
-                    <th width="25%">
-                      ${structure:view.sort_tag('likes')}
-                    </th>
                   </tr>
                 </thead>
                 
@@ -42,8 +36,6 @@
                      ><img src="${item.photo_url}" width="24" height="24"
                        />&nbsp;&nbsp;${item.title}</a>
                     </td>
-                    <td>${item.genre or 'Unknown'}</td>
-                    <td>${item.likes}</td>
                   </tr>
                 </tbody>
               </table>
