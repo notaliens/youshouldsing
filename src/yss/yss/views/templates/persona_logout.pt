@@ -1,5 +1,9 @@
 <div metal:use-macro="main_template">
 
+  <div metal:fill-slot="head-more">
+   <meta http-equiv="refresh" content="2; ${location}">
+  </div>
+
   <div metal:fill-slot="main_content">
 
    <script type="text/javascript">

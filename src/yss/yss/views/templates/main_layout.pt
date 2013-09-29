@@ -70,7 +70,14 @@
                     />
               </li>
               <li tal:condition="request.user">
-                <a href="/logout">Log Out</a>
+               <tal:def tal:define="uname request.user.__name__;
+                                   is_persona uname.startswith('persona:');
+                                  ">
+                <a href="/logout"
+                   tal:condition="not is_persona">Log Out</a>
+                <span id="persona-signout"
+                   tal:condition="is_persona">Log Out</span>
+               </tal:def>
               </li>
               <li tal:condition="request.user">
                 <a href="${request.resource_path(request.user)}">My Account</a>

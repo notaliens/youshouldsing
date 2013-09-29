@@ -127,7 +127,7 @@ _PERSONA_SIGNIN_HTML = (
     '<img src="https://login.persona.org/i/persona_sign_in_blue.png" '
           'id="persona-signin" alt="sign-in button" />')
 
-_PERSONA_SIGNOUT_HTML = '<button id="signout">logout</button>'
+_PERSONA_SIGNOUT_HTML = '<button id="persona-signout">logout</button>'
 
 PERSONA_JS = """
 $(function() {
@@ -136,7 +136,7 @@ $(function() {
         return false;
     });
 
-    $('#signout').click(function() {
+    $('#persona-signout').click(function() {
         navigator.id.logout();
         return false;
     });
@@ -179,21 +179,13 @@ $(function() {
                     window.location = res['redirect'];
                 },
                 error: function(xhr, status, err) {
-                    //alert("Logout failure: " + err);
+                    alert("Logout failure: " + err);
                 }
             });
         }
     });
 });
 """
-
-def persona_button(request):
-    """Return login button if the user is logged in, else the login button.
-    """
-    if not authenticated_userid(request):
-        return _PERSONA_SIGNIN_HTML
-    else:
-        return _PERSONA_SIGNOUT_HTML
 
 
 def persona_js(request):
@@ -268,7 +260,7 @@ def persona_logout(context, request):
     """View to forget the user
     """
     request.response.headers.extend(forget(request))
-    return {'redirect': request.POST['came_from']}
+    return {'redirect': request.resource_url(request.virtual_root)}
 
 # Retail profile views
 
