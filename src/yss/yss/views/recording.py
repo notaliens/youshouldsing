@@ -121,6 +121,7 @@ class RecordingView(object):
             'title':recording.title,
             'performer':recording.performer,
             'likes':len(recording.liked_by),
+            'liked_by': recording.liked_by,
             'recordings':[],
             }
 
