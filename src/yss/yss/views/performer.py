@@ -39,6 +39,7 @@ def profile_view(context, request):
         'form': None,
         'recent_recordings': recent_recordings(context, request),
         'likes': context.likes,
+        'likes_songs': context.likes_songs,
     }
     form = deform.Form(PerformerProfileSchema(), buttons=('Save',))
 
