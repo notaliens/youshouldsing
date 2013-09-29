@@ -11,8 +11,11 @@
         <div class="panel-body">
           <table class="table table-striped">
             <tbody>
-              <tr>
-                <td>A recording</td>
+              <tr tal:repeat="item featured_recordings">
+                <td>
+                  <a href="${request.resource_url(item)"
+                  >${item.title}</a>
+                </td>
               </tr>
             </tbody>
           </table>
@@ -31,8 +34,11 @@
         <div class="panel-body">
           <table class="table table-striped">
             <tbody>
-              <tr>
-                <td>A recording</td>
+              <tr tal:repeat="item recent_recordings">
+                <td>
+                  <a href="${request.resource_url(item)"
+                  >${item.title}</a>
+                </td>
               </tr>
             </tbody>
           </table>
