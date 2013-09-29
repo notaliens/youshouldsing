@@ -11,7 +11,27 @@
         <div class="panel-body">
           <div class="container">
             <div class="col-md-6">
-              Likes: ${likes}
+              Likes: <span id="like-count">${likes}</span>
+              <tal:if tal:condition="layout.can_like(context)">
+                &nbsp;&nbsp;
+                <a id="like-button" href="@@like"
+                 ><i class="glyphicon glyphicon-thumbs-up"> </i></a>
+                <script type="text/javascript">
+                 $("#like-button").click(function () {
+                    $.ajax('@@like')
+                    .success(function(data) {
+                        var counter = $('#like-count'),
+                            thumb = $('#like-button');
+                        counter.text(data['likes']);
+                        thumb.hide();
+                    })
+                    .fail(function() {
+                        alert('Failed to add like');
+                    });
+                    return false;
+                 });
+                </script>
+              </tal:if>
             </div>
             <div class="col-md-6">
               <a href="./record">Record this song</a>
