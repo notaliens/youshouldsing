@@ -61,6 +61,7 @@ def postprocess(recording):
                 shutil.copyfileobj(savefrom, saveto)
         print "%s/%s" % (tmpdir, "video.ogg")
         #shutil.rmtree(tmpdir)
+        transaction.commit()
     finally:
         os.chdir(curdir)
 
