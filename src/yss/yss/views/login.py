@@ -106,10 +106,11 @@ def velruse_login_complete_view(context, request):
         principals = find_service(root, 'principals')
         user = principals.add_user(username, registry=registry)
         performer = registry.content.create('Performer')
+        performer.user = user
         performer.display_name = profile['displayName']
         addresses = profile.get('addresses')
         if addresses:
-            performer.email = addresses[0]['formatted']
+            user.email = performer.email = addresses[0]['formatted']
         photos = profile.get('photos')
         if photos:
             performer.photo_url = photos[0]['value']
@@ -246,7 +247,7 @@ def verify_persona_assertion(request):
 
 def persona_gravatar_photo(request, email):
     default = request.static_url('yss:static/persona.png')
-    return ("//www.gravatar.com/avatar/" +
+    return ("http://www.gravatar.com/avatar/" +
             hashlib.md5(email.lower()).hexdigest() +
             "?" +
             urllib.urlencode({'d':default, 's': '40'})
@@ -271,8 +272,10 @@ def persona_login(context, request):
         username = 'persona:%s' % email
         principals = find_service(root, 'principals')
         user = principals.add_user(username, registry=registry)
+        user.email = email
         performer = registry.content.create('Performer')
         root['performers'][username] = performer
+        performer.user = user
         location = request.resource_url(performer, 'edit.html')
         performer.display_name = email
         performer.email = email
