@@ -7,6 +7,7 @@ import colander
 import deform
 from pyramid.httpexceptions import HTTPBadRequest
 from pyramid.httpexceptions import HTTPFound
+from pyramid.response import FileResponse
 from pyramid.session import check_csrf_token
 from pyramid.view import view_config
 from pyramid.security import (
@@ -30,17 +31,20 @@ def home(request):
     return {}
 
 
-@view_config(name="record",
+@view_config(content_type='Song',
+             name="record",
              renderer="templates/record.pt")
-def recording_app(request):
+def recording_app(song, request):
     performance_id = generate_performance_id({})
     return {
         "id": performance_id,
+        "mp3_url": request.resource_url(song, 'mp3'),
+        "timings": song.timings,
     }
 
 
-@view_config(name="record", xhr=True, renderer='string')
-def save_recording(request):
+@view_config(content_type='Song', name="record", xhr=True, renderer='string')
+def save_recording(song, request):
     f = request.params['data'].file
     id = request.params['id']
     fname = request.params['filename']
@@ -307,3 +311,14 @@ def profile_edit(context, request):
     return {
         'form': form.render(appstruct, readonly=False),
     }
+
+
+@view_config(
+    content_type='Song',
+    name='mp3',
+    #permission=???RETAIL_VIEW???
+)
+def stream_mp3(song, request):
+    return FileResponse(
+        song.blob.committed(),
+        content_type='audio/mpeg')

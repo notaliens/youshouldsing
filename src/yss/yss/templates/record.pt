@@ -1,16 +1,109 @@
 <!DOCTYPE html>
 <html metal:use-macro="main_template">
-  <h1>Make a recording!</h1>
   <div metal:fill-slot="main_content">
+    <h1>Sing, you!</h1>
     <button id="record-me">Record<!--⚫--></button>
     <button id="stop-me" disabled>◼</button>
     <video autoplay>Your browser doesn't support video.</video>
+    <div id="player" style="display: none">
+      <div id="karaoke-wrapper">
+        <div id="karaoke-display"></div>
+      </div>
+    </div>
+    <div id="status">0:00</div>
   </div>
+
   <div metal:fill-slot="tail">
     <script src="${layout.static('whammy.js')}"></script>
     <script src="${layout.static('recorder.js')}"></script>
+    <script type="text/javascript" src="${layout.static('ricekaraoke.js')}"></script>
+    <script type="text/javascript" src="${layout.static('simplekaraokedisplay.js')}"></script>
     <script>
-      (function(exports) {
+      var karaoke = (function() {
+        var numDisplayLines = 2; // Number of lines to do the karaoke with
+        var timings = ${timings};
+        var wasPaused = false;
+        var show = null;
+        var player = new Audio();
+        player.setAttribute('src', '${mp3_url}');
+        var lastPosition = 0;
+
+        function getTimeString(t) {
+          var min = Math.floor(t / 60);
+          var secs = Math.floor(t % 60);
+          return min + ':' + (secs < 10 ? '0' : '') + secs;
+        }
+         
+        function changePosition(percent) {
+          if (player != null) {
+            var duration = player.duration;
+            var position = duration * percent / 100;
+            player.currentTime = position;
+          }
+        }
+
+        function updateStatus() {
+          var duration = player.duration;
+          $('#status').text(getTimeString(player.currentTime) + ' / ' + 
+                                          getTimeString(duration));
+        }
+
+        function setup() {
+          $('#player').show();
+        }
+
+        function play() {
+          player.play();
+        }
+
+        function pause() {
+          player.pause();
+        }
+
+        function init() {
+          // Create the karaoke engine and get a show instance
+          var karaoke = new RiceKaraoke(RiceKaraoke.simpleTimingToTiming(timings));
+          var renderer = new SimpleKaraokeDisplayEngine(
+            'karaoke-display', numDisplayLines);
+          show = karaoke.createShow(renderer, numDisplayLines);
+
+          //player.addEventListener(
+          //  'canplay', updateControls, false);
+          player.addEventListener(
+            'error', function() { alert('Failed to play!') }, false);
+          //player.addEventListener('suspend', updateControls, false)
+          //player.addEventListener('pause', updateControls, false)
+          //player.addEventListener('playing', updateControls, false)
+          player.addEventListener('ended', function() { 
+            // AFAICT this isn't called
+            player.pause();
+            rtc_recorder.stop();
+          }, false);
+          player.addEventListener('timeupdate', function () {
+              var ct = player.currentTime;
+              if (ct < lastPosition) {
+                show.reset();
+              }
+              if (ct >= player.duration) {
+                rtc_recorder.stop();
+              } 
+              show.render(ct, false);
+              updateStatus();
+              lastPosition = ct;
+            }, false);
+
+
+          };
+
+          init();
+          setup();
+
+          return {
+            play: play,
+          }
+      })();
+
+      var rtc_recorder = (function(exports) {
         exports.URL = exports.URL || exports.webkitURL;
 
         exports.requestAnimationFrame = exports.requestAnimationFrame ||
@@ -126,6 +219,7 @@
           var CANVAS_HEIGHT = canvas.height;
           var CANVAS_WIDTH = canvas.width;
 
+          karaoke.play();
           recording = true;
           startTime = Date.now();
 
@@ -213,6 +307,10 @@
 
         initEvents();
         turnOnCamera();
+
+        return {
+          stop: stop
+        }
       })(window);
     </script>
   </div>

@@ -76,7 +76,7 @@ class YSSProfileSchema(Schema):
 class SongSchema(Schema):
     title = colander.SchemaNode(colander.String())
     artist = colander.SchemaNode(colander.String())
-    timing = colander.SchemaNode(colander.String())
+    timings = colander.SchemaNode(colander.String())
 
 
 class SongPropertySheet(PropertySheet):
@@ -118,10 +118,10 @@ class Songs(Folder):
 @implementer(ISong)
 class Song(persistent.Persistent):
 
-    def __init__(self, title='', artist='', timing='', stream=None):
+    def __init__(self, title='', artist='', timings='', stream=None):
         self.title = title
         self.artist = artist
-        self.timing = timing
+        self.timings = timings
         self.blob = Blob()
         with self.blob.open("w") as fp:
             shutil.copyfileobj(stream, fp)
