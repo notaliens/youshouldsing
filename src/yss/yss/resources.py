@@ -6,9 +6,11 @@ import shutil
 from substanced.content import content
 from substanced.folder import Folder
 from substanced.interfaces import IUser
+from substanced.interfaces import ReferenceType
 from substanced.interfaces import UserToGroup
 from substanced.objectmap import multireference_source_property
 from substanced.objectmap import multireference_sourceid_property
+from substanced.objectmap import reference_source_property
 from substanced.principal import User as BaseUser
 from substanced.principal import UserPropertySheet
 from substanced.principal import UserGroupsPropertySheet
@@ -23,6 +25,7 @@ from .interfaces import (
     ISong,
     IPerformers,
     IRecordings,
+    IRecording,
     )
 
 _sex_choices = (('', '- Select -'),
@@ -153,3 +156,25 @@ class Performers(Folder):
 @implementer(IRecordings)
 class Recordings(Folder):
     pass
+
+
+class RecordingToPerformer(ReferenceType):
+    pass
+
+
+class RecordingToSong(ReferenceType):
+    pass
+
+
+@content(
+    'Recording',
+    icon='glyphicon glyphicon-record',
+)
+@implementer(IRecording)
+class Recording(persistent.Persistent):
+    performer = reference_source_property(RecordingToPerformer)
+    song = reference_source_property(RecordingToSong)
+
+    def __init__(self, tmpfolder):
+        self.blob = None
+        self.tmpfolder = tmpfolder

@@ -14,6 +14,7 @@ from pyramid.security import (
     forget,
     remember,
 )
+from pyramid.traversal import resource_path
 from substanced.db import root_factory
 from substanced.interfaces import IUser
 from substanced.interfaces import IUserLocator
@@ -22,6 +23,8 @@ from substanced.util import find_service
 from substanced.util import get_oid
 
 from ..resources import YSSProfileSchema
+from ..utils import get_redis
+
 
 random.seed()
 
@@ -53,6 +56,22 @@ def save_recording(song, request):
     with open('%s/%s' % (tmpdir, fname), 'wb') as output:
         shutil.copyfileobj(f, output)
     return 'OK'
+
+
+@view_config(content_type='Song', name="record", xhr=True, renderer='string',
+             request_param='finished')
+def finish_recording(song, request):
+    tmpdir = '/tmp/' + request.params['id']
+    recording = request.registry.content.create('Recording', tmpdir)
+    recordings = request.root['recordings']
+    name = generate_recording_id(recordings)
+    recordings[name] = recording
+    recording.performer = request.user
+    recording.song = song
+
+    redis = get_redis(request)
+    redis.rpush("yss.new-recordings", resource_path(recording))
+    return request.resource_url(recording)
 
 
 idchars = (

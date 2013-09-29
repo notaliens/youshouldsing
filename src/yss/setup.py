@@ -16,6 +16,8 @@ requires = [
     'pyramid_tm',
     'velruse',
     'PyBrowserID',
+    'redis',
+    'sh',
     ]
 
 setup(name='yss',
@@ -43,6 +45,7 @@ setup(name='yss',
       main = yss:main
       [console_scripts]
       import_songs = yss.scripts.import_songs:main
+      postproc = yss.scripts.postproc:main
       """,
       )
 

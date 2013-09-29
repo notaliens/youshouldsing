@@ -9,5 +9,8 @@ class ISong(Interface):
 class IRecordings(Interface):
     """ Marker interface for the recordings folder """
 
+class IRecording(Interface):
+    """ Marker interface for recordings """
+
 class IPerformers(Interface):
     """ Marker interface for the performers folder """
