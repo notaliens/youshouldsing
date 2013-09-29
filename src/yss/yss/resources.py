@@ -5,16 +5,8 @@ import shutil
 
 from substanced.content import content
 from substanced.folder import Folder
-from substanced.interfaces import IUser
-from substanced.interfaces import ReferenceType
-from substanced.interfaces import UserToGroup
-from substanced.objectmap import multireference_source_property
-from substanced.objectmap import multireference_sourceid_property
 from substanced.objectmap import reference_sourceid_property
 from substanced.objectmap import reference_source_property
-from substanced.principal import User as BaseUser
-from substanced.principal import UserPropertySheet
-from substanced.principal import UserGroupsPropertySheet
 from substanced.property import PropertySheet
 from substanced.schema import Schema
 from substanced.util import renamer
@@ -22,12 +14,16 @@ from ZODB.blob import Blob
 from zope.interface import implementer
 
 from .interfaces import (
-    ISongs,
-    ISong,
-    IPerformers,
-    IRecordings,
-    IRecording,
     CreatorToSong,
+    IPerformer,
+    IPerformers,
+    IRecording,
+    IRecordings,
+    ISong,
+    ISongs,
+    PerformerToUser,
+    RecordingToPerformer,
+    RecordingToSong,
     )
 
 _sex_choices = (('', '- Select -'),
@@ -43,7 +39,7 @@ _genre_choices = (('', '- Select -'),
                   ('blues', 'Blues'),
                  )
 
-class YSSProfileSchema(Schema):
+class PerformerProfileSchema(Schema):
     """ Property schema for :class:`substanced.principal.User` objects.
     """
     display_name = colander.SchemaNode(
@@ -77,6 +73,31 @@ class YSSProfileSchema(Schema):
         widget=deform.widget.SelectWidget(values=_genre_choices),
     )
 
+class PerformerProfilePropertySheet(PropertySheet):
+    schema = PerformerProfileSchema()
+
+@content(
+    'Performers',
+    icon='glyphicon glyphicon-bullhorn',
+    )
+@implementer(IPerformers)
+class Performers(Folder):
+    pass
+
+@content(
+    'Performer',
+    icon='glyphicon glyphicon-user',
+    add_view='add_performer',
+    tab_order=('properties',),
+    propertysheets = (
+        ('Profile', PerformerProfilePropertySheet),
+        )
+    )
+@implementer(IPerformer)
+class Performer(Folder):
+    name = renamer()
+    performer = reference_source_property(PerformerToUser)
+
 
 class SongSchema(Schema):
     title = colander.SchemaNode(colander.String())
@@ -86,27 +107,6 @@ class SongSchema(Schema):
 
 class SongPropertySheet(PropertySheet):
     schema = SongSchema()
-
-class YSSProfilePropertySheet(PropertySheet):
-    schema = YSSProfileSchema()
-
-@content(
-    'User',
-    icon='glyphicon glyphicon-user',
-    add_view='add_user',
-    tab_order=('properties',),
-    propertysheets = (
-       ('Preferences', UserPropertySheet),
-        ('Groups', UserGroupsPropertySheet),
-        ('Profile', YSSProfilePropertySheet),
-        )
-    )
-@implementer(IUser)
-class User(BaseUser):
-    tzname = 'UTC' # backwards compatibility default
-    groupids = multireference_sourceid_property(UserToGroup)
-    groups = multireference_source_property(UserToGroup)
-    name = renamer()
 
 class SongSchema(Schema):
     title = colander.SchemaNode(colander.String())
@@ -149,27 +149,11 @@ class Song(persistent.Persistent):
             shutil.copyfileobj(stream, fp)
 
 @content(
-    'Performers',
-    icon='glyphicon glyphicon-bullhorn',
-    )
-@implementer(IPerformers)
-class Performers(Folder):
-    pass
-
-@content(
     'Recordings',
     icon='glyphicon glyphicon-record',
     )
 @implementer(IRecordings)
 class Recordings(Folder):
-    pass
-
-
-class RecordingToPerformer(ReferenceType):
-    pass
-
-
-class RecordingToSong(ReferenceType):
     pass
 
 

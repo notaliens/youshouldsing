@@ -6,7 +6,6 @@ import urllib
 
 from browserid.errors import TrustError
 import colander
-import deform
 from pyramid.httpexceptions import HTTPBadRequest
 from pyramid.httpexceptions import HTTPFound
 from pyramid.response import FileResponse
@@ -18,13 +17,11 @@ from pyramid.security import (
 )
 from pyramid.traversal import resource_path
 from substanced.db import root_factory
-from substanced.interfaces import IUser
 from substanced.interfaces import IUserLocator
 from substanced.principal import DefaultUserLocator
 from substanced.util import find_service
 from substanced.util import get_oid
 
-from ..resources import YSSProfileSchema
 from ..utils import get_redis
 
 
@@ -105,20 +102,23 @@ def velruse_login_complete_view(context, request):
         adapter = DefaultUserLocator(root, request)
     user = adapter.get_user_by_login(username)
     if user is None:
+        registry = request.registry
         principals = find_service(root, 'principals')
-        user = principals.add_user(username, registry=request.registry)
-        user.display_name = profile['displayName']
+        user = principals.add_user(username, registry=registry)
+        performer = registry.content.create('Performer')
+        performer.display_name = profile['displayName']
         addresses = profile.get('addresses')
         if addresses:
-            user.email = addresses[0]['formatted']
+            performer.email = addresses[0]['formatted']
         photos = profile.get('photos')
         if photos:
-            user.photo_url = photos[0]['value']
-        user.age = colander.null
-        user.sex = user.favorite_genre = None
-        location = request.resource_url(user, 'edit.html')
+            performer.photo_url = photos[0]['value']
+        performer.age = colander.null
+        performer.sex = user.favorite_genre = None
+        root['performers'][username] = performer
+        location = request.resource_url(performer, 'edit.html')
     else:
-        location = request.resource_url(user)
+        location = request.resource_url(root['performers'][username])
     headers = remember(request, get_oid(user))
     return HTTPFound(location, headers=headers)
 
@@ -267,17 +267,21 @@ def persona_login(context, request):
         adapter = DefaultUserLocator(root, request)
     user = adapter.get_user_by_email(email)
     if user is None:
+        registry = request.registry
         username = 'persona:%s' % email
         principals = find_service(root, 'principals')
-        user = principals.add_user(username, registry=request.registry)
-        user.display_name = email
-        user.email = email
-        user.photo_url = persona_gravatar_photo(request, email)
-        user.age = colander.null
-        user.sex = user.favorite_genre = None
-        location = request.resource_url(user, 'edit.html')
+        user = principals.add_user(username, registry=registry)
+        performer = registry.content.create('Performer')
+        root['performers'][username] = performer
+        location = request.resource_url(performer, 'edit.html')
+        performer.display_name = email
+        performer.email = email
+        performer.photo_url = persona_gravatar_photo(request, email)
+        performer.age = colander.null
+        performer.sex = user.favorite_genre = None
+        location = request.resource_url(performer, 'edit.html')
     else:
-        location = request.resource_url(user)
+        location = request.resource_url(root['performers'][user.__name__])
     headers = remember(request, get_oid(user))
     request.response.headers.extend(headers)
     return {'redirect': location, 'success': True}
@@ -300,65 +304,6 @@ def authentication_type(request):
         if request.user.__name__.startswith('persona:'):
             return 'persona'
         return 'twitter'
-
-# Retail profile views
-
-@view_config(
-    context=IUser,
-    renderer='templates/profile.pt',
-)
-def profile_view(context, request):
-    return {
-        'username': context.__name__,
-        'display_name': getattr(context, 'display_name', ''),
-        'email': getattr(context, 'email', ''),
-        'photo_url': getattr(context, 'photo_url', ''),
-        'age': getattr(context, 'age', colander.null),
-        'sex': getattr(context, 'sex', None),
-        'favorite_genre': getattr(context, 'favorite_genre', None),
-        'form': None
-    }
-    form = deform.Form(YSSProfileSchema(), buttons=('Save',))
-
-@view_config(
-    context=IUser,
-    renderer='templates/profile.pt',
-    name='edit.html',
-#    permission='edit', XXX
-)
-def profile_edit_form(context, request):
-    schema = YSSProfileSchema().bind(request=request, context=context)
-    form = deform.Form(schema, buttons=('Save',))
-    rendered = None
-    if 'Save' in request.POST:
-        controls = request.POST.items()
-        try:
-            appstruct = form.validate(controls)
-        except deform.ValidationFailure as e:
-            rendered = e.render()
-        else:
-            context.display_name = appstruct['display_name']
-            context.email = appstruct['email']
-            context.photo_url = appstruct['photo_url']
-            context.age = appstruct['age']
-            context.sex = appstruct['sex']
-            context.favorite_genre = appstruct['favorite_genre']
-    else:
-        appstruct = {
-            'csrf_token': request.session.get_csrf_token(),
-            'username': context.__name__,
-            'display_name': getattr(context, 'display_name', ''),
-            'email': getattr(context, 'email', ''),
-            'photo_url': getattr(context, 'photo_url', ''),
-            'age': getattr(context, 'age', colander.null),
-            'sex': getattr(context, 'sex', None),
-            'favorite_genre': getattr(context, 'favorite_genre', None),
-        }
-    if rendered is None:
-        rendered = form.render(appstruct, readonly=False)
-    return {
-        'form': rendered,
-    }
 
 
 @view_config(
