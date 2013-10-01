@@ -12,6 +12,8 @@
 
       <div class="row">
         <div class="col-md-4" style="padding-left: 0px; padding-right: 0px;">
+          <!-- muted="true" prevents performer from hearing themselves (in
+               chrome at least) -->
           <video muted="true" autoplay>Your browser doesn't support video.</video>
         </div>
 
