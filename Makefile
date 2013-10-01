@@ -1,16 +1,12 @@
 .PHONY: build
 
-build:
-	virtualenv -ppython2.7 .
-	bin/pip install --upgrade setuptools
-	bin/python bootstrap.py
+build: bin/buildout
 	bin/buildout
 
+bin/buildout:
+	virtualenv -ppython2.7 .
+	bin/python bootstrap.py
+
 clean:
-	rm -rf bin/ include/ lib/ .installed.cfg .mr.developer.cfg develop-eggs/ eggs/ var/ downloads/ parts/ tmp/ src/wxpython/ src/substanced/ src/deform/ src/pygame share/
-
-karaoke-gui:
-	export LD_LIBRARY_PATH=parts/wxpython-cmmi/lib
-	bin/py lib/python2.7/site-packages/pykaraoke.py
-
-
+	rm -rf bin/ include/ lib/ .installed.cfg .mr.developer.cfg develop-eggs/ eggs/ var/ downloads/ parts/ tmp/ lib/python2.7/site-packages/pygame*
+	find src/ -maxdepth 1 -mindepth 1 -type d|grep -v yss|xargs rm -rf
