@@ -49,17 +49,19 @@ def postprocess(recording):
     tmpdir = recording.tmpfolder
     curdir = os.getcwd()
     try:
+        print 'Changing dir to %s' % tmpdir
         os.chdir(tmpdir)
+        committed = recording.song.blob.committed()
         sox("-m", "audio.wav", "-t", "mp3", "-v", "0.15",
-            recording.song.blob.committed(), "mixed.wav")
+            committed, "mixed.wav")
         ffmpeg("-i", "mixed.wav",
                "-f", "image2", "-r", "1", "-i", "frame%d.png",
-               "video.ogg")
+               "-acodec", "libvorbis", "video.ogv")
         recording.blob = Blob()
         with recording.blob.open("w") as saveto:
-            with open("video.ogg") as savefrom:
+            with open("video.ogv") as savefrom:
                 shutil.copyfileobj(savefrom, saveto)
-        print "%s/%s" % (tmpdir, "video.ogg")
+        print "%s/%s" % (tmpdir, "video.ogv")
         #shutil.rmtree(tmpdir)
         transaction.commit()
     finally:
