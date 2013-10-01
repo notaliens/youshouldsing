@@ -35,11 +35,6 @@ share/
 
 Don't do this if you have data in var/ you want to keep.
 
-Testing
--------
-
-``make karaoke-gui`` should show the PyKaraoke GUI.
-
 Running
 -------
 
