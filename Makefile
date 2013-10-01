@@ -5,6 +5,7 @@ build: bin/buildout
 
 bin/buildout:
 	virtualenv -ppython2.7 .
+	bin/easy_install -U setuptools
 	bin/python bootstrap.py
 
 clean:
