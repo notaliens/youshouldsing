@@ -1,20 +1,28 @@
+import colander
+import deform.widget
+import slug
+
 from pyramid.httpexceptions import HTTPBadRequest
 from pyramid.view import view_config
 from pyramid.settings import asbool
 from pyramid.httpexceptions import HTTPFound
+
+from substanced.file import FileNode
+from substanced.form import FormView
+from substanced.folder.views import generate_text_filter_terms
+from substanced.schema import Schema
+from substanced.sdi import mgmt_view
 
 from substanced.util import (
     Batch,
     find_index,
     )
 
-from substanced.folder.views import generate_text_filter_terms
-from substanced.sdi import mgmt_view
-
 from yss.interfaces import (
     ISongs,
     ISong,
     )
+
 
 @mgmt_view(context=ISongs, name='preview')
 def preview_songs(context, request):
@@ -61,12 +69,14 @@ class SongsView(object):
         likes = find_index(context, 'yss', 'likes')
         genre = find_index(context, 'yss', 'genre')
         created = find_index(context, 'yss', 'created')
+        duration = find_index(context, 'yss', 'duration')
         sorting = {
             'date':(created, likes, title, artist, genre),
             'title':(title, artist, likes, genre, created),
             'artist':(artist, title, likes, genre, created),
             'genre':(genre, artist, title, likes, created),
             'likes':(likes, artist, title, genre, created),
+            'duration':(duration, artist, title, genre, created),
             }
         indexes = sorting.get(token, sorting[self.default_sort])
         for idx in indexes[1:]:
@@ -142,3 +152,50 @@ class SongView(object):
         return {'ok': True,
                 'likes': self.context.likes,
                }
+
+class AddSongSchema(Schema):
+    title = colander.SchemaNode(colander.String())
+    artist = colander.SchemaNode(colander.String())
+    timings = colander.SchemaNode(
+        colander.String(),
+        widget = deform.widget.TextAreaWidget(style='height: 200px'),
+        )
+    file = FileNode()
+
+@mgmt_view(
+    context=ISongs,
+    name='add_song',
+    tab_title='Add Song',
+    permission='sdi.add-content',
+    renderer='substanced.sdi:templates/form.pt',
+    tab_condition=False
+    )
+class AddSongView(FormView):
+    title = 'Add Song'
+    schema = AddSongSchema()
+    buttons = ('add',)
+
+    def add_success(self, appstruct):
+        title = appstruct['title']
+        artist = appstruct['artist']
+        timings = appstruct['timings']
+        name = slug.slug(title)
+        stream = appstruct['file']['fp']
+        song = self.request.registry.content.create(
+            'Song',
+            title,
+            artist,
+            timings,
+            stream
+            )
+        self.context[name] = song
+        return HTTPFound(self.request.sdiapi.mgmt_path(self.context))
+
+@view_config(
+    context=ISong,
+    name='mp3',
+)
+def stream_mp3(context, request):
+    return context.get_response(request=request)
+
+

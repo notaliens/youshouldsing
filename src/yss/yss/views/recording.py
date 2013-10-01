@@ -101,17 +101,6 @@ def generate_recording_id(recordings):
     return id
 
 
-@view_config(
-    content_type='Song',
-    name='mp3',
-    #permission=???RETAIL_VIEW???
-)
-def stream_mp3(song, request):
-    return FileResponse(
-        song.blob.committed(),
-        content_type='audio/mpeg')
-
-
 class RecordingView(object):
     def __init__(self, context, request):
         self.context = context
@@ -136,7 +125,8 @@ class RecordingView(object):
 def stream_movie(recording, request):
     return FileResponse(
         recording.blob.committed(),
-        content_type='video/ogg')
+        content_type='video/ogg'
+        )
 
 
 class RecordingsView(object):

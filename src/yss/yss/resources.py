@@ -1,9 +1,14 @@
+import audioread
 import colander
 import deform
 import persistent
-import shutil
 
 from substanced.content import content
+from substanced.file import (
+    File,
+    FilePropertiesSchema,
+    FileUploadPropertySheet,
+    )
 from substanced.folder import Folder
 from substanced.objectmap import multireference_source_property
 from substanced.objectmap import multireference_target_property
@@ -18,7 +23,6 @@ from substanced.schema import MultireferenceIdSchemaNode
 from substanced.schema import Schema
 from substanced.util import get_oid
 from substanced.util import renamer
-from ZODB.blob import Blob
 from zope.interface import implementer
 
 from .interfaces import (
@@ -152,21 +156,27 @@ class Performer(Folder):
     def likes(self):
         return len(self.liked_by)
 
-class SongSchema(Schema):
-    title = colander.SchemaNode(colander.String())
+class SongSchema(FilePropertiesSchema):
     artist = colander.SchemaNode(colander.String())
     genre = colander.SchemaNode(
         colander.String(),
         widget=deform.widget.SelectWidget(values=_genre_choices),
     )
+    duration = colander.SchemaNode(
+        colander.Int(),
+        missing=colander.null,
+        title='Duration in seconds',
+        widget = deform.widget.TextInputWidget(readonly=True),
+        )
     timings = colander.SchemaNode(
         colander.String(),
         widget=deform.widget.TextAreaWidget(style="height: 200px;"),
         )
 
-
 class SongPropertySheet(PropertySheet):
     schema = SongSchema()
+    def set(self, appstruct):
+        return PropertySheet.set(self, appstruct, omit=('duration'))
 
 @content(
     'Songs',
@@ -183,28 +193,39 @@ class Songs(Folder):
     propertysheets=(
         ('Basic', SongPropertySheet),
         ('Related', RelatedPropertySheet),
+        ('Upload', FileUploadPropertySheet),
     ),
     add_view='add_song'
     )
 @implementer(ISong)
-class Song(persistent.Persistent):
+class Song(File):
 
     genre = 'Unknown'
     recordings = multireference_target_property(RecordingToSong)
     liked_by = multireference_target_property(PerformerLikesSong)
     liked_by_ids = multireference_targetid_property(PerformerLikesSong)
+    duration = 0
+
+    def __init__(self, title, artist, timings, audio_stream,
+                 audio_mimetype='audio/mpeg'):
+        File.__init__(self, audio_stream, audio_mimetype, title)
+        self.artist = artist
+        self.timings = timings
 
     @property
     def likes(self):
         return len(self.liked_by)
 
-    def __init__(self, title='', artist='', timings='', stream=None):
-        self.title = title
-        self.artist = artist
-        self.timings = timings
-        self.blob = Blob()
-        with self.blob.open("w") as fp:
-            shutil.copyfileobj(stream, fp)
+    def upload(self, stream, mimetype_hint=None):
+        result = File.upload(self, stream, mimetype_hint)
+        duration = audioread.audio_open(self.blob._p_blob_uncommitted).duration
+        self.duration = duration
+        return result
+
+    def duration_str(self):
+        minutes = int(self.duration) // 60
+        seconds = int(self.duration) % 60
+        return '%s:%02d' % (minutes, seconds)
 
 @content(
     'Recordings',

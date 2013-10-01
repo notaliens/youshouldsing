@@ -32,8 +32,11 @@
                     <th width="20%">
                       ${structure:view.sort_tag('genre')}
                     </th>
-                    <th width="20%">
+                    <th width="10%">
                       ${structure:view.sort_tag('likes')}
+                    </th>
+                    <th width="10%">
+                      ${structure:view.sort_tag('duration')}
                     </th>
                   </tr>
                 </thead>
@@ -46,6 +49,7 @@
                     </td>
                     <td>${item.genre or 'Unknown'}</td>
                     <td>${item.likes}</td>
+                    <td>${item.duration_str()}</td>
                   </tr>
                 </tbody>
               </table>

@@ -83,7 +83,8 @@ def main(argv=sys.argv):
                 title=title,
                 artist=artist,
                 timings=timings,
-                stream=stream
+                audio_stream=stream,
+                audio_mimetype='audio/mpeg',
                 )
             songs[name] = song
             transaction.commit()
@@ -116,13 +117,12 @@ def get_timings(input_filename):
             next_lyric = None
         if lyric.line != last_line:
             last_ms = lyric.ms
-            timings.append(
-                (
-                    float(first_ms)/1000,
-                    float(last_ms)/1000,
-                    current_line,
+            newline = (
+                float(first_ms)/1000,
+                float(last_ms)/1000,
+                current_line,
                 )
-            )
+            timings.append(newline)
             last_line = lyric.line
             current_line = []
             if next_lyric:

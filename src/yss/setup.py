@@ -20,6 +20,7 @@ requires = [
     'sh',
     'beautifulsoup4',
     'pykaraoke',
+    'audioread',
     ]
 
 setup(name='yss',

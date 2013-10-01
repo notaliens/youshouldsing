@@ -5,7 +5,10 @@ from substanced.catalog import (
     Field
     )
 
-from yss.interfaces import IRecording
+from yss.interfaces import (
+    IRecording,
+    ISong,
+    )
 
 @catalog_factory('yss')
 class Indexes(object):
@@ -16,10 +19,12 @@ class Indexes(object):
     creator_id = Field()
     created = Field()
     performer = Field()
+    duration = Field() # in seconds
 
 class IndexViews(object):
     def __init__(self, resource):
         self.resource = resource
+
 
     def tolower(self, val, default):
         if val in (default, None):
@@ -30,6 +35,10 @@ class IndexViews(object):
         title = getattr(self.resource, 'title', default)
         return self.tolower(title, default)
 
+    def duration(self, default):
+        duration = getattr(self.resource, 'duration', default)
+        return duration # intent: in seconds
+    
     def genre(self, default):
         genre = getattr(self.resource, 'genre', default)
         return self.tolower(genre, default)
@@ -107,4 +116,11 @@ def includeme(config):  # pragma: no cover
         index_name='performer',
         attr='performer',
         context = IRecording,
+        )
+    config.add_indexview(
+        IndexViews,
+        catalog_name='yss',
+        index_name='duration',
+        attr='duration',
+        context = ISong,
         )
