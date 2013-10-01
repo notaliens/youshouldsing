@@ -94,7 +94,7 @@ def main(argv=sys.argv):
 
 def get_timings(input_filename):
     # Avoid needing this during venusian scan
-    import pykar
+    from pykaraoke import pykar
     def errback(msg):
         print msg
     kardata = open(input_filename, 'rb').read()

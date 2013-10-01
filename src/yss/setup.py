@@ -18,7 +18,9 @@ requires = [
     'PyBrowserID',
     'redis',
     'sh',
-    'beautifulsoup4'
+    'beautifulsoup4',
+    'pygame',
+    'pykaraoke',
     ]
 
 setup(name='yss',
