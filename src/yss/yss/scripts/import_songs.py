@@ -50,9 +50,11 @@ def main(argv=sys.argv):
     try:
         for input_filename in args[1:]:
             basename, ext = os.path.splitext(os.path.basename(input_filename))
-            if basename in songs:
-                if not overwrite:
-                    continue
+            name = basename.replace('_NifterDotCom', '')
+            name = name.replace('_karaoke_songs', '')
+            if name in songs and not overwrite:
+                print 'Not overwriting %s' % name
+                continue
             def errback(msg):
                 print msg
             try:
@@ -69,8 +71,6 @@ def main(argv=sys.argv):
             command2 = ['lame', output_filename, mp3_filename ]
             subprocess.check_call(command2)
             os.remove(output_filename)
-            name = basename.replace('_NifterDotCom', '')
-            name = name.replace('_karaoke_songs', '')
             try:
                 del songs[name]
             except KeyError:
