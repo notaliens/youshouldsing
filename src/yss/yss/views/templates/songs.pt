@@ -6,7 +6,7 @@
 
       <div class="row">
         <div tal:condition="batch"
-             metal:use-macro="request.sdiapi.get_macro('yss.views:templates/batching.pt', 'batching')"/>
+             metal:use-macro="layout.batching_macro"></div>
       </div>
 
       <div class="row">
@@ -45,7 +45,7 @@
                   <tr tal:repeat="item batch">
                     <td>${item.artist}</td>
                     <td>
-                     <a href="${request.resource_url(item)}">${item.title}</a>
+                      <a href="${request.resource_url(item)}">${item.title}</a>
                     </td>
                     <td>${item.genre or 'Unknown'}</td>
                     <td>${item.likes}</td>

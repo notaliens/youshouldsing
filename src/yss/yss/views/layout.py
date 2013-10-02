@@ -44,6 +44,13 @@ class MainLayout(object):
                 tab_data.append(d)
         return tab_data
 
+    @property
+    def batching_macro(self):
+        return self.request.sdiapi.get_macro(
+            'yss.views:templates/batching.pt',
+            'batching'
+            )
+
     def can_like(self, target=None):
         user = self.request.user
         if user is not None:
