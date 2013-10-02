@@ -1,12 +1,12 @@
 <div metal:define-macro="batching">
   <ul tal:condition="not batch.required"
       class="pager pager-compact">
-    <li tal:content="'%d total' % batch.seqlen"></li>
+    <li class="label label-warning" tal:content="'%d total' % batch.seqlen"></li>
   </ul>
 
   <div tal:condition="batch.required" 
        class="text-center">
-    <div class="label label-primary">
+    <div class="label label-warning">
       Page # ${batch.num+1}
          (${'%d-%d of %d' % (batch.startitem+1, batch.enditem+1, batch.seqlen)})
     </div>
