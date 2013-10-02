@@ -4,7 +4,7 @@
 
     <div class="container">
 
-      <div class="row">
+      <div class="row" style="margin-bottom: 10px;">
         <div tal:condition="batch"
              metal:use-macro="layout.batching_macro"></div>
       </div>
@@ -40,7 +40,11 @@
                 
                 <tbody>
                   <tr tal:repeat="item batch">
-                    <td>${item.performer.title}</td>
+                    <td>
+                      <a href="${request.resource_url(item.performer)}"
+                         ><img src="${item.performer.photo_url}" width="24" height="24"
+                               />&nbsp;&nbsp;${item.performer.title}</a>
+                    </td>
                     <td>
                       <a href="${request.resource_url(item)}">${item.title}</a>
                     </td>

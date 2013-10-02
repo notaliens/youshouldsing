@@ -4,7 +4,7 @@
     
     <div class="container">
       
-      <div class="row">
+      <div class="row" style="margin-bottom: 10px;">
         <div tal:condition="batch"
              metal:use-macro="layout.batching_macro"></div>
       </div>

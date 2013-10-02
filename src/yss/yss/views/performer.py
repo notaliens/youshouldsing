@@ -99,6 +99,8 @@ def profile_edit_form(context, request):
 
 
 class PerformersView(object):
+    default_sort = 'date'
+    batch_size = 20
     def __init__(self, context, request):
         self.context = context
         self.request = request
@@ -128,7 +130,7 @@ class PerformersView(object):
         if sorting:
             resultset = self.sort_by(resultset, sorting, reverse)
         else:
-            resultset = self.sort_by(resultset, 'date', False)
+            resultset = self.sort_by(resultset, self.default_sort, False)
         return resultset
 
     def sort_by(self, rs, token, reverse):
@@ -144,7 +146,7 @@ class PerformersView(object):
             'genre':(genre, title, likes, created),
             'likes':(likes, title, genre, created),
             }
-        indexes = sorting.get(token, sorting['date'])
+        indexes = sorting.get(token, sorting[self.default_sort])
         for idx in indexes[1:]:
             rs = rs.sort(idx)
         first = indexes[0]
@@ -156,7 +158,7 @@ class PerformersView(object):
         request = self.request
         resultset = self.query()
         batch = Batch(resultset, self.request, seqlen=len(resultset),
-                      default_size=100)
+                      default_size=self.batch_size)
         return {
             'batch':batch,
             'filter_text':request.params.get('filter_text'),

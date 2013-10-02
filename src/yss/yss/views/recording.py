@@ -131,6 +131,7 @@ def stream_movie(recording, request):
 
 class RecordingsView(object):
     default_sort = 'performer'
+    batch_size = 20
     def __init__(self, context, request):
         self.context = context
         self.request = request
@@ -189,7 +190,7 @@ class RecordingsView(object):
         request = self.request
         resultset = self.query()
         batch = Batch(resultset, self.request, seqlen=len(resultset),
-                      default_size=100)
+                      default_size=self.batch_size)
         return {
             'batch':batch,
             'filter_text':request.params.get('filter_text'),

@@ -14,7 +14,7 @@
               <tr tal:repeat="item featured_recordings">
                 <td>
                   <a href="${request.resource_url(item)}"
-                  >${item.title}</a> by <a href="${request.resource_url(item.performer or item)}">${getattr(item.performer, 'title', 'Unknown')}</a>
+                  >${item.title}</a> by <a href="${request.resource_url(item.performer or item)}"><img src="${item.performer.photo_url}" width="24" height="24"/>&nbsp;&nbsp;${getattr(item.performer, 'title', 'Unknown')}</a>
                 </td>
               </tr>
             </tbody>
@@ -37,7 +37,7 @@
               <tr tal:repeat="item recent_recordings">
                 <td>
                   <a href="${request.resource_url(item)}"
-                  >${item.title}</a> by <a href="${request.resource_url(item.performer or item)}">${getattr(item.performer, 'title', 'Unknown')}</a>
+                  >${item.title}</a> by <a href="${request.resource_url(item.performer or item)}"><img src="${item.performer.photo_url}" width="24" height="24"/>&nbsp;&nbsp;${getattr(item.performer, 'title', 'Unknown')}</a>
                 </td>
               </tr>
             </tbody>
