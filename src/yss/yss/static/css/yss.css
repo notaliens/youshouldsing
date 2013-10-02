@@ -49,6 +49,17 @@ code {
   margin: auto;
 }
 
+/* bootstrap overrides */
+
+.navbar-brand {
+    float: left;
+    padding: 5px 10px;
+    font-size: 30px;
+    line-height: 20px;
+}
+
+/* record page */
+
 .karaoke-type-upcoming {
     color: #999999;
 }
@@ -78,3 +89,4 @@ code {
 #buttons{float:left;}
 
 #status{float:right;padding:6px 0 0 0;}
+

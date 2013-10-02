@@ -85,7 +85,7 @@ _PERSONA_SIGNOUT_HTML = '<button id="persona-signout">logout</button>'
 
 PERSONA_JS = """
 $(function() {
-    $('#persona-signin').click(function() {
+    $('#persona-button').click(function() {
         navigator.id.request(%(request_params)s);
         return false;
     });

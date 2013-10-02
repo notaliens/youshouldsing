@@ -46,32 +46,50 @@
             </button>
           </div>
           <div class="navbar-collapse collapse" id="navbar-main">
+
             <ul class="nav navbar-nav pull-right"
-                style="padding-top: 8px"
                 tal:define="authn_type request.authentication_type"
                 >
-              <li tal:condition="not request.user">
-                <span>Login</span>
-              </li>
-              <li tal:condition="not request.user">
-                <form action="${layout.twitter_login_url}" method="post">
-                  <button type="submit"
-                          style="background: transparent; 
-                                 border: none; 
-                                 cursor: pointer;">
-                    <img src="${layout.static('twitter.png')}" 
-                         alt="Log in with Twitter"
-                         title="Log in with Twitter"
-                         />
-                  </button>
-                </form>
-              </li>
-              <li tal:condition="not request.user">
-               <img src="${layout.static('persona.png')}"
-                    id="persona-signin"
-                    alt="Log in with Persona"
-                    title="Log in with Persona"
-                    />
+              <tal:block define="tabs layout.tabs()"
+                         tal:condition="tabs">
+                <li tal:repeat="tab_data tabs"
+                    tal:attributes="class tab_data['class']">
+                  <a href="${tab_data['url']}">${tab_data['title']}</a>
+                </li>
+              </tal:block>
+              <li class="dropdown" tal:condition="not request.user">
+                <a href="dropdown-toggle" data-toggle="dropdown">Login</a>
+                <ul class="dropdown-menu">
+                  <li>
+                    <form action="${layout.twitter_login_url}" method="post">
+                      <button type="submit"
+                              style="background: transparent; 
+                              border: none; 
+                              cursor: pointer;"
+                              id="twitter-button">
+                        <img src="${layout.static('twitter.png')}" 
+                             alt="Log in via Twitter"
+                             title="Log in via Twitter"
+                             />
+                        Via Twitter
+                      </button>
+                    </form>
+                  </li>
+                  <li>
+                    <button type="submit"
+                            style="background: transparent; 
+                            border: none; 
+                            cursor: pointer;"
+                            id="persona-button">
+                      <img src="${layout.static('persona.png')}"
+                           id="persona-signin"
+                           alt="Log in via Persona"
+                           title="Log in via Persona"
+                           />
+                      Via Persona
+                      </button>
+                  </li>
+                </ul>
               </li>
               <li tal:condition="request.user">
                 <a href="/logout"
@@ -90,19 +108,6 @@
       </div>
 
       <div class="container">
-        <div class="row" style="padding-top:10px;">
-          <div class="col-md-12">
-            <ul class="nav nav-pills"
-                tal:define="tabs layout.tabs()"
-                tal:condition="tabs">
-              <li tal:repeat="tab_data tabs"
-                  tal:attributes="class tab_data['class']">
-                <a href="${tab_data['url']}">${tab_data['title']}</a>
-              </li>
-            </ul>
-
-          </div>
-        </div>
 
         <div id="messages"
              tal:attributes="class request.is_xhr and 'ajax-replace' or None">
@@ -118,7 +123,7 @@
           </div>
         </div>
         
-        <div id="main_content" style="margin-top: 15px;">
+        <div id="main_content">
           <metal:slot define-slot="main_content">
             Sing here.
           </metal:slot>
