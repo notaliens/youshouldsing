@@ -7,15 +7,15 @@ from pyramid.httpexceptions import HTTPBadRequest
 from pyramid.httpexceptions import HTTPFound
 from pyramid.session import check_csrf_token
 from pyramid.view import view_config
-from pyramid.security import (
-    forget,
-    remember,
-)
+from pyramid.security import Allow
+from pyramid.security import forget
+from pyramid.security import remember
 from substanced.db import root_factory
 from substanced.interfaces import IUserLocator
 from substanced.principal import DefaultUserLocator
 from substanced.util import find_service
 from substanced.util import get_oid
+from substanced.util import set_acl
 
 @view_config(
     context='velruse.AuthenticationComplete',
@@ -35,6 +35,7 @@ def velruse_login_complete_view(context, request):
         principals = find_service(root, 'principals')
         user = principals.add_user(username, registry=registry)
         performer = registry.content.create('Performer')
+        root['performers'][username] = performer
         performer.title = profile['displayName']
         addresses = profile.get('addresses')
         if addresses:
@@ -44,8 +45,8 @@ def velruse_login_complete_view(context, request):
             performer.photo_url = photos[0]['value']
         performer.age = colander.null
         performer.sex = user.favorite_genre = None
-        root['performers'][username] = performer
         performer.user = user
+        set_acl(performer, [(Allow, user.__oid__, ['yss.edit-profile'])])
         location = request.resource_url(performer, 'edit.html')
     else:
         location = request.resource_url(root['performers'][username])
@@ -205,6 +206,7 @@ def persona_login(context, request):
         performer = registry.content.create('Performer')
         root['performers'][username] = performer
         performer.user = user
+        set_acl(performer, [(Allow, user.__oid__, ['yss.edit-profile'])])
         location = request.resource_url(performer, 'edit.html')
         performer.title = email
         performer.email = email

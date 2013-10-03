@@ -8,7 +8,7 @@
          <div class="panel-heading">
            <div style="float:right">
             <img src="${photo_url}" />
-            <p><a href="@@edit.html">Edit</a></p>
+            <p tal:condition="can_edit"><a href="@@edit.html">Edit</a></p>
            </div>
            <p style="float: right; padding-right: 2em">
               <tal:if tal:condition="email">

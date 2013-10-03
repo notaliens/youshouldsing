@@ -40,6 +40,7 @@ def profile_view(context, request):
         'recent_recordings': recent_recordings(context, request),
         'likes': context.likes,
         'likes_songs': context.likes_songs,
+        'can_edit': getattr(request.user, 'performer', None) is context,
     }
     form = deform.Form(PerformerProfileSchema(), buttons=('Save',))
 
@@ -61,7 +62,7 @@ def like_profile(context, request):
     context=IPerformer,
     renderer='templates/profile.pt',
     name='edit.html',
-#    permission='edit', XXX
+    permission='yss.edit-profile',
 )
 def profile_edit_form(context, request):
     schema = PerformerProfileSchema().bind(request=request, context=context)
