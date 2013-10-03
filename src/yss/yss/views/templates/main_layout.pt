@@ -37,7 +37,8 @@
 
     <div id="wrap">
 
-      <div class="navbar navbar-inverse navbar-static-top" role="navigation">
+      <div class="navbar navbar-inverse navbar-static-top"
+           tal:define="authn_type request.authentication_type">
         <div class="container">
           <div class="navbar-header">
             <button class="navbar-toggle" type="button" data-toggle="collapse" 
@@ -51,47 +52,56 @@
           </div>
           <div class="navbar-collapse collapse" id="navbar-main">
 
-            <ul class="nav navbar-nav pull-right"
-                tal:define="authn_type request.authentication_type"
-                >
+            <ul class="nav navbar-nav navbar-right">
+
+              <!-- computed tab line items -->
               <li tal:repeat="tab_data layout.tabs()"
                   tal:attributes="class tab_data['class']">
                 <a href="${tab_data['url']}">${tab_data['title']}</a>
               </li>
-              <li class="dropdown" tal:condition="not request.user">
-                <a href="dropdown-toggle" data-toggle="dropdown">Login</a>
-                <ul class="dropdown-menu">
-                  <li>
-                    <form action="${layout.twitter_login_url}" method="post">
-                      <button type="submit"
-                              style="background: transparent; 
-                              border: none; 
-                              cursor: pointer;"
-                              id="twitter-button">
+
+              <!--login/logout line items -->
+              <li tal:condition="not request.user">
+                <form class="dropdown navbar-form">
+                  <a type="button" 
+                     class="form-control btn btn-warning" 
+                     style="text-transform: uppercase; font-weight: bold;" 
+                     data-toggle="dropdown"
+                     >Login <b class="caret"></b></a>
+                  <ul class="dropdown-menu">
+                    <li>
+                      <a href="${layout.twitter_login_url}"
+                         id="twitter-button">
                         <i class="icon-twitter-sign" 
                            style="color: #00C9FC;" > </i>
                         Via Twitter
-                      </button>
-                    </form>
-                  </li>
-                  <li>
-                    <button type="submit"
-                            style="background: transparent; 
-                            border: none; 
-                            cursor: pointer;"
-                            id="persona-button">
-                      <i class="icon-persona" 
-                         style="color: #ED822C;"> </i>
-                      Via Persona
-                      </button>
-                  </li>
-                </ul>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="#" id="persona-button">
+                        <i class="icon-persona" 
+                           style="color: #ED822C;"> </i>
+                        Via Persona
+                      </a>
+                    </li>
+                  </ul>
+                </form>
               </li>
               <li tal:condition="request.user">
-                <a href="/logout"
-                   tal:condition="authn_type != 'persona'">Log Out</a>
-                <a id="persona-signout" href="#"
-                   tal:condition="authn_type == 'persona'">Log Out</a>
+                <form class="navbar-form">
+                  <a type="button" 
+                     tal:condition="authn_type != 'persona'"
+                     href="/logout"
+                     class="form-control btn btn-warning" 
+                     style="text-transform: uppercase; font-weight: bold;" 
+                     >Log Out</a>
+                  <a type="button" 
+                     id="persona-signout"
+                     tal:condition="authn_type == 'persona'"
+                     class="form-control btn btn-warning" 
+                     style="text-transform: uppercase; font-weight: bold;" 
+                     >Log Out</a>
+                </form>
               </li>
             </ul>
 
