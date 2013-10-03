@@ -64,23 +64,21 @@
               <li tal:condition="not request.user">
                 <form class="dropdown navbar-form">
                   <a type="button" 
+                     id="login-button"
                      class="form-control btn btn-warning" 
-                     style="text-transform: uppercase; font-weight: bold;" 
                      data-toggle="dropdown"
                      >Login <b class="caret"></b></a>
                   <ul class="dropdown-menu">
                     <li>
                       <a href="${layout.twitter_login_url}"
                          id="twitter-button">
-                        <i class="icon-twitter-sign" 
-                           style="color: #00C9FC;" > </i>
+                        <i class="icon-twitter-sign"> </i>
                         Via Twitter
                       </a>
                     </li>
                     <li>
                       <a href="#" id="persona-button">
-                        <i class="icon-persona" 
-                           style="color: #ED822C;"> </i>
+                        <i class="icon-persona"> </i>
                         Via Persona
                       </a>
                     </li>
@@ -93,13 +91,11 @@
                      tal:condition="authn_type != 'persona'"
                      href="/logout"
                      class="form-control btn btn-warning" 
-                     style="text-transform: uppercase; font-weight: bold;" 
                      >Log Out</a>
                   <a type="button" 
                      id="persona-signout"
                      tal:condition="authn_type == 'persona'"
                      class="form-control btn btn-warning" 
-                     style="text-transform: uppercase; font-weight: bold;" 
                      >Log Out</a>
                 </form>
               </li>

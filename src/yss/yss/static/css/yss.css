@@ -6115,6 +6115,30 @@ code {
   font-weight: bold;
   font-size: 14px;
 }
+#login-button {
+  text-transform: uppercase;
+  font-weight: bold;
+}
+#login-button .caret {
+  border-top-color: #FFFFFF;
+  border-bottom-color: #FFFFFF;
+}
+.navbar-nav .dropdown-menu {
+  text-transform: none;
+}
+.navbar-form .form-control {
+  text-transform: uppercase;
+  font-weight: bold;
+}
+.navbar-form {
+  padding-left: 10px;
+}
+.icon-twitter-sign {
+  color: #00C9FC;
+}
+.icon-persona {
+  color: #ED822C;
+}
 .navbar-inverse .navbar-nav > .active > a,
 .navbar-default .navbar-nav > .active > a:hover,
 .navbar-default .navbar-nav > .active > a:focus {

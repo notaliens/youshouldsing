@@ -28,12 +28,7 @@ class MainLayout(object):
         performer = None
         if user:
             performer = getattr(user, 'performer', None)
-        home_data = {
-            'url':request.resource_url(root),
-            'title':'Home',
-            'class':context is root and 'active' or None
-            }
-        tab_data = [ home_data ]
+        tab_data = []
         songs = root.get('songs')
         performers = root.get('performers')
         recordings = root.get('recordings')
