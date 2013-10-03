@@ -20,6 +20,7 @@ src/substanced/
 src/wxpython/
 src/lesswatcher/
 src/bootswatch/
+src/bootstrap/
 var/
 tmp/
 etc/supervisord.conf

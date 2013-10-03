@@ -7,10 +7,6 @@
     <title>${page_title|layout.page_title|'You Should Sing'}</title>
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0"/>
-    <link rel="stylesheet" href="${layout.static('css/bootstrap.css')}" 
-          media="screen"/>
-    <link rel="stylesheet" href="${layout.static('css/openwebicons-bootstrap.css')}"/>
-    <link rel="stylesheet" href="${layout.static('css/font-awesome.css')}" />
     <link rel="stylesheet" href="${layout.static('css/yss.css')}" 
           media="screen"/>
     <!-- Fav icon -->
@@ -41,17 +37,17 @@
 
     <div id="wrap">
 
-      <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar navbar-inverse navbar-static-top" role="navigation">
         <div class="container">
           <div class="navbar-header">
-            <a class="navbar-brand" href="/"><i 
-              class="icon-microphone"> </i> You should sing</a>
             <button class="navbar-toggle" type="button" data-toggle="collapse" 
                     data-target="#navbar-main">
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
             </button>
+            <a class="navbar-brand" href="/"><i 
+              class="icon-microphone"> </i> You should sing</a>
           </div>
           <div class="navbar-collapse collapse" id="navbar-main">
 
@@ -75,7 +71,8 @@
                               border: none; 
                               cursor: pointer;"
                               id="twitter-button">
-                        <i class="icon-twitter-sign"> </i>
+                        <i class="icon-twitter-sign" 
+                           style="color: #00C9FC;" > </i>
                         Via Twitter
                       </button>
                     </form>
@@ -86,7 +83,8 @@
                             border: none; 
                             cursor: pointer;"
                             id="persona-button">
-                      <i class="icon-persona"> </i>
+                      <i class="icon-persona" 
+                         style="color: #ED822C;"> </i>
                       Via Persona
                       </button>
                   </li>
