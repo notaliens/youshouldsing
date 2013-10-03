@@ -21,26 +21,36 @@ class MainLayout(object):
         return login_url(self.request, 'twitter')
 
     def tabs(self):
-        root = self.request.virtual_root
+        request = self.request
+        context = self.context
+        root = request.virtual_root
+        user = request.user
+        performer = None
+        if user:
+            performer = getattr(user, 'performer', None)
         home_data = {
-            'url':self.request.resource_url(root),
+            'url':request.resource_url(root),
             'title':'Home',
-            'class':self.context is root and 'active' or None
+            'class':context is root and 'active' or None
             }
         tab_data = [ home_data ]
         songs = root.get('songs')
         performers = root.get('performers')
         recordings = root.get('recordings')
-        for (title, section) in (
-            ('Songs', songs),
-            ('Performers', performers),
-            ('Recordings', recordings),
+        for (title, section, exact) in (
+            ('Songs', songs, None),
+            ('Performers', performers, lambda s: context is not performer),
+            ('Recordings', recordings, None),
+            ('My Profile', performer, None),
             ):
             if section is not None:
                 d = {}
-                d['url'] = self.request.resource_url(section)
+                d['url'] = request.resource_url(section)
                 d['title'] = title
-                d['class'] = inside(self.context, section) and 'active' or None
+                active = inside(context, section) and 'active' or None
+                if exact and active:
+                    active = exact(section) and 'active' or None
+                d['class'] = active
                 tab_data.append(d)
         return tab_data
 
