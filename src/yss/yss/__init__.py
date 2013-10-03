@@ -1,3 +1,4 @@
+import mimetypes
 import json
 
 from pyramid.config import Configurator
@@ -10,6 +11,7 @@ from .views.login import authentication_type
 from .views.login import persona_js
 
 def main(global_config, **settings):
+    mimetypes.add_type('application/font-woff', '.woff')
     secret = settings['substanced.secret']
     authn_policy = YSSAuthenticationPolicy(secret)
     config = Configurator(settings=settings,
