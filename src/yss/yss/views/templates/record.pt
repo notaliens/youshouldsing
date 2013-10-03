@@ -30,9 +30,9 @@
   </div>
 
   <div metal:fill-slot="tail">
-    <script src="${layout.static('recorder.js')}"></script>
-    <script type="text/javascript" src="${layout.static('ricekaraoke.js')}"></script>
-    <script type="text/javascript" src="${layout.static('simplekaraokedisplay.js')}"></script>
+    <script src="${layout.static('js/recorder.js')}"></script>
+    <script type="text/javascript" src="${layout.static('js/ricekaraoke.js')}"></script>
+    <script type="text/javascript" src="${layout.static('js/simplekaraokedisplay.js')}"></script>
     <script>
       var karaoke = (function() {
         var numDisplayLines = 4; // Number of lines to do the karaoke with
