@@ -42,8 +42,11 @@
                   <tr tal:repeat="item batch">
                     <td>
                       <a href="${request.resource_url(item.performer)}"
-                         ><img src="${item.performer.photo_url}" width="24" height="24"
-                               />&nbsp;&nbsp;${item.performer.title}</a>
+                         ><img src="${item.performer.photo_url}" 
+                               width="24" 
+                               height="24"
+                               style="padding-right: 10px;"
+                               />${item.performer.title}</a>
                     </td>
                     <td>
                       <a href="${request.resource_url(item)}">${item.title}</a>
