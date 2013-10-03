@@ -6111,6 +6111,9 @@ code {
   text-transform: uppercase;
   font-weight: bold;
 }
+.navbar-inverse .navbar-brand {
+  color: #FAAB4A;
+}
 .navbar-nav {
   text-transform: uppercase;
   font-weight: bold;
