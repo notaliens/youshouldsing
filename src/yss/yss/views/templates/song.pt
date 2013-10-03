@@ -1,6 +1,6 @@
 <div metal:use-macro="main_template">
 
-  <div metal:fill-slot="main_content">
+  <div metal:fill-slot="main_content" class="container">
 
     <div class="col-md-12">
 
@@ -9,7 +9,7 @@
           ${title} by ${artist}
         </div>
         <div class="panel-body">
-          <div class="container">
+          <div class="row">
             <div class="col-md-6">
               Likes: <span id="like-count">${likes}</span>
               <tal:if tal:condition="layout.can_like(context)">
@@ -37,7 +37,7 @@
             </div>
           </div>
 
-          <div class="container">
+          <div class="row">
             <div class="panel panel-default">
               <div class="panel-heading">
                 Recordings of this song
@@ -63,7 +63,7 @@
 
           </div>
 
-          <div class="container" 
+          <div class="row" 
                tal:condition="likes">
             <div class="panel panel-default">
               <div class="panel-heading">

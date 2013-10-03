@@ -1,67 +1,64 @@
 <div metal:use-macro="main_template">
 
-  <div metal:fill-slot="main_content">
+  <div metal:fill-slot="main_content" class="container">
 
-    <div class="container">
+    <div class="row" style="margin-bottom:10px;">
+      <div tal:condition="batch"
+           metal:use-macro="layout.batching_macro"></div>
+    </div>
 
-      <div class="row" style="margin-bottom:10px;">
-        <div tal:condition="batch"
-             metal:use-macro="layout.batching_macro"></div>
-      </div>
+    <div class="row">
 
-      <div class="row">
+      <div class="panel panel-default">
+        <div class="panel-heading">Songs</div>
+        <div class="panel-body">
 
-        <div class="panel panel-default">
-          <div class="panel-heading">Songs</div>
-          <div class="panel-body">
+          <form action="${request.resource_url(context)}" method="GET">
+            <label for="filter_text">Search</label>
+            <input class="form-control" name="filter_text" value="${filter_text|''}"/>
+            <table tal:condition="batch|None" 
+                   class="table table-striped table-condensed">
 
-            <form action="${request.resource_url(context)}" method="GET">
-              <label for="filter_text">Search</label>
-              <input class="form-control" name="filter_text" value="${filter_text|''}"/>
-              <table tal:condition="batch|None" 
-                     class="table table-striped table-condensed">
-
-                <thead>
-                  <tr>
-                    <th width="30%">
-                      ${structure:view.sort_tag('artist')}
-                    </th>
-                    <th width="30%">
-                      ${structure:view.sort_tag('title')}
-                    </th>
-                    <th width="20%">
-                      ${structure:view.sort_tag('genre')}
-                    </th>
-                    <th width="10%">
-                      ${structure:view.sort_tag('likes')}
-                    </th>
-                    <th width="10%">
-                      ${structure:view.sort_tag('duration')}
-                    </th>
-                  </tr>
-                </thead>
-                
-                <tbody>
-                  <tr tal:repeat="item batch">
-                    <td>${item.artist}</td>
-                    <td>
-                      <a href="${request.resource_url(item)}">${item.title}</a>
-                    </td>
-                    <td>${item.genre or 'Unknown'}</td>
-                    <td>${item.likes}</td>
-                    <td>${item.duration_str()}</td>
-                  </tr>
-                </tbody>
-              </table>
-              <div style="padding-top: 10px;" tal:condition="not batch">
-                No songs found.
-              </div>
-            </form>
-          </div>
+              <thead>
+                <tr>
+                  <th width="30%">
+                    ${structure:view.sort_tag('artist')}
+                  </th>
+                  <th width="30%">
+                    ${structure:view.sort_tag('title')}
+                  </th>
+                  <th width="20%">
+                    ${structure:view.sort_tag('genre')}
+                  </th>
+                  <th width="10%">
+                    ${structure:view.sort_tag('likes')}
+                  </th>
+                  <th width="10%">
+                    ${structure:view.sort_tag('duration')}
+                  </th>
+                </tr>
+              </thead>
+              
+              <tbody>
+                <tr tal:repeat="item batch">
+                  <td>${item.artist}</td>
+                  <td>
+                    <a href="${request.resource_url(item)}">${item.title}</a>
+                  </td>
+                  <td>${item.genre or 'Unknown'}</td>
+                  <td>${item.likes}</td>
+                  <td>${item.duration_str()}</td>
+                </tr>
+              </tbody>
+            </table>
+            <div style="padding-top: 10px;" tal:condition="not batch">
+              No songs found.
+            </div>
+          </form>
         </div>
-
       </div>
 
     </div>
+
   </div>
 </div>

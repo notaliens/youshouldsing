@@ -1,6 +1,6 @@
 <div metal:use-macro="main_template">
 
-  <div metal:fill-slot="main_content">
+  <div metal:fill-slot="main_content" class="container">
 
     <div class="col-md-8">
 
@@ -12,7 +12,7 @@
 
         <div class="panel-body">
 
-          <div class="container">
+          <div class="row">
 
             <div id="recording-video" style="float: left">
               <video tal:condition="processed"
@@ -49,7 +49,7 @@
             </div>
           </div>
 
-          <div class="container">
+          <div class="row">
             <div class="panel panel-default">
               <div class="panel-heading">
                 Other recordings of this song
@@ -75,7 +75,7 @@
 
           </div>
 
-          <div class="container" 
+          <div class="row" 
                tal:condition="likes">
             <div class="panel panel-default">
               <div class="panel-heading">
@@ -114,7 +114,7 @@
 
         <div class="panel-body">
 
-          <div class="container">
+          <div class="row">
             <div id="disqus_thread"></div>
             <script type="text/javascript">
                 /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
