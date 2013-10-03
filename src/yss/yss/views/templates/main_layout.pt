@@ -9,6 +9,8 @@
           content="width=device-width, initial-scale=1.0"/>
     <link rel="stylesheet" href="${layout.static('css/bootstrap.css')}" 
           media="screen"/>
+    <link rel="stylesheet" href="${layout.static('css/openwebicons-bootstrap.css')}" />
+    <link rel="stylesheet" href="${layout.static('css/font-awesome.css')}" />
     <link rel="stylesheet" href="${layout.static('css/yss.css')}" 
           media="screen"/>
     <!-- Fav icons -->
@@ -67,10 +69,7 @@
                               border: none; 
                               cursor: pointer;"
                               id="twitter-button">
-                        <img src="${layout.static('twitter.png')}" 
-                             alt="Log in via Twitter"
-                             title="Log in via Twitter"
-                             />
+                        <i class="icon-twitter-sign"> </i>
                         Via Twitter
                       </button>
                     </form>
@@ -81,11 +80,7 @@
                             border: none; 
                             cursor: pointer;"
                             id="persona-button">
-                      <img src="${layout.static('persona.png')}"
-                           id="persona-signin"
-                           alt="Log in via Persona"
-                           title="Log in via Persona"
-                           />
+                      <i class="icon-persona"> </i>
                       Via Persona
                       </button>
                   </li>
