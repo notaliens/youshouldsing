@@ -54,13 +54,10 @@
             <ul class="nav navbar-nav pull-right"
                 tal:define="authn_type request.authentication_type"
                 >
-              <tal:block define="tabs layout.tabs()"
-                         tal:condition="tabs">
-                <li tal:repeat="tab_data tabs"
-                    tal:attributes="class tab_data['class']">
-                  <a href="${tab_data['url']}">${tab_data['title']}</a>
-                </li>
-              </tal:block>
+              <li tal:repeat="tab_data layout.tabs()"
+                  tal:attributes="class tab_data['class']">
+                <a href="${tab_data['url']}">${tab_data['title']}</a>
+              </li>
               <li class="dropdown" tal:condition="not request.user">
                 <a href="dropdown-toggle" data-toggle="dropdown">Login</a>
                 <ul class="dropdown-menu">
