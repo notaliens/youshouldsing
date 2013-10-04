@@ -2,52 +2,60 @@
 
   <div metal:fill-slot="main_content" class="container">
 
-    <div class="jumbotron">
-      <h2><i class="glyphicon glyphicon-music"> </i> You should sing.  It's good for you. <i class="glyphicon glyphicon-music"> </i> </h2>
-      <div>Sing karaoke songs, share your creations with other users, get comments, leave comments, and have a good time.  Log in to get
-      started.</div>
+    <div class="row">
+      <div class="col-sm-12">
+        <div class="jumbotron">
+          <h2><i class="glyphicon glyphicon-music"> </i> You should sing.  It's good for you. <i class="glyphicon glyphicon-music"> </i> </h2>
+          <div>Sing karaoke songs, share your creations with other users, get comments, leave comments, and have a good time.  Log in to get
+            started.</div>
+        </div>
+      </div>
     </div>
 
-    <div class="col-md-6">
+    <div class="row">
 
-      <div class="panel panel-primary">
-        <div class="panel-heading">
-          Featured Recordings
-        </div>
-        <div class="panel-body">
-          <table class="table table-striped">
-            <tbody>
-              <tr tal:repeat="item featured_recordings">
-                <td>
-                  <a href="${request.resource_url(item)}"
-                  >${item.title}</a> by <a href="${request.resource_url(item.performer or item)}"><img src="${item.performer.photo_url}" width="24" height="24"  style="padding-right: 10px;"/>${getattr(item.performer, 'title', 'Unknown')}</a>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+      <div class="col-md-6">
+
+        <div class="panel panel-primary">
+          <div class="panel-heading">
+            Featured Recordings
+          </div>
+          <div class="panel-body">
+            <table class="table table-striped">
+              <tbody>
+                <tr tal:repeat="item featured_recordings">
+                  <td>
+                    <a href="${request.resource_url(item)}"
+                       >${item.title}</a> by <a href="${request.resource_url(item.performer or item)}"><img src="${item.performer.photo_url}" width="24" height="24"  style="padding-right: 10px;"/>${getattr(item.performer, 'title', 'Unknown')}</a>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
         </div>
 
       </div>
 
-    </div>
+      <div class="col-md-6">
 
-    <div class="col-md-6">
+        <div class="panel panel-info">
+          <div class="panel-heading">
+            Latest Recordings
+          </div>
+          <div class="panel-body">
+            <table class="table table-striped">
+              <tbody>
+                <tr tal:repeat="item recent_recordings">
+                  <td>
+                    <a href="${request.resource_url(item)}"
+                       >${item.title}</a> by <a href="${request.resource_url(item.performer or item)}"><img src="${item.performer.photo_url}" width="24" height="24" style="padding-right: 10px;"/>${getattr(item.performer, 'title', 'Unknown')}</a>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
 
-      <div class="panel panel-info">
-        <div class="panel-heading">
-          Latest Recordings
-        </div>
-        <div class="panel-body">
-          <table class="table table-striped">
-            <tbody>
-              <tr tal:repeat="item recent_recordings">
-                <td>
-                  <a href="${request.resource_url(item)}"
-                  >${item.title}</a> by <a href="${request.resource_url(item.performer or item)}"><img src="${item.performer.photo_url}" width="24" height="24" style="padding-right: 10px;"/>${getattr(item.performer, 'title', 'Unknown')}</a>
-                </td>
-              </tr>
-            </tbody>
-          </table>
         </div>
 
       </div>
