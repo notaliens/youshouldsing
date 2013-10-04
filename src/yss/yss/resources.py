@@ -4,11 +4,9 @@ import deform
 import persistent
 
 from substanced.content import content
-from substanced.file import (
-    File,
-    FilePropertiesSchema,
-    FileUploadPropertySheet,
-    )
+from substanced.file import File
+from substanced.file import FilePropertiesSchema
+from substanced.file import FileUploadPropertySheet
 from substanced.folder import Folder
 from substanced.objectmap import multireference_source_property
 from substanced.objectmap import multireference_target_property
@@ -20,6 +18,7 @@ from substanced.principal import UserPropertySheet
 from substanced.principal import UserGroupsPropertySheet
 from substanced.property import PropertySheet
 from substanced.schema import MultireferenceIdSchemaNode
+from substanced.schema import NameSchemaNode
 from substanced.schema import Schema
 from substanced.util import get_oid
 from substanced.util import renamer
@@ -157,6 +156,9 @@ class Performer(Folder):
         return len(self.liked_by)
 
 class SongSchema(FilePropertiesSchema):
+    name = NameSchemaNode(
+        editing=lambda c, r: r.registry.content.istype(c, 'Song'),
+        )
     artist = colander.SchemaNode(colander.String())
     genre = colander.SchemaNode(
         colander.String(),
@@ -200,6 +202,7 @@ class Songs(Folder):
 @implementer(ISong)
 class Song(File):
 
+    name = renamer()
     genre = 'Unknown'
     recordings = multireference_target_property(RecordingToSong)
     liked_by = multireference_target_property(PerformerLikesSong)
