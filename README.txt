@@ -1,13 +1,10 @@
 Prep
 ----
 
-On Ubuntu 12.04:
+On Ubuntu 18.04:
 
-sudo apt-get install timidity lame sox
+sudo apt-get install timidity lame sox libsox-fmt-mp3
 sudo apt-get install redis-server
-cd /usr/include/linux
-sudo ln -s ../libv4l1-videodev.h videodev.h
-
 
 Installation
 ------------
@@ -28,8 +25,3 @@ Running
 
 ``bin/supervisord`` will start up the app on 6549.
 
-Note that ``pserve`` will also work but you'll have to do::
-
-  export LD_LIBRARY_PATH=$buildoutdir/parts/wxpython-cmmi/lib
-
-Before executing it.

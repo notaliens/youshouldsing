@@ -203,13 +203,13 @@
              audio: true}, 
              function(stream) {
                theStream = stream;
-               video.src = window.URL.createObjectURL(stream);
+               video.srcObject = theStream;
 
                var input = audio_context.createMediaStreamSource(stream);
 
-               modulatorInput = audio_context.createGainNode();
+               modulatorInput = audio_context.createGain();
 
-               modulatorGain = audio_context.createGainNode();
+               modulatorGain = audio_context.createGain();
                modulatorGain.gain.value = 4.0;
                modulatorGain.connect( modulatorInput );
 
@@ -251,7 +251,8 @@
 
         function stop() {
           if (recorder === undefined) { return; }
-          theStream.stop();
+          theStream.getTracks().forEach(track => track.stop());
+          // theStream.stop();
           recorder.stop();
           endTime = Date.now();
           recording = false;
