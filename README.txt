@@ -3,8 +3,7 @@ Prep
 
 On Ubuntu 18.04:
 
-sudo apt-get install timidity lame sox libsox-fmt-mp3
-sudo apt-get install redis-server
+sudo apt-get install timidity lame sox libsox-fmt-mp3 redis-server supervisor
 
 Installation
 ------------
@@ -23,5 +22,5 @@ Don't do this if you have data in var/ you want to keep.
 Running
 -------
 
-``bin/supervisord`` will start up the app on 6549.
+``supervisord -c etc/supervisord.conf`` will start up the app on 6549.
 
