@@ -66,6 +66,9 @@ def main(argv=sys.argv):
             except UnicodeError:
                 print ('Could not get timings for %s' % input_filename)
                 continue
+            if timings is None:
+                print ('Could not get timings for %s' % input_filename)
+                continue
             wav_filename = basename + '.wav'
             output_filename = os.path.join(outdir, wav_filename)
             command = ['timidity', '-Ow', '-o%s' % output_filename,
@@ -107,6 +110,9 @@ def get_timings(input_filename):
         errback,
         ''
         )
+    if midifile is None:
+        print ('Not a valid midi file %s' % input_filename)
+        return
     lyrics_list = midifile.lyrics.list
     timings = []
     last_line = lyrics_list[0].line
