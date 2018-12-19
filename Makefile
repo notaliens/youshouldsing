@@ -4,10 +4,10 @@ build: bin/buildout
 	bin/buildout
 
 bin/buildout:
-	virtualenv -ppython2.7 .
-	bin/easy_install -U setuptools
+	virtualenv -ppython3.7 .
+	bin/pip install -U setuptools
 	bin/python bootstrap.py
 
 clean:
-	rm -rf bin/ include/ lib/ .installed.cfg .mr.developer.cfg develop-eggs/ eggs/ var/ downloads/ parts/ tmp/ lib/python2.7/site-packages/pygame*
+	rm -rf bin/ include/ lib/ .installed.cfg .mr.developer.cfg develop-eggs/ eggs/ var/ downloads/ parts/ tmp/
 	find src/ -maxdepth 1 -mindepth 1 -type d|grep -v yss|xargs rm -rf

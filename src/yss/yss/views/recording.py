@@ -77,20 +77,20 @@ def finish_recording(song, request):
     recordings = request.root['recordings']
     name = generate_recording_id(recordings)
     recordings[name] = recording
-    print request.user.performer
+    print (request.user.performer)
     recording.performer = request.user.performer
     recording.song = song
 
     redis = get_redis(request)
-    print "finished", tmpdir, resource_path(recording)
+    print ("finished", tmpdir, resource_path(recording))
     redis.rpush("yss.new-recordings", resource_path(recording))
     return request.resource_url(recording)
 
 
 idchars = (
-    map(chr, range(ord('a'), ord('z') + 1)) +
-    map(chr, range(ord('A'), ord('Z') + 1)) +
-    map(chr, range(ord('0'), ord('9') + 1)))
+    list(map(chr, range(ord('a'), ord('z') + 1))) +
+    list(map(chr, range(ord('A'), ord('Z') + 1))) +
+    list(map(chr, range(ord('0'), ord('9') + 1))))
 
 
 def generate_recording_id(recordings):

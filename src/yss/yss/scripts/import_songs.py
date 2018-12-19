@@ -12,13 +12,17 @@ from pyramid.paster import (
     bootstrap,
     )
 
+from yss import midi
+
 def main(argv=sys.argv):
     def usage(msg):
-        print msg
+        print (msg)
         sys.exit(2)
     description = "Import a set of midi files into the songs folder"
-    usage = "usage: %prog config_uri input_filenames"
-    parser = optparse.OptionParser(usage, description=description)
+    parser = optparse.OptionParser(
+        "usage: %prog config_uri input_filenames",
+        description=description
+    )
     parser.add_option(
         '-d',
         '--dir',
@@ -53,14 +57,14 @@ def main(argv=sys.argv):
             name = basename.replace('_NifterDotCom', '')
             name = name.replace('_karaoke_songs', '')
             if name in songs and not overwrite:
-                print 'Not overwriting %s' % name
+                print ('Not overwriting %s' % name)
                 continue
             def errback(msg):
-                print msg
+                print (msg)
             try:
                 timings = get_timings(input_filename)
             except UnicodeError:
-                print 'Could not get timings for %s' % input_filename
+                print ('Could not get timings for %s' % input_filename)
                 continue
             wav_filename = basename + '.wav'
             output_filename = os.path.join(outdir, wav_filename)
@@ -95,11 +99,10 @@ def main(argv=sys.argv):
 
 def get_timings(input_filename):
     # Avoid needing this during venusian scan
-    from pykaraoke import pykar
     def errback(msg):
-        print msg
+        print (msg)
     kardata = open(input_filename, 'rb').read()
-    midifile = pykar.midiParseData(
+    midifile = midi.midiParseData(
         kardata,
         errback,
         ''
@@ -137,3 +140,4 @@ def get_timings(input_filename):
             )
         )
     return json.dumps(timings, indent=2)
+ 

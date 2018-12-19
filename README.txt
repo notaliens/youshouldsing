@@ -3,22 +3,11 @@ Prep
 
 On Ubuntu 12.04:
 
-sudo apt-get install timidity
-sudo apt-get install lame
-sudo apt-get build-dep libwxgtk2.8-0
-sudo apt-get build-dep python-pygame
-sudo apt-get install
-sudo apt-get install python-wxgtk2.8
-sudo apt-get install libwxgtk2.8-dev
-sudo apt-get install libsdl1.2-dev
-sudo apt-get install libsdl-mixer1.2-dev
-sudo apt-get install libsdl-image1.2-dev
-sudo apt-get install libsmpeg-dev
-sudo apt-get install libv4l-dev
+sudo apt-get install timidity lame sox
 sudo apt-get install redis-server
-sudo apt-get install sox
 cd /usr/include/linux
 sudo ln -s ../libv4l1-videodev.h videodev.h
+
 
 Installation
 ------------
@@ -30,8 +19,7 @@ Starting Over
 -------------
 
 ``make clean`` will blow away: bin/ include/ lib/ .installed.cfg
-.mr.developer.cfg develop-eggs/ eggs/ var/ downloads/ parts/ tmp/ src/wxpython
-share/
+.mr.developer.cfg develop-eggs/ eggs/ var/ downloads/ parts/ tmp/ share/
 
 Don't do this if you have data in var/ you want to keep.
 

@@ -18,7 +18,7 @@ from ..utils import get_redis
 
 def main(argv=sys.argv):
     def usage(msg):
-        print msg
+        print (msg)
         sys.exit(2)
     description = "Postprocess new recordings as they are made."
     usage = "usage: %prog config_uri"
@@ -49,7 +49,7 @@ def postprocess(recording):
     tmpdir = recording.tmpfolder
     curdir = os.getcwd()
     try:
-        print 'Changing dir to %s' % tmpdir
+        print ('Changing dir to %s' % tmpdir)
         os.chdir(tmpdir)
         committed = recording.song.blob.committed()
         sox("-m", "audio.wav", "-t", "mp3", "-v", "0.15",
@@ -61,7 +61,7 @@ def postprocess(recording):
         with recording.blob.open("w") as saveto:
             with open("video.ogv") as savefrom:
                 shutil.copyfileobj(savefrom, saveto)
-        print "%s/%s" % (tmpdir, "video.ogv")
+        print ("%s/%s" % (tmpdir, "video.ogv"))
         #shutil.rmtree(tmpdir)
         transaction.commit()
     finally:

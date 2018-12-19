@@ -19,7 +19,7 @@ requires = [
     'redis',
     'sh',
     'beautifulsoup4',
-    'pykaraoke',
+#    'pykaraoke',
     'audioread',
     ]
 
