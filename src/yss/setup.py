@@ -10,16 +10,16 @@ requires = [
     'pyramid',
     'pyramid_debugtoolbar',
     'pyramid_layout',
+    'pyramid_retry',
+    'pyramid_tm',
     'waitress',
     'slug',
     'substanced',
-    'pyramid_tm',
     'velruse',
     'PyBrowserID',
     'redis',
     'sh',
     'beautifulsoup4',
-#    'pykaraoke',
     'audioread',
     ]
 
