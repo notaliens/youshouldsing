@@ -319,7 +319,8 @@
 
         function initEvents() {
           $('#record-me')[0].addEventListener('click', record);
-          $('#stop-me')[0].addEventListener('click', function () { document.location = document.location });
+          //$('#stop-me')[0].addEventListener('click', function () { document.location = document.location });
+          $('#stop-me')[0].addEventListener('click', stop);
         }
 
         initEvents();
