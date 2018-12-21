@@ -326,7 +326,6 @@ class Lyrics:
             if l:
                 l[0].left = 0 # X_BORDER
 
-        #print lines
         return lines
 
     def write(self):
@@ -355,6 +354,28 @@ def varLength(filehdl):
         else:
             return (0, 0)
     return (convertedInt, bytesRead)
+
+meta_events = {
+    0x00: 'Sequence number',
+    0x01: 'Text event',
+    0x02: 'Copyright',
+    0x03: 'Track title',
+    0x04: 'Instrument',
+    0x05: 'Lyric event',
+    0x06: 'Marker',
+    0x07: 'Cue point',
+    0x08: 'Program name',
+    0x09: 'Device (port) name',
+    0x20: 'MIDI channel',
+    0x21: 'MIDI port',
+    0x2F: 'End of track',
+    0x51: 'Set tempo',
+    0x54: 'SMPTE',
+    0x58: 'Time signature',
+    0x59: 'Key signature',
+    0x7F: 'Sequencer specific',
+    }
+    
 
 def midiProcessEvent (filehdl, track_desc, midifile, ErrorNotifyCallback):
     bytesRead = 0
@@ -397,7 +418,8 @@ def midiProcessEvent (filehdl, track_desc, midifile, ErrorNotifyCallback):
         bytesRead = bytesRead + 1
         event = ord(byteStr)
         if debug:
-            print ("MetaEvent: 0x%X" % event)
+            meta_event_name = meta_events.get(event)
+            print ("MetaEvent: 0x%X (%s)" % (event, meta_event_name))
         if event == 0x00:
             # Sequence number (discarded)
             packet = filehdl.read(2)
