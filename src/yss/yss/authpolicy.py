@@ -165,8 +165,6 @@ class YSSAuthenticationPolicy(object):
         result = self.cookie.identify(request)
         if result:
             userid = result['userid']
-            if isinstance(userid, str) and userid.startswith('persona:'):
-                userid = userid[len('persona:'):]
             return userid
 
     def authenticated_userid(self, request):
