@@ -62,7 +62,7 @@ def main(argv=sys.argv):
             def errback(msg):
                 print (msg)
             try:
-                timings = get_timings(input_filename)
+                title, artist, timings = get_timings(input_filename)
             except UnicodeError:
                 print ('Could not get timings for %s' % input_filename)
                 continue
@@ -83,8 +83,6 @@ def main(argv=sys.argv):
             except KeyError:
                 pass
             stream = open(mp3_filename, 'rb')
-            artist = ''
-            title = ' '.join([x.capitalize() for x in name.split('_')])
             song = registry.content.create(
                 'Song',
                 title=title,
@@ -94,6 +92,7 @@ def main(argv=sys.argv):
                 audio_mimetype='audio/mpeg',
                 )
             songs[name] = song
+            print ('%s, %s, %s' % (name, title, artist))
             transaction.commit()
             songs._p_jar.sync()
     finally:
@@ -108,7 +107,7 @@ def get_timings(input_filename):
     midifile = midi.midiParseData(
         kardata,
         errback,
-        ''
+        'utf-8'
         )
     if midifile is None:
         print ('Not a valid midi file %s' % input_filename)
@@ -118,7 +117,13 @@ def get_timings(input_filename):
     last_line = lyrics_list[0].line
     first_ms = lyrics_list[0].ms
     current_line = []
+    title = ' '.join([x.capitalize() for x in input_filename.split('_')])
+    artist = ''
     for i, lyric in enumerate(lyrics_list):
+        if i == 0:
+            title = lyric.text.title()
+        if i == 1:
+            artist = lyric.text.title()
         current_line.append([float(lyric.ms-first_ms)/1000, lyric.text])
         try:
             next_lyric = lyrics_list[i+1]
@@ -145,5 +150,5 @@ def get_timings(input_filename):
             current_line,
             )
         )
-    return json.dumps(timings, indent=2)
+    return title, artist, json.dumps(timings, indent=2)
  
