@@ -23,11 +23,6 @@
             type="text/javascript"></script>
     <script src="${layout.static('js/bootstrap.js')}"
             type="text/javascript"></script>
-    <script type="text/javascript"
-            src="https://login.persona.org/include.js"></script>
-    <tal:if tal:condition="request.authentication_type != 'twitter'">
-     <script type="text/javascript">${structure:request.persona_js}</script>
-    </tal:if>
     
     <more tal:omit-tag="" metal:define-slot="head-more"></more>
 
@@ -76,25 +71,13 @@
                         Via Twitter
                       </a>
                     </li>
-                    <li>
-                      <a href="#" id="persona-button">
-                        <i class="icon-persona"> </i>
-                        Via Persona
-                      </a>
-                    </li>
                   </ul>
                 </form>
               </li>
               <li tal:condition="request.user">
                 <form class="navbar-form">
                   <a type="button" 
-                     tal:condition="authn_type != 'persona'"
                      href="/logout"
-                     class="form-control btn btn-warning" 
-                     >Log Out</a>
-                  <a type="button" 
-                     id="persona-signout"
-                     tal:condition="authn_type == 'persona'"
                      class="form-control btn btn-warning" 
                      >Log Out</a>
                 </form>
