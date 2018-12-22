@@ -26,6 +26,7 @@ def recent_recordings(context, request, limit=10):
 @view_config(
     context=IPerformer,
     renderer='templates/profile.pt',
+    permission='view',
 )
 def profile_view(context, request):
     return {
@@ -38,7 +39,7 @@ def profile_view(context, request):
         'genre': getattr(context, 'genre', None),
         'form': None,
         'recent_recordings': recent_recordings(context, request),
-        'likes': context.likes,
+        'num_likes': context.num_likes,
         'likes_songs': context.likes_songs,
         'can_edit': getattr(request.user, 'performer', None) is context,
     }
@@ -48,6 +49,7 @@ def profile_view(context, request):
     context=IPerformer,
     name='like',
     renderer='json',
+    permission='yss.like',
 )
 def like_profile(context, request):
     performer = request.user.performer
@@ -55,7 +57,7 @@ def like_profile(context, request):
         raise HTTPBadRequest("Already")
     context.liked_by.connect([performer])
     return {'ok': True,
-            'likes': context.likes,
+            'num_likes': context.num_likes,
             }
 
 @view_config(
@@ -137,15 +139,15 @@ class PerformersView(object):
     def sort_by(self, rs, token, reverse):
         context = self.context
         title = find_index(context, 'yss', 'title')
-        likes = find_index(context, 'yss', 'likes')
+        num_likes = find_index(context, 'yss', 'num_likes')
         genre = find_index(context, 'yss', 'genre')
         created = find_index(context, 'yss', 'created')
         sorting = {
             #'date':(created, likes, title, genre),
             'date':(created,),
-            'title':(title, likes, genre, created),
-            'genre':(genre, title, likes, created),
-            'likes':(likes, title, genre, created),
+            'title':(title, num_likes, genre, created),
+            'genre':(genre, title, num_likes, created),
+            'likes':(num_likes, title, genre, created),
             }
         indexes = sorting.get(token, sorting[self.default_sort])
         for idx in indexes[1:]:
@@ -154,7 +156,11 @@ class PerformersView(object):
         rs = rs.sort(first, reverse=reverse)
         return rs
 
-    @view_config(context=IPerformers, renderer='templates/performers.pt')
+    @view_config(
+        context=IPerformers,
+        renderer='templates/performers.pt',
+        permission='view',
+    )
     def contents(self):
         request = self.request
         resultset = self.query()
@@ -166,7 +172,7 @@ class PerformersView(object):
             'reverse':request.params.get('reverse', 'false')
             }
 
-    def sort_tag(self, token):
+    def sort_tag(self, token, title):
         request = self.request
         context = self.context
         reverse = request.params.get('reverse', 'false')
@@ -189,7 +195,7 @@ class PerformersView(object):
             )
         return '<a href="%s">%s <i class="%s"> </i></a>' % (
             url,
-            token.capitalize(),
+            title,
             icon
             )
 

@@ -11,7 +11,7 @@
         <div class="panel-body">
           <div class="row">
             <div class="col-md-6">
-              Likes: <span id="like-count">${likes}</span>
+              Likes: <span id="like-count">${num_likes}</span>
               <tal:if tal:condition="layout.can_like(context)">
                 <a id="like-button" href="@@like" style="padding-left: 10px;"
                  ><i class="glyphicon glyphicon-thumbs-up"> </i></a>
@@ -21,7 +21,7 @@
                     .success(function(data) {
                         var counter = $('#like-count'),
                             thumb = $('#like-button');
-                        counter.text(data['likes']);
+                        counter.text(data['num_likes']);
                         thumb.hide();
                     })
                     .fail(function() {
@@ -32,12 +32,15 @@
                 </script>
               </tal:if>
             </div>
-            <div class="col-md-6">
+            <div tal:condition="can_record" class="col-md-6">
               <a href="./record">Record this song</a>
+            </div>
+            <div tal:condition="not: can_record" class="col-md-6">
+              Log in to record this song
             </div>
           </div>
 
-          <div class="row">
+          <div class="row" tal:condition="len(recordings)">
             <div class="panel panel-default">
               <div class="panel-heading">
                 Recordings of this song
@@ -52,7 +55,7 @@
                       <td>
                         <a href="${request.resource_url(item)}">${item.title}</a>
                       </td>
-                      <td>${item.likes}</td>
+                      <td>${item.num_likes}</td>
                     </tr>
                   </tbody>
                 </table>
@@ -64,10 +67,10 @@
           </div>
 
           <div class="row" 
-               tal:condition="likes">
+               tal:condition="num_likes">
             <div class="panel panel-default">
               <div class="panel-heading">
-                Like this song:
+                Performers who like this song
               </div>
               <div class="panel-body">
                 <table class="table table-striped table-condensed">

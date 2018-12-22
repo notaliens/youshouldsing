@@ -11,9 +11,6 @@
             <p tal:condition="can_edit"><a href="@@edit.html">Edit</a></p>
            </div>
            <p style="float: right; padding-right: 2em">
-              <tal:if tal:condition="email">
-               <a href="mailto:${email}">${email}</a><br/>
-              <tal:if>
               <span tal:condition="age">${age} - </span>
 
               <span tal:condition="sex">${sex} - </span>
@@ -23,7 +20,7 @@
            <h3>${title}</h3>
          </div>
          <div class="panel-body">
-              Likes: <span id="like-count">${likes}</span>
+              Likes: <span id="like-count">${num_likes}</span>
               <tal:if tal:condition="layout.can_like(context)">
                 <a id="like-button" href="@@like" style="padding-left: 10px;"
                  ><i class="glyphicon glyphicon-thumbs-up"> </i></a>
@@ -33,7 +30,7 @@
                     .success(function(data) {
                         var counter = $('#like-count'),
                             thumb = $('#like-button');
-                        counter.text(data['likes']);
+                        counter.text(data['num_likes']);
                         thumb.hide();
                     })
                     .fail(function() {
@@ -79,8 +76,8 @@
                   <a href="${request.resource_url(item)}">${item.song.title}</a>
                  </td>
                  <td>${item.song.genre or 'Unknown'}</td>
-                 <td>${item.likes}</td>
-                 <td>${item.created.isoformat()}</td>
+                 <td>${item.num_likes}</td>
+                 <td>${item.created.ctime()}</td>
                </tr>
              </tbody>
            </table>
@@ -130,7 +127,7 @@
                   <a href="${request.resource_url(item)}">${item.title}</a>
                  </td>
                  <td>${item.genre or 'Unknown'}</td>
-                 <td>${item.likes}</td>
+                 <td>${item.num_likes}</td>
                </tr>
              </tbody>
            </table>

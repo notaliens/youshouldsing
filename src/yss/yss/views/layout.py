@@ -4,6 +4,8 @@ from pyramid.location import inside
 
 from velruse import login_url
 
+import yss.likes
+
 @layout_config(template="templates/main_layout.pt")
 class MainLayout(object):
 
@@ -56,11 +58,9 @@ class MainLayout(object):
             'batching'
             )
 
-    def can_like(self, target=None):
-        user = self.request.user
-        if user is not None:
-            performer = user.performer
-            if performer is not None:
-                if target is None:
-                    target = self.context
-                return performer not in target.liked_by
+    def can_like(self, target):
+        return yss.likes.can_like(self.request, target)
+
+    def has_liked(self, target):
+        return yss.likes.has_liked(self.request, target)
+

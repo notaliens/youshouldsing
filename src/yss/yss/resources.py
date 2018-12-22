@@ -55,7 +55,8 @@ class User(BaseUser):
 
 _sex_choices = (('', '- Select -'),
                 ('Female', 'Female'),
-                ('Male', 'Male')
+                ('Male', 'Male'),
+                ('Nonbinary', 'Nonbinary'),
                )
 
 _genre_choices = (('', '- Select -'),
@@ -110,7 +111,7 @@ class PerformerProfileSchema(Schema):
         )
     sex = colander.SchemaNode(
         colander.String(),
-        title='Sex',
+        title='Gender',
         widget=deform.widget.SelectWidget(values=_sex_choices),
     )
     genre = colander.SchemaNode(
@@ -152,8 +153,8 @@ class Performer(Folder):
     likes_recordings = multireference_source_property(PerformerLikesRecording)
 
     @property
-    def likes(self):
-        return len(self.liked_by)
+    def num_likes(self):
+        return len(self.liked_by_ids)
 
 class SongSchema(FilePropertiesSchema):
     name = NameSchemaNode(
@@ -169,6 +170,10 @@ class SongSchema(FilePropertiesSchema):
         missing=colander.null,
         title='Duration in seconds',
         widget = deform.widget.TextInputWidget(readonly=True),
+        )
+    lyrics = colander.SchemaNode(
+        colander.String(),
+        widget=deform.widget.TextAreaWidget(style="height: 200px;"),
         )
     timings = colander.SchemaNode(
         colander.String(),
@@ -209,15 +214,20 @@ class Song(File):
     liked_by_ids = multireference_targetid_property(PerformerLikesSong)
     duration = 0
 
-    def __init__(self, title, artist, timings, audio_stream,
+    def __init__(self, title, artist, lyrics, timings, audio_stream,
                  audio_mimetype='audio/mpeg'):
         File.__init__(self, audio_stream, audio_mimetype, title)
         self.artist = artist
+        self.lyrics = lyrics
         self.timings = timings
 
     @property
-    def likes(self):
-        return len(self.liked_by)
+    def num_likes(self):
+        return len(self.liked_by_ids)
+
+    @property
+    def num_recordings(self):
+        return len(self.recordings)
 
     def upload(self, stream, mimetype_hint=None):
         result = File.upload(self, stream, mimetype_hint)
@@ -264,8 +274,8 @@ class Recording(persistent.Persistent):
         return getattr(self.song, 'genre', 'Unknown')
 
     @property
-    def likes(self):
-        return len(self.liked_by)
+    def num_likes(self):
+        return len(self.liked_by_ids)
 
     def __init__(self, tmpfolder):
         self.blob = None

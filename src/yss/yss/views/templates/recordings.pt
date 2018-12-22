@@ -22,16 +22,16 @@
               <thead>
                 <tr>
                   <th width="30%">
-                    ${structure:view.sort_tag('performer')}
+                    ${structure:view.sort_tag('performer', 'Performer')}
                   </th>
                   <th width="30%">
-                    ${structure:view.sort_tag('title')}
+                    ${structure:view.sort_tag('title', 'Title')}
                   </th>
                   <th width="20%">
-                    ${structure:view.sort_tag('genre')}
+                    ${structure:view.sort_tag('genre', 'Genre')}
                   </th>
                   <th width="20%">
-                    ${structure:view.sort_tag('likes')}
+                    ${structure:view.sort_tag('num_likes', 'Likes')}
                   </th>
                 </tr>
               </thead>
@@ -50,7 +50,7 @@
                     <a href="${request.resource_url(item)}">${item.title}</a>
                   </td>
                   <td>${item.genre or 'Unknown'}</td>
-                  <td>${item.likes}</td>
+                  <td>${item.num_likes}</td>
                 </tr>
               </tbody>
             </table>

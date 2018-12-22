@@ -1,0 +1,54 @@
+- Google login
+
+- Facebook login
+
+- Allow "real" logout (currently when you logout and log back in, it logs
+  you in as the last account you used with that provder).
+
+- Homepage:
+
+  Featured recordings should take into account number of likes vs.
+  number of views and perhaps number of comments.
+
+- Profile:
+
+  - Divulge age
+  - Divulge sex
+  - Divulge song likes
+  - Divulge recording likes
+  - Divulge performer likes
+  - Divulge real name
+  - Delete/edit recordings
+  - Timezone
+
+- View recording:
+
+  - Dropdown for who liked instead of inline table
+  - Dropdown for other recordings instead of inline table.
+  - "Likes disabled" instead of 0 performers have liked this recording
+    when like permission is not available.
+
+- Edit recording:
+
+  - Private/public/authenticated viewers (workflow?)
+  - Allow/disallow likes
+  - Allow/disallow comments
+  - Remix (e.g. no video)
+
+- Record:
+
+  - Choose mic
+  - Choose cam (including none)
+  - Better video
+  - Keep intermediate tempfiles around for remixing
+  - Cut off mix after cam video ends
+  - When we stop before the song ends, stop playing music and display a
+    spinner until page reload.
+  - Mic volume meter.
+  - Unhelpful errors when camera is already used.
+
+- Song import:
+
+  - Index lyrics into text
+  
+- Allow uploads of songs (yikes)

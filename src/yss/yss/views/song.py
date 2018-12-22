@@ -29,8 +29,10 @@ def preview_songs(context, request):
     return HTTPFound(location=request.resource_url(context))
 
 class SongsView(object):
+
     default_sort = 'title'
     batch_size = 20
+
     def __init__(self, context, request):
         self.context = context
         self.request = request
@@ -44,10 +46,15 @@ class SongsView(object):
         filter_text = request.params.get('filter_text')
         if filter_text:
             terms = generate_text_filter_terms(filter_text)
-            text = find_index(context, 'system', 'text')
+            lyrics = find_index(context, 'yss', 'lyrics')
+            # depends on artist and song name being in lyrics, probably
+            # not tenable and must create a more generic yss-specific
+            # generic text index that includes, artist, song title,
+            # and lyrics
             for term in terms:
-                if text.check_query(term):
-                    q = q & text.eq(term)
+                if lyrics.check_query(term):
+                    q = q & lyrics.eq(term)
+                
         filter_genre = request.params.get('filter_genre')
         if filter_genre:
             q = q & find_index(context, 'yss', 'genre').eq(filter_genre)
@@ -67,17 +74,26 @@ class SongsView(object):
         context = self.context
         title = find_index(context, 'yss', 'title')
         artist = find_index(context, 'yss', 'artist')
-        likes = find_index(context, 'yss', 'likes')
+        num_likes = find_index(context, 'yss', 'num_likes')
+        num_recordings = find_index(context, 'yss', 'num_recordings')
         genre = find_index(context, 'yss', 'genre')
         created = find_index(context, 'yss', 'created')
         duration = find_index(context, 'yss', 'duration')
         sorting = {
-            'date':(created, likes, title, artist, genre),
-            'title':(title, artist, likes, genre, created),
-            'artist':(artist, title, likes, genre, created),
-            'genre':(genre, artist, title, likes, created),
-            'likes':(likes, artist, title, genre, created),
-            'duration':(duration, artist, title, genre, created),
+            'date':
+            (created, num_recordings, num_likes, title, artist, genre),
+            'title':
+            (title, artist, num_recordings, num_likes, genre, created),
+            'artist':
+            (artist, title, num_recordings, num_likes, genre, created),
+            'genre':
+            (genre, artist, title, num_recordings, num_likes, created),
+            'num_likes':
+            (num_likes, artist, title, num_recordings, genre, created),
+            'recordings':
+            (num_recordings, artist, title, num_likes, genre, created),
+            'duration':
+            (duration, artist, title, genre, created, num_likes,num_recordings),
             }
         indexes = sorting.get(token, sorting[self.default_sort])
         for idx in indexes[1:]:
@@ -86,7 +102,10 @@ class SongsView(object):
         rs = rs.sort(first, reverse=reverse)
         return rs
 
-    @view_config(context=ISongs, renderer='templates/songs.pt')
+    @view_config(
+        context=ISongs,
+        renderer='templates/songs.pt'
+    )
     def contents(self):
         request = self.request
         resultset = self.query()
@@ -98,7 +117,7 @@ class SongsView(object):
             'reverse':request.params.get('reverse', 'false')
             }
 
-    def sort_tag(self, token):
+    def sort_tag(self, token, title):
         request = self.request
         context = self.context
         reverse = request.params.get('reverse', 'false')
@@ -121,8 +140,8 @@ class SongsView(object):
             )
         return '<a href="%s">%s <i class="%s"> </i></a>' % (
             url,
-            token.capitalize(),
-            icon
+            title,
+            icon,
             )
 
 class SongView(object):
@@ -130,33 +149,44 @@ class SongView(object):
         self.context = context
         self.request = request
 
-    @view_config(context=ISong, renderer='templates/song.pt')
+    @view_config(
+        context=ISong,
+        renderer='templates/song.pt',
+        permission='view'
+    )
     def __call__(self):
         song = self.context
         return {
             'title':song.title,
             'artist':song.artist,
-            'likes':song.likes,
+            'num_likes':song.num_likes,
             'liked_by': song.liked_by,
             'recordings':song.recordings,
+            'can_record':self.request.has_permission('yss.record', song),
             }
 
-    @view_config(context=ISong,
-                 name='like',
-                 renderer='json',
-                )
+    @view_config(
+        context=ISong,
+        name='like',
+        renderer='json',
+        permission='yss.like',
+    )
     def like(self):
         performer = self.request.user.performer
         if performer in self.context.liked_by:
             raise HTTPBadRequest("Already")
         self.context.liked_by.connect([performer])
         return {'ok': True,
-                'likes': self.context.likes,
+                'num_likes': self.context.num_likes,
                }
 
 class AddSongSchema(Schema):
     title = colander.SchemaNode(colander.String())
     artist = colander.SchemaNode(colander.String())
+    lyrics = colander.SchemaNode(
+        colander.String(),
+        widget = deform.widget.TextAreaWidget(style='height: 200px'),
+    )
     timings = colander.SchemaNode(
         colander.String(),
         widget = deform.widget.TextAreaWidget(style='height: 200px'),
@@ -180,12 +210,14 @@ class AddSongView(FormView):
         title = appstruct['title']
         artist = appstruct['artist']
         timings = appstruct['timings']
+        lyrics = appstruct['lyrics']
         name = slug.slug(title)
         stream = appstruct['file']['fp']
         song = self.request.registry.content.create(
             'Song',
             title,
             artist,
+            lyrics,
             timings,
             stream
             )
@@ -195,6 +227,7 @@ class AddSongView(FormView):
 @view_config(
     context=ISong,
     name='mp3',
+    permission='view',
 )
 def stream_mp3(context, request):
     return context.get_response(request=request)

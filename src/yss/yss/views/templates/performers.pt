@@ -22,7 +22,7 @@
               <thead>
                 <tr>
                   <th width="50%">
-                    ${structure:view.sort_tag('title')}
+                    ${structure:view.sort_tag('title', 'Name')}
                   </th>
                 </tr>
               </thead>

@@ -21,6 +21,7 @@ requires = [
     'sh',
     'beautifulsoup4',
     'audioread',
+    'titlecase',
     ]
 
 setup(name='yss',

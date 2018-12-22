@@ -13,9 +13,9 @@ class HomepageView(object):
         q = find_index(context, 'system', 'content_type').eq('Recording')
         q = q & find_index(context, 'system', 'allowed').allows(
             request, 'view')
-        likes = find_index(context, 'yss', 'likes')
+        num_likes = find_index(context, 'yss', 'num_likes')
         resultset = q.execute()
-        return resultset.sort(likes, reverse=True, limit=limit)
+        return resultset.sort(num_likes, reverse=True, limit=limit)
 
     def recent_recordings(self, limit=10):
         request = self.request

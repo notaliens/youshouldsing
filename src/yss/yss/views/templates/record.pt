@@ -46,7 +46,7 @@
           var secs = Math.floor(t % 60);
           return min + ':' + (secs < 10 ? '0' : '') + secs;
         }
-         
+
         function changePosition(percent) {
           if (player != null) {
             var duration = player.duration;
@@ -57,7 +57,7 @@
 
         function updateStatus() {
           var duration = player.duration;
-          $('#status').text(getTimeString(player.currentTime) + ' / ' + 
+          $('#status').text(getTimeString(player.currentTime) + ' / ' +
                                           getTimeString(duration));
         }
 
@@ -82,7 +82,7 @@
 
           player.addEventListener(
             'error', function(e) { alert('Failed to play! ' + e) }, false);
-          player.addEventListener('ended', function() { 
+          player.addEventListener('ended', function() {
             // AFAICT this isn't called
             player.pause();
             rtc_recorder.stop();
@@ -94,7 +94,7 @@
               }
               if (ct >= player.duration) {
                 rtc_recorder.stop();
-              } 
+              }
               show.render(ct, false);
               updateStatus();
               lastPosition = ct;
@@ -115,24 +115,24 @@
         exports.URL = exports.URL || exports.webkitURL;
 
         exports.requestAnimationFrame = exports.requestAnimationFrame ||
-            exports.webkitRequestAnimationFrame || 
+            exports.webkitRequestAnimationFrame ||
             exports.mozRequestAnimationFrame ||
-            exports.msRequestAnimationFrame || 
+            exports.msRequestAnimationFrame ||
             exports.oRequestAnimationFrame;
 
         exports.cancelAnimationFrame = exports.cancelAnimationFrame ||
-            exports.webkitCancelAnimationFrame || 
+            exports.webkitCancelAnimationFrame ||
             exports.mozCancelAnimationFrame ||
-            exports.msCancelAnimationFrame || 
+            exports.msCancelAnimationFrame ||
             exports.oCancelAnimationFrame;
 
         navigator.getUserMedia = navigator.getUserMedia ||
-            navigator.webkitGetUserMedia || 
+            navigator.webkitGetUserMedia ||
             navigator.mozGetUserMedia ||
             navigator.msGetUserMedia;
 
         window.AudioContext = window.AudioContext || window.webkitAudioContext;
-        navigator.getUserMedia = navigator.getUserMedia || 
+        navigator.getUserMedia = navigator.getUserMedia ||
             navigator.webkitGetUserMedia;
         window.URL = window.URL || window.webkitURL;
 
@@ -154,7 +154,7 @@
         var recording_id = "${id}";
         var recording = false;
         var framerate = 1;
-        var video_frames; 
+        var video_frames;
 
         function toggleActivateRecordButton() {
           var b = $('#record-me')[0];
@@ -171,14 +171,14 @@
           try {
             console.log('Audio context set up.');
             console.log(
-              'navigator.getUserMedia ' + 
+              'navigator.getUserMedia ' +
               (navigator.getUserMedia ? 'available.' : 'not present!'));
           } catch (e) {
             console.log('No web audio support in this browser!');
           }
 
           var finishVideoSetup_ = function() {
-            // Note: video.onloadedmetadata doesn't fire in Chrome when using 
+            // Note: video.onloadedmetadata doesn't fire in Chrome when using
             // getUserMedia so we have to use setTimeout. See crbug.com/110938.
             setTimeout(function() {
               video.width = 320;//video.clientWidth;
@@ -200,7 +200,7 @@
                  "maxHeight": "240",
                  "maxFrameRate": "10"}
              },
-             audio: true}, 
+             audio: true},
              function(stream) {
                theStream = stream;
                video.srcObject = theStream;
@@ -236,7 +236,7 @@
           toggleActivateRecordButton();
           $('#stop-me')[0].disabled = false;
 
-          recorder.record(); 
+          recorder.record();
           video_frames = [];
           function captureFrame() {
             if (recording) {
@@ -291,7 +291,7 @@
           for (var i in video_frames) {
             fd.append('framedata', video_frames[i]);
           }
-          
+
           var videoDeferred = jQuery.ajax({
             type: 'POST',
             url: window.location,

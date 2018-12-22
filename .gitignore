@@ -2,6 +2,7 @@
 *.pyc
 .installed.cfg
 .mr.developer.cfg
+pip-selfcheck.json
 bin/
 develop-eggs/
 eggs/

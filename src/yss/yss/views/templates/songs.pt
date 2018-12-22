@@ -22,19 +22,22 @@
               <thead>
                 <tr>
                   <th width="30%">
-                    ${structure:view.sort_tag('artist')}
+                    ${structure:view.sort_tag('artist', 'Artist')}
                   </th>
                   <th width="30%">
-                    ${structure:view.sort_tag('title')}
+                    ${structure:view.sort_tag('title', 'Title')}
                   </th>
                   <th width="20%">
-                    ${structure:view.sort_tag('genre')}
+                    ${structure:view.sort_tag('genre', 'Genre')}
                   </th>
                   <th width="10%">
-                    ${structure:view.sort_tag('likes')}
+                    ${structure:view.sort_tag('num_likes', 'Likes')}
                   </th>
                   <th width="10%">
-                    ${structure:view.sort_tag('duration')}
+                    ${structure:view.sort_tag('num_recordings', 'Records')}
+                  </th>
+                  <th width="10%">
+                    ${structure:view.sort_tag('duration', 'Duration')}
                   </th>
                 </tr>
               </thead>
@@ -46,7 +49,8 @@
                     <a href="${request.resource_url(item)}">${item.title}</a>
                   </td>
                   <td>${item.genre or 'Unknown'}</td>
-                  <td>${item.likes}</td>
+                  <td>${item.num_likes}</td>
+                  <td>${item.num_recordings}</td>
                   <td>${item.duration_str()}</td>
                 </tr>
               </tbody>

@@ -3,7 +3,6 @@ import os
 import random
 import shutil
 
-from pyramid.httpexceptions import HTTPBadRequest
 from pyramid.response import FileResponse
 from pyramid.traversal import resource_path
 from pyramid.view import view_config
@@ -23,13 +22,15 @@ from ..interfaces import (
     IRecordings,
     )
 
+import yss.likes
 
 random.seed()
 
-
-@view_config(content_type='Song',
-             name="record",
-             renderer="templates/record.pt")
+@view_config(
+    content_type='Song',
+    name="record",
+    renderer="templates/record.pt"
+)
 def recording_app(song, request):
     recording_id = generate_recording_id({})
     return {
@@ -39,7 +40,13 @@ def recording_app(song, request):
     }
 
 
-@view_config(content_type='Song', name="record", xhr=True, renderer='string')
+@view_config(
+    content_type='Song',
+    name="record",
+    xhr=True,
+    renderer='string',
+    permission='yss.record',
+)
 def save_audio(song, request):
     f = request.params['data'].file
     id = request.params['id']
@@ -52,8 +59,14 @@ def save_audio(song, request):
     return 'OK'
 
 
-@view_config(content_type='Song', name="record", xhr=True, renderer='string',
-             request_param='framedata')
+@view_config(
+    content_type='Song',
+    name="record",
+    xhr=True,
+    renderer='string',
+    request_param='framedata',
+    permission='yss.record',
+)
 def save_video(song, request):
     id = request.params['id']
     tmpdir = '/tmp/' + id
@@ -69,15 +82,20 @@ def save_video(song, request):
     return 'OK'
 
 
-@view_config(content_type='Song', name="record", xhr=True, renderer='string',
-             request_param='finished')
+@view_config(
+    content_type='Song',
+    name="record",
+    xhr=True,
+    renderer='string',
+    request_param='finished',
+    permission='yss.record',
+)
 def finish_recording(song, request):
     tmpdir = '/tmp/' + request.params['id']
     recording = request.registry.content.create('Recording', tmpdir)
     recordings = request.root['recordings']
     name = generate_recording_id(recordings)
     recordings[name] = recording
-    print (request.user.performer)
     recording.performer = request.user.performer
     recording.song = song
 
@@ -106,26 +124,39 @@ class RecordingView(object):
         self.context = context
         self.request = request
 
-    @view_config(context=IRecording, renderer='templates/recording.pt')
+    @view_config(
+        context=IRecording,
+        renderer='templates/recording.pt',
+        permission='view',
+    )
     def __call__(self):
         recording = self.context
+        # XXX compute other_recordings more efficiently
+        other_recordings = [
+            other_recording for other_recording in
+            recording.song.recordings if
+            other_recording is not recording and
+            self.request.has_permission('view', other_recording)
+            ]
         return {
             'title':recording.title,
             'performer':recording.performer,
-            'likes':len(recording.liked_by),
+            'num_likes':recording.num_likes,
             'liked_by': recording.liked_by,
-            'recordings':[],
+            'other_recordings':other_recordings,
             'video_url': self.request.resource_url(recording, 'movie'),
             'processed': bool(recording.blob),
             }
 
 @view_config(
     content_type='Recording',
-    name='movie')
+    name='movie',
+    permission='view'
+)
 def stream_movie(recording, request):
     return FileResponse(
         recording.blob.committed(),
-        content_type='video/ogg'
+        content_type='video/mp4'
         )
 
 
@@ -168,15 +199,15 @@ class RecordingsView(object):
         context = self.context
         title = find_index(context, 'yss', 'title')
         performer = find_index(context, 'yss', 'performer')
-        likes = find_index(context, 'yss', 'likes')
+        num_likes = find_index(context, 'yss', 'num_likes')
         genre = find_index(context, 'yss', 'genre')
         created = find_index(context, 'yss', 'created')
         sorting = {
-            'date':(created, likes, title, performer, genre),
-            'title':(title, performer, likes, genre, created),
-            'performer':(performer, title, likes, genre, created),
-            'genre':(genre, performer, title, likes, created),
-            'likes':(likes, performer, title, genre, created),
+            'date':(created, num_likes, title, performer, genre),
+            'title':(title, performer, num_likes, genre, created),
+            'performer':(performer, title, num_likes, genre, created),
+            'genre':(genre, performer, title, num_likes, created),
+            'likes':(num_likes, performer, title, genre, created),
             }
         indexes = sorting.get(token, sorting[self.default_sort])
         for idx in indexes[1:]:
@@ -197,7 +228,7 @@ class RecordingsView(object):
             'reverse':request.params.get('reverse', 'false')
             }
 
-    def sort_tag(self, token):
+    def sort_tag(self, token, title):
         request = self.request
         context = self.context
         reverse = request.params.get('reverse', 'false')
@@ -220,7 +251,7 @@ class RecordingsView(object):
             )
         return '<a href="%s">%s <i class="%s"> </i></a>' % (
             url,
-            token.capitalize(),
+            title,
             icon
             )
 
@@ -228,12 +259,28 @@ class RecordingsView(object):
     context=IRecording,
     name='like',
     renderer='json',
+    permission='yss.like',
 )
 def like_recording(context, request):
     performer = request.user.performer
-    if performer in context.liked_by:
-        raise HTTPBadRequest("Already")
-    context.liked_by.connect([performer])
+    if not performer in context.liked_by:
+        context.liked_by.connect([performer])
     return {'ok': True,
-            'likes': context.likes,
+            'num_likes': context.num_likes,
+            'can_like':yss.likes.can_like(request, context),
+            }
+
+@view_config(
+    context=IRecording,
+    name='unlike',
+    renderer='json',
+    permission='yss.like',
+)
+def unlike_recording(context, request):
+    performer = request.user.performer
+    if performer in context.liked_by:
+        context.liked_by.disconnect([performer])
+    return {'ok': True,
+            'num_likes': context.num_likes,
+            'can_like':yss.likes.can_like(request, context),
             }
