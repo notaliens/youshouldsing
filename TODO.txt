@@ -2,6 +2,10 @@
 
 - Facebook login
 
+- Twitter login
+
+  - "email" is currently populated by location during the callback
+
 - Allow "real" logout (currently when you logout and log back in, it logs
   you in as the last account you used with that provder).
 
@@ -50,5 +54,9 @@
 - Song import:
 
   - Index lyrics into text
+
+- Recordings/performers/songs search box:
+
+  - Provide an "X" which removes the current filter.
   
 - Allow uploads of songs (yikes)

@@ -11,9 +11,12 @@ from substanced.util import (
     find_index,
     )
 
-from ..interfaces import IPerformer
-from ..interfaces import IPerformers
-from ..resources import PerformerProfileSchema
+from yss.interfaces import (
+    IPerformer,
+    IPerformers,
+    )
+
+from . import PerformerProfileSchema
 
 def recent_recordings(context, request, limit=10):
     q = find_index(context, 'system', 'content_type').eq('Recording')

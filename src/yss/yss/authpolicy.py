@@ -184,7 +184,9 @@ class YSSAuthenticationPolicy(object):
             adapter = DefaultUserLocator(context, request)
         try:
             user = adapter.get_user_by_userid(userid)
-        except ValueError: #pragma NO COVER
+            user.groupids
+        except (ValueError, AttributeError): #pragma NO COVER
+            # AttributeError catches BrokenWrapper.groupids
             user = None
 
         if user is not None:
@@ -212,7 +214,9 @@ class YSSAuthenticationPolicy(object):
             adapter = DefaultUserLocator(context, request)
         try:
             user = adapter.get_user_by_userid(userid)
-        except ValueError:
+            user.groupids
+        except (ValueError, AttributeError):
+            # AttributeError catches BrokenWrapper.groupids
             user = None
  
         if user is not None:

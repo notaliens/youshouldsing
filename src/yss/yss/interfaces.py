@@ -1,6 +1,10 @@
 from zope.interface import Interface
 
 from substanced.interfaces import ReferenceType
+from substanced.property import PropertySheet
+from substanced.schema import MultireferenceIdSchemaNode
+from substanced.schema import Schema
+from substanced.util import get_oid
 
 class ISongs(Interface):
     """ Marker interface for the songs folder """
@@ -51,4 +55,38 @@ class RecordingToSong(ReferenceType):
 
 class CreatorToSong(ReferenceType):
     """ XXX kept around to unpickle old instances """
+
+def performers_choices(context, request):
+    performers = request.virtual_root.get('performers')
+    if performers is None:
+        return () # fbo dump/load
+    values = [(get_oid(performer), name) for name, performer in
+                performers.items()]
+    return values
+
+class RelatedSchema(Schema):
+    liked_by_ids = MultireferenceIdSchemaNode(
+        choices_getter=performers_choices,
+        title='Liked By',
+        )
+
+class RelatedPropertySheet(PropertySheet):
+    schema = RelatedSchema()
+
+sex_choices = (
+    ('', '- Select -'),
+    ('Female', 'Female'),
+    ('Male', 'Male'),
+    ('Nonbinary', 'Nonbinary'),
+)
+
+genre_choices = (
+    ('', '- Select -'),
+    ('Unknown', 'Unknown'),
+    ('Rock', 'Rock'),
+    ('Pop', 'Pop'),
+    ('Country', 'Country'),
+    ('Jazz', 'Jazz'),
+    ('Blues', 'Blues'),
+)
 
