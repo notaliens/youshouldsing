@@ -57,7 +57,6 @@
   - Allow choosing no cam
   - Better video
   - Keep intermediate tempfiles around for remixing
-  - Cut off mix after cam video ends
   - When we stop before the song ends, stop playing music and display a
     spinner until page reload.
   - Mic volume meter.
