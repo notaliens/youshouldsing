@@ -34,7 +34,7 @@ random.seed()
 def recording_app(song, request):
     recording_id = generate_recording_id({})
     return {
-        "id": recording_id,
+        "recording_id": recording_id,
         "mp3_url": request.resource_url(song, 'mp3'),
         "timings": song.timings,
     }
@@ -49,9 +49,9 @@ def recording_app(song, request):
 )
 def save_audio(song, request):
     f = request.params['data'].file
-    id = request.params['id']
+    recording_id = request.params['recording_id']
     fname = request.params['filename']
-    tmpdir = '/tmp/' + id
+    tmpdir = '/tmp/' + recording_id
     if not os.path.exists(tmpdir):
         os.mkdir(tmpdir)
     with open('%s/%s' % (tmpdir, fname), 'wb') as output:
@@ -68,8 +68,8 @@ def save_audio(song, request):
     permission='yss.record',
 )
 def save_video(song, request):
-    id = request.params['id']
-    tmpdir = '/tmp/' + id
+    recording_id = request.params['recording_id']
+    tmpdir = '/tmp/' + recording_id
     if not os.path.exists(tmpdir):
         os.mkdir(tmpdir)
     fname = os.path.join(tmpdir, 'frame%d.png')
@@ -91,7 +91,7 @@ def save_video(song, request):
     permission='yss.record',
 )
 def finish_recording(song, request):
-    tmpdir = '/tmp/' + request.params['id']
+    tmpdir = '/tmp/' + request.params['recording_id']
     recording = request.registry.content.create('Recording', tmpdir)
     recordings = request.root['recordings']
     name = generate_recording_id(recordings)
