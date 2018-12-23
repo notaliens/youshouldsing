@@ -33,6 +33,7 @@
     <script type="text/javascript" src="${layout.static('js/simplekaraokedisplay.js')}"></script>
     <script type="text/javascript" src="${layout.static('js/yssrecorder.js')}"></script>
     <script type="text/javascript">
+     // karaoke and rtc_recorder are exported by yssrecorder
      kar = karaoke("${mp3_url}", ${timings}, "${recording_id}");
      rtc_recorder(window, kar, "${recording_id}");
     </script>
