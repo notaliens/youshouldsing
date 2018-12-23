@@ -19,6 +19,7 @@
 - Song import:
 
   - Investigate missing instruments (e.g blackbird).
+  - Handle conflict errors.
 
 - Homepage:
 
@@ -62,6 +63,7 @@
   - Mic volume meter.
   - Unhelpful errors when camera is already used (e.g. by OBS).
   - Reverb
+  - Handle conflict errors in postprocessing.
 
 - Search:
 
