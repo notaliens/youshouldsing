@@ -1,6 +1,7 @@
 from zope.interface import Interface
 
 from substanced.interfaces import ReferenceType
+from substanced.objectmap import Cascading
 from substanced.property import PropertySheet
 from substanced.schema import MultireferenceIdSchemaNode
 from substanced.schema import Schema
@@ -52,9 +53,8 @@ class RecordingToSong(ReferenceType):
     """ Map a recording to the corresponding song.
     """
     source_ordered = True
-
-class CreatorToSong(ReferenceType):
-    """ XXX kept around to unpickle old instances """
+    # delete recordings when their associated songs are deleted
+    target_integrity = Cascading.DELETE
 
 def performers_choices(context, request):
     performers = request.virtual_root.get('performers')
