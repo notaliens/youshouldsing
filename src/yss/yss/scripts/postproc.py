@@ -13,7 +13,8 @@ from pyramid.paster import (
     bootstrap,
     )
 from pyramid.traversal import find_resource
-from ..utils import get_redis
+from yss.utils import get_redis
+from yss.interfaces import framerate
 
 
 def main(argv=sys.argv):
@@ -63,7 +64,7 @@ def postprocess(recording):
         sox("-V", "--clobber", "-m", "rerated.wav", "-t", "mp3", "-v", "0.15",
             committed, "mixed.wav")
         ffmpeg("-y", "-i", "mixed.wav",
-               "-f", "image2", "-r", "1", "-i", "frame%d.png",
+               "-f", "image2", "-r", f"{framerate}", "-i", "frame%d.png",
                "-acodec", "mp3", "video.mp4")
         recording.blob = Blob()
         with recording.blob.open("w") as saveto:

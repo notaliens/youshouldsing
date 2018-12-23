@@ -6,13 +6,13 @@ var karaoke = (function(mp3_url, timings, recording_id) {
     var player = new Audio();
     player.setAttribute('src', mp3_url);
     var lastPosition = 0;
-    
+
     function getTimeString(t) {
         var min = Math.floor(t / 60);
         var secs = Math.floor(t % 60);
         return min + ':' + (secs < 10 ? '0' : '') + secs;
     }
-    
+
     function changePosition(percent) {
         if (player != null) {
             var duration = player.duration;
@@ -20,32 +20,32 @@ var karaoke = (function(mp3_url, timings, recording_id) {
             player.currentTime = position;
         }
     }
-    
+
     function updateStatus() {
         var duration = player.duration;
         $('#status').text(getTimeString(player.currentTime) + ' / ' +
                           getTimeString(duration));
     }
-    
+
     function setup() {
         $('#player').show();
     }
-    
+
     function play() {
         player.play();
     }
-    
+
     function pause() {
         player.pause();
     }
-    
+
     function init() {
         // Create the karaoke engine and get a show instance
         var rice = new RiceKaraoke(RiceKaraoke.simpleTimingToTiming(timings));
         var renderer = new SimpleKaraokeDisplayEngine(
             'karaoke-display', numDisplayLines);
         show = rice.createShow(renderer, numDisplayLines);
-        
+
         player.addEventListener(
             'error', function(e) { alert('Failed to play! ' + e) }, false);
         player.addEventListener('ended', function() {
@@ -75,34 +75,29 @@ var karaoke = (function(mp3_url, timings, recording_id) {
     }
 });
 
-var rtc_recorder = (function(exports, karaoke, recording_id) {
+var rtc_recorder = (function(exports, karaoke, recording_id, framerate) {
     exports.URL = exports.URL || exports.webkitURL;
-    
+
     exports.requestAnimationFrame = exports.requestAnimationFrame ||
         exports.webkitRequestAnimationFrame ||
         exports.mozRequestAnimationFrame ||
         exports.msRequestAnimationFrame ||
         exports.oRequestAnimationFrame;
-    
+
     exports.cancelAnimationFrame = exports.cancelAnimationFrame ||
         exports.webkitCancelAnimationFrame ||
         exports.mozCancelAnimationFrame ||
         exports.msCancelAnimationFrame ||
         exports.oCancelAnimationFrame;
-    
-    navigator.getUserMedia = navigator.getUserMedia ||
-        navigator.webkitGetUserMedia ||
-        navigator.mozGetUserMedia ||
-        navigator.msGetUserMedia;
-    
+
     window.AudioContext = window.AudioContext || window.webkitAudioContext;
-    navigator.getUserMedia = navigator.getUserMedia ||
-        navigator.webkitGetUserMedia;
     window.URL = window.URL || window.webkitURL;
-    
+
     var CANVAS_WIDTH = 320;
     var CANVAS_HEIGHT = 240;
-    var video = $('video')[0];
+    const video = $('video')[0];
+    const audioSelect = $('select#audioSource')[0];
+    const videoSelect = $('select#videoSource')[0];
     video.width = CANVAS_WIDTH;
     video.height = CANVAS_HEIGHT;
     var canvas = document.createElement('canvas'); // offscreen canvas.
@@ -113,12 +108,11 @@ var rtc_recorder = (function(exports, karaoke, recording_id) {
     var endTime = null;
     var audio_context;
     var recorder;
-    var theStream;
     var tagTime = Date.now();
     var recording = false;
-    var framerate = 1;
+    var framerate = framerate;
     var video_frames;
-    
+
     function toggleActivateRecordButton() {
         var b = $('#record-me')[0];
         b.textContent = b.disabled ? 'Record' : 'Recording...';
@@ -126,19 +120,58 @@ var rtc_recorder = (function(exports, karaoke, recording_id) {
         b.disabled = !b.disabled;
     }
 
-    function turnOnCamera() {
-        video.controls = false;
-
-        // audio setup
-        audio_context = new AudioContext;
-        try {
-            console.log('Audio context set up.');
-            console.log(
-                'navigator.getUserMedia ' +
-                    (navigator.getUserMedia ? 'available.' : 'not present!'));
-        } catch (e) {
-            console.log('No web audio support in this browser!');
+    function getStream() {
+        if (window.stream) {
+            window.stream.getTracks().forEach(function(track) {
+                track.stop();
+            });
         }
+        const constraints = {
+            "audio": {
+                "deviceId": {exact: audioSelect.value}
+            },
+            "video": {
+                "width": { exact: "320" },
+                "height": { exact: "240"},
+                "frameRate": { min: 10, max: 10 },
+                "deviceId": { exact: videoSelect.value}
+            }
+        }
+        navigator.mediaDevices.getUserMedia(constraints).then(gotStream);
+    }
+
+    function gotDevices(deviceInfos) {
+        for (let i = 0; i !== deviceInfos.length; ++i) {
+            const deviceInfo = deviceInfos[i];
+            const option = document.createElement('option');
+            option.value = deviceInfo.deviceId;
+            if (deviceInfo.kind === 'audioinput') {
+                option.text = deviceInfo.label ||
+                    'microphone ' + (audioSelect.length + 1);
+                audioSelect.appendChild(option);
+            } else if (deviceInfo.kind === 'videoinput') {
+                option.text = deviceInfo.label || 'camera ' +
+                    (videoSelect.length + 1);
+                videoSelect.appendChild(option);
+            }
+        }
+    }
+
+
+    function gotStream(stream) {
+        window.stream = stream;
+        video.srcObject = stream;
+        video.controls = false;
+        audio_context = new AudioContext;
+
+        var input = audio_context.createMediaStreamSource(stream);
+
+        modulatorInput = audio_context.createGain();
+        modulatorGain = audio_context.createGain();
+        modulatorGain.gain.value = 4.0;
+        modulatorGain.connect( modulatorInput );
+        input.connect(modulatorGain);
+        recorder = new Recorder(input);
 
         var finishVideoSetup_ = function() {
             // Note: video.onloadedmetadata doesn't fire in Chrome when using
@@ -153,37 +186,8 @@ var rtc_recorder = (function(exports, karaoke, recording_id) {
             }, 1000);
         };
 
-        navigator.webkitGetUserMedia(
-            {"video": {
-                "mandatory": {
-                    "minWidth": "320",
-                    "minHeight": "240",
-                    "minFrameRate": "10",
-                    "maxWidth": "320",
-                    "maxHeight": "240",
-                    "maxFrameRate": "10"}
-            },
-             audio: true},
-            function(stream) {
-                theStream = stream;
-                video.srcObject = theStream;
-
-                var input = audio_context.createMediaStreamSource(stream);
-
-                modulatorInput = audio_context.createGain();
-
-                modulatorGain = audio_context.createGain();
-                modulatorGain.gain.value = 4.0;
-                modulatorGain.connect( modulatorInput );
-
-                input.connect(modulatorGain);
-                recorder = new Recorder(input);
-
-                finishVideoSetup_();},
-            function(e) {
-                alert('something went wrong');
-            });
-    };
+        finishVideoSetup_();
+    }
 
     function record() {
         if (recorder === undefined) { return; }
@@ -203,7 +207,8 @@ var rtc_recorder = (function(exports, karaoke, recording_id) {
         video_frames = [];
         function captureFrame() {
             if (recording) {
-                window.setTimeout(captureFrame, 1000 / framerate);
+                frame_time = 1000 / framerate;
+                window.setTimeout(captureFrame, frame_time);
             }
 
             ctx.drawImage(video, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
@@ -214,8 +219,7 @@ var rtc_recorder = (function(exports, karaoke, recording_id) {
 
     function stop() {
         if (recorder === undefined) { return; }
-        theStream.getTracks().forEach(track => track.stop());
-        // theStream.stop();
+        window.stream.getTracks().forEach(track => track.stop());
         recorder.stop();
         endTime = Date.now();
         recording = false;
@@ -286,12 +290,13 @@ var rtc_recorder = (function(exports, karaoke, recording_id) {
         $('#stop-me')[0].addEventListener('click', stop);
     }
 
+    navigator.mediaDevices.enumerateDevices().then(gotDevices).then(getStream);
+    audioSelect.onchange = getStream;
+    videoSelect.onchange = getStream;
     initEvents();
-    turnOnCamera();
 
     return {
         stop: stop
     }
 
 });
-

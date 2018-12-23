@@ -1,13 +1,24 @@
-- Google login
+- Login:
 
-- Facebook login
+  - Google login
 
-- Twitter login
+  - Facebook login
 
-  - "email" is currently populated by location during the callback
+  - Provide an interstitial page before a performer is created that
+    allows a user to choose his username, change his photo, etc.
 
-- Allow "real" logout (currently when you logout and log back in, it logs
-  you in as the last account you used with that provder).
+  - How do we deal with someone forgetting which service he used to
+    login with?  How do we deal with it if a user wants to log in
+    to the same yss account using two different oauth providers?
+
+  - Allow "real" logout (currently when you logout and log back in, it logs
+    you in as the last account you used with that provder).
+
+  - Impersonation.
+
+- Song import:
+
+  - Investigate missing instruments (e.g blackbird).
 
 - Homepage:
 
@@ -24,12 +35,13 @@
   - Divulge real name
   - Delete/edit recordings
   - Timezone
+  - Flash message on edit
 
 - View recording:
 
   - Dropdown for who liked instead of inline table
   - Dropdown for other recordings instead of inline table.
-  - "Likes disabled" instead of 0 performers have liked this recording
+  - "Likes disabled" instead of "0 performers have liked this recording"
     when like permission is not available.
 
 - Edit recording:
@@ -37,26 +49,32 @@
   - Private/public/authenticated viewers (workflow?)
   - Allow/disallow likes
   - Allow/disallow comments
-  - Remix (e.g. no video)
+  - Remix (e.g. no video, adjust latency)
 
 - Record:
 
-  - Choose mic
-  - Choose cam (including none)
+  - Allow choosing no cam
   - Better video
   - Keep intermediate tempfiles around for remixing
   - Cut off mix after cam video ends
   - When we stop before the song ends, stop playing music and display a
     spinner until page reload.
   - Mic volume meter.
-  - Unhelpful errors when camera is already used.
+  - Unhelpful errors when camera is already used (e.g. by OBS).
+  - Reverb
 
-- Song import:
+- Search:
 
-  - Index lyrics into text
-
-- Recordings/performers/songs search box:
+  - Index lyrics into song text index
 
   - Provide an "X" which removes the current filter.
   
 - Allow uploads of songs (yikes)
+
+- Tests
+
+- JS:
+
+  - Upgrade bootstrap and jquery (or ditch and go with the new hotness,
+    whatever those are).
+

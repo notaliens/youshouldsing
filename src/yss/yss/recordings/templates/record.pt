@@ -10,6 +10,19 @@
     </div>
 
     <div class="row">
+      <div class="col-md-12 pull-right">
+        <div class="select">
+          <label for="audioSource">Mic </label><select id="audioSource"></select>
+        </div>
+        <div class="select">
+          <label for="videoSource">Cam </label><select id="videoSource"></select
+>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="row">
       <div class="col-md-4" style="padding-left: 0px; padding-right: 0px;">
         <!-- muted="true" prevents performer from hearing themselves (in
         chrome at least) -->
@@ -35,7 +48,7 @@
     <script type="text/javascript">
      // karaoke and rtc_recorder are exported by yssrecorder
      kar = karaoke("${mp3_url}", ${timings}, "${recording_id}");
-     rtc_recorder(window, kar, "${recording_id}");
+     rtc_recorder(window, kar, "${recording_id}", ${framerate});
     </script>
   </div>
 </html>

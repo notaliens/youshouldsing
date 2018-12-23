@@ -15,11 +15,12 @@ from substanced.util import (
 
 from substanced.folder.views import generate_text_filter_terms
 
-from ..utils import get_redis
+from yss.utils import get_redis
 
-from ..interfaces import (
+from yss.interfaces import (
     IRecording,
     IRecordings,
+    framerate
     )
 
 import yss.likes
@@ -37,6 +38,7 @@ def recording_app(song, request):
         "recording_id": recording_id,
         "mp3_url": request.resource_url(song, 'mp3'),
         "timings": song.timings,
+        "framerate":framerate,
     }
 
 
