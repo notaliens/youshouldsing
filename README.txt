@@ -3,7 +3,20 @@ Prep
 
 On Ubuntu 18.04:
 
-sudo apt-get install timidity lame sox libsox-fmt-mp3 redis-server supervisor
+sudo apt-get install timidity lame sox libsox-fmt-mp3 redis-server supervisor \
+   fluid-soundfont-gm fluid-soundfont-gs
+
+To get all instruments mapped during song import, edit
+/etc/timidity/timidity.cfg and change:
+
+ source /etc/timidity/freepats.cfg
+
+To:
+
+ source /etc/timidity/fluidr3_gm.cfg
+ source /etc/timidity/fluidr3_gs.cfg
+
+And sudo service restart timidity
 
 Installation
 ------------
