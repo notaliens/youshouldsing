@@ -201,6 +201,8 @@ var rtc_recorder = (function(exports, karaoke, recording_id, framerate) {
         startTime = Date.now();
 
         toggleActivateRecordButton();
+        $('select#audioSource')[0].disabled = true;
+        $('select#videoSource')[0].disabled = true;
         $('#stop-me')[0].disabled = false;
 
         recorder.record();
@@ -224,7 +226,8 @@ var rtc_recorder = (function(exports, karaoke, recording_id, framerate) {
         endTime = Date.now();
         recording = false;
         $('#stop-me')[0].disabled = true;
-
+        $('select#audioSource')[0].disabled = false;
+        $('select#videoSource')[0].disabled = false;
         toggleActivateRecordButton();
 
         console.log('frames captured: ' + video_frames.length + ' => ' +
