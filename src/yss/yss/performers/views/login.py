@@ -34,9 +34,6 @@ def velruse_login_complete_view(context, request):
         performer = registry.content.create('Performer')
         root['performers'][username] = performer
         performer.title = profile['displayName']
-        addresses = profile.get('addresses')
-        if addresses:
-            user.email = performer.email = addresses[0]['formatted']
         photos = profile.get('photos')
         if photos:
             performer.photo_url = photos[0]['value']

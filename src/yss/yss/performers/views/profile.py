@@ -16,7 +16,7 @@ from yss.interfaces import (
     IPerformers,
     )
 
-from . import PerformerProfileSchema
+from yss.performers import PerformerProfileSchema
 
 def recent_recordings(context, request, limit=10):
     q = find_index(context, 'system', 'content_type').eq('Recording')
@@ -46,7 +46,6 @@ def profile_view(context, request):
         'likes_songs': context.likes_songs,
         'can_edit': getattr(request.user, 'performer', None) is context,
     }
-    form = deform.Form(PerformerProfileSchema(), buttons=('Save',))
 
 @view_config(
     context=IPerformer,

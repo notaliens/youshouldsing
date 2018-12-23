@@ -113,4 +113,3 @@ class Performer(Folder):
     @property
     def num_likes(self):
         return len(self.liked_by_ids)
-

@@ -4,7 +4,7 @@ from pyramid.config import Configurator
 from substanced import root_factory
 
 from .authpolicy import YSSAuthenticationPolicy
-from .views.login import authentication_type
+from yss.performers.views.login import authentication_type
 
 def main(global_config, **settings):
     mimetypes.add_type('application/font-woff', '.woff')
