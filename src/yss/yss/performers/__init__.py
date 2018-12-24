@@ -1,5 +1,6 @@
 import colander
 import deform
+import pytz
 
 from substanced.content import content
 from substanced.folder import Folder
@@ -30,6 +31,8 @@ from yss.interfaces import (
     genre_choices,
 )
 
+_ZONES = pytz.all_timezones
+
 @content(
     'User',
     icon='glyphicon glyphicon-user',
@@ -42,6 +45,10 @@ from yss.interfaces import (
     )
 class User(BaseUser):
     performer = reference_target_property(PerformerToUser)
+
+@colander.deferred
+def tzname_widget(node, kw): #pragma NO COVER
+    return deform.widget.Select2Widget(values=zip(_ZONES, _ZONES))
 
 class PerformerProfileSchema(Schema):
     """ Property schema for :class:`substanced.principal.User` objects.
@@ -56,6 +63,12 @@ class PerformerProfileSchema(Schema):
             colander.Email(),
             colander.Length(max=100)
             ),
+        )
+    tzname = colander.SchemaNode(
+        colander.String(),
+        title='Timezone',
+        widget=tzname_widget,
+        validator=colander.OneOf(_ZONES)
         )
     photo_url = colander.SchemaNode(
         colander.String(),
@@ -113,3 +126,19 @@ class Performer(Folder):
     @property
     def num_likes(self):
         return len(self.liked_by_ids)
+
+    def _tzname_set(self, name):
+        self.user.tzname = name
+
+    def _tzname_get(self):
+        return self.user.tzname
+
+    tzname = property(_tzname_get, _tzname_set)
+
+    def _email_set(self, email):
+        self.user.email = email
+
+    def _email_get(self):
+        return self.user.email
+
+    email = property(_email_get, _email_set)

@@ -40,6 +40,7 @@ def profile_view(context, request):
         'age': getattr(context, 'age', colander.null),
         'sex': getattr(context, 'sex', None),
         'genre': getattr(context, 'genre', None),
+        'tzname': getattr(context, 'tzname', 'UTC'),
         'form': None,
         'recent_recordings': recent_recordings(context, request),
         'num_likes': context.num_likes,
@@ -85,6 +86,7 @@ def profile_edit_form(context, request):
             context.age = appstruct['age']
             context.sex = appstruct['sex']
             context.genre = appstruct['genre']
+            context.tzname = appstruct['tzname']
     else:
         appstruct = {
             'csrf_token': request.session.get_csrf_token(),
@@ -95,6 +97,7 @@ def profile_edit_form(context, request):
             'age': getattr(context, 'age', colander.null),
             'sex': getattr(context, 'sex', None),
             'genre': getattr(context, 'genre', None),
+            'tzname':getattr(context, 'tzname', None),
         }
     if rendered is None:
         rendered = form.render(appstruct, readonly=False)
