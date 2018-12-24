@@ -33,13 +33,15 @@ def velruse_login_complete_view(context, request):
         user = principals.add_user(username, registry=registry)
         performer = registry.content.create('Performer')
         root['performers'][username] = performer
+        # NB: performer.user required before setting tzname and email
+        performer.user = user
         performer.title = profile['displayName']
         photos = profile.get('photos')
         if photos:
             performer.photo_url = photos[0]['value']
         performer.age = colander.null
-        performer.sex = user.favorite_genre = None
-        performer.user = user
+        performer.sex = None
+        performer.genre = None
         set_acl(performer, [(Allow, user.__oid__, ['yss.edit-profile'])])
         location = request.resource_url(performer, 'edit.html')
     else:
