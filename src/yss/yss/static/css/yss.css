@@ -7036,11 +7036,30 @@ code {
   padding: 6px 0 0 0;
 }
 .mic-vol-blocks {
-  width: 100%;
+  width: 50%;
+  display: inline-block;
 }
 .mic-vol-block {
   width: calc(10% - 10px);
   height: 10px;
   display: inline-block;
-  margin: 5px;
+  margin: 2px;
+}
+label#audioSourceLabel {
+  padding-right: 10px;
+}
+label#videoSourceLabel {
+  padding-right: 10px;
+}
+select#videoSource {
+  width: 50%;
+}
+select#audioSource {
+  width: 50%;
+}
+select#audioSource > option {
+  width: 50%;
+}
+select#videoSource > option {
+  width: 50%;
 }

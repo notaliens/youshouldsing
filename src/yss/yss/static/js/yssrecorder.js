@@ -71,7 +71,7 @@ var karaoke = (function(mp3_url, timings, recording_id) {
 
     return {
         play: play,
-        pause: pause,
+        pause: pause
     };
 });
 

@@ -12,9 +12,8 @@
     <div class="row">
       <div class="col-md-12 pull-right">
         <div class="select">
-          <label for="audioSource">Mic </label><select id="audioSource"></select>
+          <label id="audioSourceLabel" for="audioSource">Mic </label><select id="audioSource"></select>
         </div>
-        
         <div class="mic-vol-blocks"> 
           <div class="mic-vol-block"></div>
           <div class="mic-vol-block"></div>
@@ -24,10 +23,13 @@
           <div class="mic-vol-block"></div>
           <div class="mic-vol-block"></div>
           <div class="mic-vol-block"></div>
+          <div class="mic-vol-block"></div>
+          <div class="mic-vol-block"></div>
         </div>
         
+        
         <div class="select">
-          <label for="videoSource">Cam </label><select id="videoSource"></select
+          <label for="videoSource" id="videoSourceLabel">Cam </label><select id="videoSource"></select
 >
         </div>
       </div>

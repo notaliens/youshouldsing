@@ -60,11 +60,11 @@
 - Record:
 
   - Allow choosing no cam
+  - Allow play without record
   - Better video
   - Keep intermediate tempfiles around for remixing
   - When we stop before the song ends, stop playing music and display a
     spinner until page reload.
-  - Mic volume meter.
   - Unhelpful errors when camera is already used (e.g. by OBS).
   - Reverb
   - Handle conflict errors in postprocessing.
