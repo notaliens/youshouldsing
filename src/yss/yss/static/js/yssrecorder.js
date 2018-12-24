@@ -162,16 +162,52 @@ var rtc_recorder = (function(exports, karaoke, recording_id, framerate) {
         window.stream = stream;
         video.srcObject = stream;
         video.controls = false;
-        audio_context = new AudioContext;
+        audio_context = new AudioContext();
 
-        var input = audio_context.createMediaStreamSource(stream);
+        var micinput = audio_context.createMediaStreamSource(stream);
 
         modulatorInput = audio_context.createGain();
         modulatorGain = audio_context.createGain();
         modulatorGain.gain.value = 4.0;
         modulatorGain.connect( modulatorInput );
-        input.connect(modulatorGain);
-        recorder = new Recorder(input);
+        micinput.connect(modulatorGain);
+
+        analyser = audio_context.createAnalyser();
+        scriptprocessor = audio_context.createScriptProcessor(2048, 1, 1);
+        analyser.smoothingTimeConstant = 0.8;
+        analyser.fftSize = 1024;
+        micinput.connect(analyser);
+        scriptprocessor.connect(audio_context.destination);
+
+        function colorPids(vol) {
+            var all_pids = $('.mic-vol-block');
+            var amout_of_pids = Math.round(vol/10);
+            var elem_range = all_pids.slice(0, amout_of_pids);
+            for (var i = 0; i < all_pids.length; i++) {
+                all_pids[i].style.backgroundColor="#e6e7e8";
+            }
+            for (var j = 0; j < elem_range.length; j++) {
+                // console.log(elem_range[j]);
+                elem_range[j].style.backgroundColor="#69ce2b";
+            }
+        }
+        
+        scriptprocessor.onaudioprocess = function() {
+            var array = new Uint8Array(analyser.frequencyBinCount);
+            analyser.getByteFrequencyData(array);
+            var values = 0;
+            
+            var length = array.length;
+            for (var i = 0; i < length; i++) {
+                values += (array[i]);
+            }
+            var average = values / length;
+
+            //console.log(Math.round(average));
+            colorPids(average);
+        };
+        
+        recorder = new Recorder(micinput);
 
         var finishVideoSetup_ = function() {
             // Note: video.onloadedmetadata doesn't fire in Chrome when using

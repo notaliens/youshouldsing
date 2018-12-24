@@ -14,13 +14,24 @@
         <div class="select">
           <label for="audioSource">Mic </label><select id="audioSource"></select>
         </div>
+        
+        <div class="mic-vol-blocks"> 
+          <div class="mic-vol-block"></div>
+          <div class="mic-vol-block"></div>
+          <div class="mic-vol-block"></div>
+          <div class="mic-vol-block"></div>
+          <div class="mic-vol-block"></div>
+          <div class="mic-vol-block"></div>
+          <div class="mic-vol-block"></div>
+          <div class="mic-vol-block"></div>
+        </div>
+        
         <div class="select">
           <label for="videoSource">Cam </label><select id="videoSource"></select
 >
         </div>
       </div>
     </div>
-
 
     <div class="row">
       <div class="col-md-4" style="padding-left: 0px; padding-right: 0px;">
