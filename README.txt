@@ -3,20 +3,26 @@ Prep
 
 On Ubuntu 18.04:
 
-sudo apt-get install timidity lame sox libsox-fmt-mp3 redis-server supervisor \
-   fluid-soundfont-gm fluid-soundfont-gs
+sudo apt install timidity lame sox libsox-fmt-mp3 redis-server supervisor \
+   fluid-soundfont-gm fluid-soundfont-gs npm
 
 To get all instruments mapped during song import, edit
 /etc/timidity/timidity.cfg and change:
 
- source /etc/timidity/freepats.cfg
+  source /etc/timidity/freepats.cfg
 
 To:
 
- source /etc/timidity/fluidr3_gm.cfg
- source /etc/timidity/fluidr3_gs.cfg
+  source /etc/timidity/fluidr3_gm.cfg
+  source /etc/timidity/fluidr3_gs.cfg
 
-And sudo service restart timidity
+And sudo service restart timidity.
+
+To install less so you can recompile yss.less to yss.css, etc:
+
+  sudo npm install -g less jshint recess uglify-js
+
+Then lessc yss.less to gen output.
 
 Installation
 ------------
