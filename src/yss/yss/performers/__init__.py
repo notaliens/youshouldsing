@@ -51,7 +51,7 @@ def tzname_widget(node, kw): #pragma NO COVER
     return deform.widget.Select2Widget(values=zip(_ZONES, _ZONES))
 
 class PerformerProfileSchema(Schema):
-    """ Property schema for :class:`substanced.principal.User` objects.
+    """ Property schema for Performer.
     """
     title = colander.SchemaNode(
         colander.String(),
@@ -129,6 +129,8 @@ class Performer(Folder):
 
     def _tzname_set(self, name):
         self.user.tzname = name
+
+    # proxy timezone and email settings to related User object
 
     def _tzname_get(self):
         return self.user.tzname
