@@ -71,6 +71,7 @@ var karaoke = (function(mp3_url, timings, recording_id) {
 
     return {
         play: play,
+        pause: pause,
     };
 });
 
@@ -170,6 +171,7 @@ var rtc_recorder = (function(exports, karaoke, recording_id, framerate) {
         modulatorGain.connect( modulatorInput );
         micinput.connect(modulatorGain);
 
+        // fbo mic volume meter
         analyser = audio_context.createAnalyser();
         scriptprocessor = audio_context.createScriptProcessor(2048, 1, 1);
         analyser.smoothingTimeConstant = 0.8;
@@ -213,8 +215,8 @@ var rtc_recorder = (function(exports, karaoke, recording_id, framerate) {
             setTimeout(function() {
                 video.width = 320;//video.clientWidth;
                 video.height = 240;// video.clientHeight;
-                // Canvas is 1/2 for performance. Otherwise, getImageData() readback is
-                // awful 100ms+ as 640x480.
+                // Canvas is 1/2 for performance. Otherwise, getImageData()
+                // readback is awful 100ms+ as 640x480.
                 canvas.width = video.width;
                 canvas.height = video.height;
             }, 1000);
@@ -258,6 +260,7 @@ var rtc_recorder = (function(exports, karaoke, recording_id, framerate) {
         window.stream.getTracks().forEach(function(track) {
             track.stop();
         });
+        karaoke.pause();
         recorder.stop();
         endTime = Date.now();
         recording = false;
@@ -325,7 +328,8 @@ var rtc_recorder = (function(exports, karaoke, recording_id, framerate) {
 
     function initEvents() {
         $('#record-me')[0].addEventListener('click', record);
-        //$('#stop-me')[0].addEventListener('click', function () { document.location = document.location });
+        //$('#stop-me')[0].addEventListener(
+        //   'click', function () { document.location = document.location });
         $('#stop-me')[0].addEventListener('click', stop);
     }
 
