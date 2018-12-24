@@ -1,6 +1,5 @@
 var karaoke = (function(mp3_url, timings, recording_id) {
     var numDisplayLines = 4; // Number of lines to do the karaoke with
-    var timings = timings;
     var wasPaused = false;
     var show = null;
     var player = new Audio();
@@ -47,7 +46,7 @@ var karaoke = (function(mp3_url, timings, recording_id) {
         show = rice.createShow(renderer, numDisplayLines);
 
         player.addEventListener(
-            'error', function(e) { alert('Failed to play! ' + e) }, false);
+            'error', function(e) { alert('Failed to play! ' + e); }, false);
         player.addEventListener('ended', function() {
             // AFAICT this isn't called
             player.pause();
@@ -65,14 +64,14 @@ var karaoke = (function(mp3_url, timings, recording_id) {
             updateStatus();
             lastPosition = ct;
         }, false);
-    };
+    }
 
     init();
     setup();
 
     return {
         play: play,
-    }
+    };
 });
 
 var rtc_recorder = (function(exports, karaoke, recording_id, framerate) {
@@ -95,9 +94,9 @@ var rtc_recorder = (function(exports, karaoke, recording_id, framerate) {
 
     var CANVAS_WIDTH = 320;
     var CANVAS_HEIGHT = 240;
-    const video = $('video')[0];
-    const audioSelect = $('select#audioSource')[0];
-    const videoSelect = $('select#videoSource')[0];
+    var video = $('video')[0];
+    var audioSelect = $('select#audioSource')[0];
+    var videoSelect = $('select#videoSource')[0];
     video.width = CANVAS_WIDTH;
     video.height = CANVAS_HEIGHT;
     var canvas = document.createElement('canvas'); // offscreen canvas.
@@ -110,7 +109,6 @@ var rtc_recorder = (function(exports, karaoke, recording_id, framerate) {
     var recorder;
     var tagTime = Date.now();
     var recording = false;
-    var framerate = framerate;
     var video_frames;
 
     function toggleActivateRecordButton() {
@@ -126,7 +124,7 @@ var rtc_recorder = (function(exports, karaoke, recording_id, framerate) {
                 track.stop();
             });
         }
-        const constraints = {
+        var constraints = {
             "audio": {
                 "deviceId": {exact: audioSelect.value}
             },
@@ -136,14 +134,14 @@ var rtc_recorder = (function(exports, karaoke, recording_id, framerate) {
                 "frameRate": { min: 10, max: 10 },
                 "deviceId": { exact: videoSelect.value}
             }
-        }
+        };
         navigator.mediaDevices.getUserMedia(constraints).then(gotStream);
     }
 
     function gotDevices(deviceInfos) {
-        for (let i = 0; i !== deviceInfos.length; ++i) {
-            const deviceInfo = deviceInfos[i];
-            const option = document.createElement('option');
+        for (var i = 0; i !== deviceInfos.length; ++i) {
+            var deviceInfo = deviceInfos[i];
+            var option = document.createElement('option');
             option.value = deviceInfo.deviceId;
             if (deviceInfo.kind === 'audioinput') {
                 option.text = deviceInfo.label ||
@@ -251,13 +249,15 @@ var rtc_recorder = (function(exports, karaoke, recording_id, framerate) {
 
             ctx.drawImage(video, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
             video_frames.push(canvas.toDataURL('image/png'));
-        };
+        }
         captureFrame();
-    };
+    }
 
     function stop() {
         if (recorder === undefined) { return; }
-        window.stream.getTracks().forEach(track => track.stop());
+        window.stream.getTracks().forEach(function(track) {
+            track.stop();
+        });
         recorder.stop();
         endTime = Date.now();
         recording = false;
@@ -270,7 +270,7 @@ var rtc_recorder = (function(exports, karaoke, recording_id, framerate) {
                     (video_frames.length / framerate) + 's video');
 
         embedVideoPreview();
-    };
+    }
 
     function embedVideoPreview(opt_url) {
         var audioDeferred = jQuery.Deferred();
@@ -336,6 +336,6 @@ var rtc_recorder = (function(exports, karaoke, recording_id, framerate) {
 
     return {
         stop: stop
-    }
+    };
 
 });
