@@ -163,7 +163,7 @@ def stream_movie(recording, request):
 
 
 class RecordingsView(object):
-    default_sort = 'performer'
+    default_sort = 'created'
     batch_size = 20
     def __init__(self, context, request):
         self.context = context
@@ -205,7 +205,7 @@ class RecordingsView(object):
         genre = find_index(context, 'yss', 'genre')
         created = find_index(context, 'yss', 'created')
         sorting = {
-            'date':(created, num_likes, title, performer, genre),
+            'created':(created, num_likes, title, performer, genre),
             'title':(title, performer, num_likes, genre, created),
             'performer':(performer, title, num_likes, genre, created),
             'genre':(genre, performer, title, num_likes, created),

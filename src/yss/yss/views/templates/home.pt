@@ -24,9 +24,14 @@
             <table class="table table-striped">
               <tbody>
                 <tr tal:repeat="item featured_recordings">
-                  <td>
-                    <a href="${request.resource_url(item)}"
-                       >${item.title}</a> by <a href="${request.resource_url(item.performer or item)}"><img tal:condition="item.performer.photo_url|None" src="${item.performer.photo_url}" width="24" height="24"  style="padding-right: 10px;"/>${getattr(item.performer, 'title', 'Unknown')}</a>
+                  <td width="20%">
+                    <a href="${request.resource_url(item)}">${layout.short_created_local(item)}</a>
+                  </td>
+                  <td width="35%">
+                    <a href="${request.resource_url(item.performer or item)}"><img alt="" tal:condition="item.performer.photo_url|None" src="${item.performer.photo_url}" height="20"  style="padding-right: 10px;"/>${getattr(item.performer, 'title', 'Unknown')}</a>
+                  </td>
+                  <td width="45%">
+                    <a href="${request.resource_url(item.song)}">${item.song.title}</a>
                   </td>
                 </tr>
               </tbody>
@@ -41,15 +46,20 @@
 
         <div class="panel panel-info">
           <div class="panel-heading">
-            Latest Recordings
+            Recent Recordings
           </div>
           <div class="panel-body">
             <table class="table table-striped">
               <tbody>
                 <tr tal:repeat="item recent_recordings">
-                  <td>
-                    <a href="${request.resource_url(item)}"
-                       >${item.title}</a> by <a href="${request.resource_url(item.performer or item)}"><img tal:condition="item.performer.photo_url|None" src="${item.performer.photo_url}" width="24" height="24" style="padding-right: 10px;"/>${getattr(item.performer, 'title', 'Unknown')}</a>
+                  <td width="20%">
+                    <a href="${request.resource_url(item)}">${layout.short_created_local(item)}</a>
+                  </td>
+                  <td width="35%">
+                    <a href="${request.resource_url(item.performer or item)}"><img alt="" tal:condition="item.performer.photo_url|None" src="${item.performer.photo_url}" height="20"  style="padding-right: 10px;"/>${getattr(item.performer, 'title', 'Unknown')}</a>
+                  </td>
+                  <td width="45%">
+                    <a href="${request.resource_url(item.song)}">${item.song.title}</a>
                   </td>
                 </tr>
               </tbody>

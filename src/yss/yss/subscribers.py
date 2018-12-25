@@ -1,5 +1,6 @@
 import datetime
 import pkg_resources
+import pytz
 
 from pyramid.security import (
     Allow,
@@ -51,7 +52,7 @@ def root_added(event):
 
 @subscribe_will_be_added()
 def content_will_be_added(event):
-    event.object.created = datetime.datetime.utcnow()
+    event.object.created = datetime.datetime.utcnow().replace(tzinfo=pytz.UTC)
     
 @subscribe_will_be_removed(content_type='Performer')
 def performer_will_be_removed(event):

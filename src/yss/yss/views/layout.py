@@ -1,3 +1,5 @@
+import pytz
+
 from pyramid_layout.layout import layout_config
 from pyramid.decorator import reify
 from pyramid.location import inside
@@ -34,15 +36,17 @@ class MainLayout(object):
         songs = root.get('songs')
         performers = root.get('performers')
         recordings = root.get('recordings')
-        for (title, section, exact) in (
-            ('Songs', songs, None),
-            ('Performers', performers, lambda s: context is not performer),
-            ('Recordings', recordings, None),
-            ('My Profile', performer, None),
+        for (title, section, exact, q) in (
+            ('Songs', songs, None, None),
+            ('Performers', performers, lambda s: context is not performer,
+             None),
+            ('Recordings', recordings,
+             None, {'sorting':'created', 'reverse':'true'}),
+            ('My Profile', performer, None, None),
             ):
             if section is not None:
                 d = {}
-                d['url'] = request.resource_url(section)
+                d['url'] = request.resource_url(section, query=q)
                 d['title'] = title
                 active = inside(context, section) and 'active' or None
                 if exact and active:
@@ -63,4 +67,12 @@ class MainLayout(object):
 
     def has_liked(self, target):
         return yss.likes.has_liked(self.request, target)
+
+    def localize_created(self, resource):
+        tzname = self.request.user.tzname
+        return resource.created.replace(tzinfo=pytz.timezone(tzname))
+
+    def short_created_local(self, resource):
+        localized = self.localize_created(resource)
+        return localized.strftime('%b %d %Y')
 

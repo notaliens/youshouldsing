@@ -127,10 +127,10 @@ class Performer(Folder):
     def num_likes(self):
         return len(self.liked_by_ids)
 
+    # proxy timezone and email settings to related User object
+
     def _tzname_set(self, name):
         self.user.tzname = name
-
-    # proxy timezone and email settings to related User object
 
     def _tzname_get(self):
         return self.user.tzname

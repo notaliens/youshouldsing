@@ -43,6 +43,10 @@ class Recording(persistent.Persistent):
     liked_by = multireference_target_property(PerformerLikesRecording)
     liked_by_ids = multireference_targetid_property(PerformerLikesRecording)
 
+    def __init__(self, tmpfolder):
+        self.blob = None
+        self.tmpfolder = tmpfolder
+
     @property
     def title(self):
         return getattr(self.song, 'title', 'Unknown')
@@ -55,6 +59,3 @@ class Recording(persistent.Persistent):
     def num_likes(self):
         return len(self.liked_by_ids)
 
-    def __init__(self, tmpfolder):
-        self.blob = None
-        self.tmpfolder = tmpfolder

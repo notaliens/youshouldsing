@@ -21,16 +21,19 @@
 
               <thead>
                 <tr>
-                  <th width="30%">
+                  <th width="15%">
+                    ${structure:view.sort_tag('created', 'Created')}
+                  </th>
+                  <th width="20%">
                     ${structure:view.sort_tag('performer', 'Performer')}
                   </th>
-                  <th width="30%">
-                    ${structure:view.sort_tag('title', 'Title')}
+                  <th width="45%">
+                    ${structure:view.sort_tag('title', 'Song')}
                   </th>
-                  <th width="20%">
+                  <th width="10%">
                     ${structure:view.sort_tag('genre', 'Genre')}
                   </th>
-                  <th width="20%">
+                  <th width="10%">
                     ${structure:view.sort_tag('num_likes', 'Likes')}
                   </th>
                 </tr>
@@ -39,15 +42,17 @@
               <tbody>
                 <tr tal:repeat="item batch">
                   <td>
+                    <a href="${request.resource_url(item)}">${layout.short_created_local(item)}</a>
+                  </td>
+                  <td>
                     <a href="${request.resource_url(item.performer)}"
                        ><img src="${item.performer.photo_url}" 
-                             width="24" 
-                             height="24"
+                             height="20"
                              style="padding-right: 10px;"
                              />${item.performer.title}</a>
                   </td>
                   <td>
-                    <a href="${request.resource_url(item)}">${item.title}</a>
+                    <a href="${request.resource_url(item.song)}">${item.song.title}</a>
                   </td>
                   <td>${item.genre or 'Unknown'}</td>
                   <td>${item.num_likes}</td>
