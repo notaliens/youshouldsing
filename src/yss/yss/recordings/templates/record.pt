@@ -1,56 +1,86 @@
 <!DOCTYPE html>
 <html metal:use-macro="main_template">
+
   <div metal:fill-slot="main_content" class="container">
 
+    <div class="row">
+      <div class="col-md-6">
+        <div class="panel panel-warning">
+          <div class="panel-heading">
+            <h3 class="panel-title">Microphone</h3>
+          </div>
+          <div class="panel-body">
+            <div class="select">
+              <select id="audioSource"></select>
+            </div>
+            <div class="mic-vol-blocks">
+              <div class="mic-vol-block"></div>
+              <div class="mic-vol-block"></div>
+              <div class="mic-vol-block"></div>
+              <div class="mic-vol-block"></div>
+              <div class="mic-vol-block"></div>
+              <div class="mic-vol-block"></div>
+              <div class="mic-vol-block"></div>
+              <div class="mic-vol-block"></div>
+              <div class="mic-vol-block"></div>
+              <div class="mic-vol-block"></div>
+            </div>
+
+            <div class="sliderbox">
+              <div class="sliderlabel">Mic Volume</div>
+              <div class="slider">
+                <input id="micLevel" type="range" min="0" max="1" value="1"
+                       step="0.01"/>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="panel panel-warning">
+          <div class="panel-heading">
+            <h3 class="panel-title">Camera</h3>
+          </div>
+          <div class="panel-body" style="padding-bottom: 60px;">
+            <div class="select">
+              <select id="videoSource"></select>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12">
+        <div class="well">
+          <div class="center-block">
+            <video class="embed-responsive-item" muted="true"
+                   autoplay>Your browser doesn't support video.</video>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12">
+        <div class="well">
+          <div id="player" style="display: none">
+            <div id="karaoke-wrapper">
+              <div id="karaoke-display"></div>
+            </div>
+          </div>
+          <div id="status" style="padding-bottom: 5px;">0:00</div>
+        </div>
+      </div>
+
+    </div>
+
     <div class="row" style="padding-bottom: 10px;">
-      <div class="col-md-12 pull-right">
+      <div class="col-md-12">
+        <button id="play-me">Play</button>
         <button id="record-me">Record</button>
         <button id="stop-me" disabled>◼</button>
       </div>
     </div>
 
-    <div class="row">
-      <div class="col-md-12 pull-right">
-        <div class="select">
-          <label id="audioSourceLabel" for="audioSource">Mic </label><select id="audioSource"></select>
-        </div>
-        <div class="mic-vol-blocks"> 
-          <div class="mic-vol-block"></div>
-          <div class="mic-vol-block"></div>
-          <div class="mic-vol-block"></div>
-          <div class="mic-vol-block"></div>
-          <div class="mic-vol-block"></div>
-          <div class="mic-vol-block"></div>
-          <div class="mic-vol-block"></div>
-          <div class="mic-vol-block"></div>
-          <div class="mic-vol-block"></div>
-          <div class="mic-vol-block"></div>
-        </div>
-        
-        
-        <div class="select">
-          <label for="videoSource" id="videoSourceLabel">Cam </label><select id="videoSource"></select
->
-        </div>
-      </div>
-    </div>
-
-    <div class="row">
-      <div class="col-md-4" style="padding-left: 0px; padding-right: 0px;">
-        <!-- muted="true" prevents performer from hearing themselves (in
-        chrome at least) -->
-        <video muted="true" autoplay>Your browser doesn't support video.</video>
-      </div>
-
-      <div class="col-md-8">
-        <div id="player" style="display: none">
-          <div id="karaoke-wrapper">
-            <div id="karaoke-display"></div>
-          </div>
-        </div>
-        <div id="status">0:00</div>
-      </div>
-    </div>
   </div>
 
   <div metal:fill-slot="tail">
@@ -64,4 +94,5 @@
      rtc_recorder(window, kar, "${recording_id}", ${framerate});
     </script>
   </div>
+
 </html>

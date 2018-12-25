@@ -6982,9 +6982,6 @@ code {
 .icon-twitter-sign {
   color: #00C9FC;
 }
-.icon-persona {
-  color: #ED822C;
-}
 .navbar-inverse .navbar-nav > .active > a,
 .navbar-default .navbar-nav > .active > a:hover,
 .navbar-default .navbar-nav > .active > a:focus {
@@ -7025,7 +7022,7 @@ code {
   border: 3px solid #CCCCCC;
 }
 #karaoke-display {
-  font-size: 200%;
+  font-size: 150%;
   text-align: center;
 }
 #buttons {
@@ -7036,30 +7033,45 @@ code {
   padding: 6px 0 0 0;
 }
 .mic-vol-blocks {
-  width: 50%;
-  display: inline-block;
+  width: 100%;
+  padding-bottom: 5px;
 }
-.mic-vol-block {
-  width: calc(10% - 10px);
+.mic-vol-block,
+.mic-vol-block-on,
+.mic-vol-block-off {
+  width: calc(10% - 5px);
   height: 10px;
   display: inline-block;
-  margin: 2px;
 }
-label#audioSourceLabel {
-  padding-right: 10px;
+.mic-vol-block-on {
+  background-color: "#69ce2b";
 }
-label#videoSourceLabel {
-  padding-right: 10px;
+.mic-vol-block-off {
+  background-color: "#e6e7e8";
 }
 select#videoSource {
-  width: 50%;
+  width: 100%;
 }
 select#audioSource {
-  width: 50%;
+  width: 100%;
 }
 select#audioSource > option {
-  width: 50%;
+  width: 100%;
 }
 select#videoSource > option {
-  width: 50%;
+  width: 100%;
+}
+.sliderbox {
+  position: relative;
+}
+.sliderlabel {
+  position: absolute;
+  z-index: 1;
+  left: 0;
+  top: 0;
+  font-weight: bold;
+}
+.slider {
+  position: relative;
+  z-index: 0;
 }

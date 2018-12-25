@@ -60,7 +60,7 @@
 - Record:
 
   - Allow choosing no cam
-  - Allow play without record
+  - Scrub on playonly
   - Better video
   - Keep intermediate tempfiles around for remixing
   - When we stop before the song ends, stop playing music and display a

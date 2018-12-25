@@ -1,6 +1,6 @@
 var karaoke = (function(mp3_url, timings, recording_id) {
     var numDisplayLines = 4; // Number of lines to do the karaoke with
-    var wasPaused = false;
+    var paused = true;
     var show = null;
     var player = new Audio();
     player.setAttribute('src', mp3_url);
@@ -31,11 +31,33 @@ var karaoke = (function(mp3_url, timings, recording_id) {
     }
 
     function play() {
+        show.reset();
         player.play();
+        paused = false;
+        var b = $('#play-me')[0];
+        b.textContent = "Pause";
     }
 
     function pause() {
+        show.reset();
         player.pause();
+        paused = true;
+        var b = $('#play-me')[0];
+        b.textContent = "Play";
+    }
+
+    function playtoggle() {
+        if (paused) {
+            play();
+        }
+        else {
+            pause();
+        }
+    }
+
+    function reset() {
+        pause();
+        player.currentTime = 0;
     }
 
     function init() {
@@ -48,9 +70,7 @@ var karaoke = (function(mp3_url, timings, recording_id) {
         player.addEventListener(
             'error', function(e) { alert('Failed to play! ' + e); }, false);
         player.addEventListener('ended', function() {
-            // AFAICT this isn't called
-            player.pause();
-            rtc_recorder.stop();
+            reset();
         }, false);
         player.addEventListener('timeupdate', function () {
             var ct = player.currentTime;
@@ -58,7 +78,7 @@ var karaoke = (function(mp3_url, timings, recording_id) {
                 show.reset();
             }
             if (ct >= player.duration) {
-                rtc_recorder.stop();
+                reset();
             }
             show.render(ct, false);
             updateStatus();
@@ -71,7 +91,9 @@ var karaoke = (function(mp3_url, timings, recording_id) {
 
     return {
         play: play,
-        pause: pause
+        pause: pause,
+        reset: reset,
+        playtoggle: playtoggle
     };
 });
 
@@ -165,11 +187,15 @@ var rtc_recorder = (function(exports, karaoke, recording_id, framerate) {
 
         var micinput = audio_context.createMediaStreamSource(stream);
 
+        // mic level
         modulatorInput = audio_context.createGain();
         modulatorGain = audio_context.createGain();
-        modulatorGain.gain.value = 4.0;
+        modulatorGain.gain.value = 1.0;
         modulatorGain.connect( modulatorInput );
         micinput.connect(modulatorGain);
+        $('#micLevel')[0].onchange = function() {
+            modulatorGain.gain.value = parseFloat(this.value);
+        };
 
         // fbo mic volume meter
         analyser = audio_context.createAnalyser();
@@ -187,16 +213,15 @@ var rtc_recorder = (function(exports, karaoke, recording_id, framerate) {
                 all_pids[i].style.backgroundColor="#e6e7e8";
             }
             for (var j = 0; j < elem_range.length; j++) {
-                // console.log(elem_range[j]);
                 elem_range[j].style.backgroundColor="#69ce2b";
             }
         }
-        
+
         scriptprocessor.onaudioprocess = function() {
             var array = new Uint8Array(analyser.frequencyBinCount);
             analyser.getByteFrequencyData(array);
             var values = 0;
-            
+
             var length = array.length;
             for (var i = 0; i < length; i++) {
                 values += (array[i]);
@@ -206,7 +231,7 @@ var rtc_recorder = (function(exports, karaoke, recording_id, framerate) {
             //console.log(Math.round(average));
             colorPids(average);
         };
-        
+
         recorder = new Recorder(micinput);
 
         var finishVideoSetup_ = function() {
@@ -232,6 +257,7 @@ var rtc_recorder = (function(exports, karaoke, recording_id, framerate) {
         var CANVAS_HEIGHT = canvas.height;
         var CANVAS_WIDTH = canvas.width;
 
+        karaoke.reset();
         karaoke.play();
         recording = true;
         startTime = Date.now();
@@ -240,6 +266,7 @@ var rtc_recorder = (function(exports, karaoke, recording_id, framerate) {
         $('select#audioSource')[0].disabled = true;
         $('select#videoSource')[0].disabled = true;
         $('#stop-me')[0].disabled = false;
+        $('#play-me').hide();
 
         recorder.record();
         video_frames = [];
@@ -265,6 +292,7 @@ var rtc_recorder = (function(exports, karaoke, recording_id, framerate) {
         endTime = Date.now();
         recording = false;
         $('#stop-me')[0].disabled = true;
+        $('#play-me').show();
         $('select#audioSource')[0].disabled = false;
         $('select#videoSource')[0].disabled = false;
         toggleActivateRecordButton();
@@ -331,6 +359,7 @@ var rtc_recorder = (function(exports, karaoke, recording_id, framerate) {
         //$('#stop-me')[0].addEventListener(
         //   'click', function () { document.location = document.location });
         $('#stop-me')[0].addEventListener('click', stop);
+        $('#play-me')[0].addEventListener('click', karaoke.playtoggle);
     }
 
     navigator.mediaDevices.enumerateDevices().then(gotDevices).then(getStream);
@@ -339,7 +368,7 @@ var rtc_recorder = (function(exports, karaoke, recording_id, framerate) {
     initEvents();
 
     return {
-        stop: stop
+        stop: stop,
     };
 
 });
