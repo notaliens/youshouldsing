@@ -295,6 +295,7 @@ var rtc_recorder = (function(exports, karaoke, recording_id, framerate) {
         $('#play-me').show();
         $('select#audioSource')[0].disabled = false;
         $('select#videoSource')[0].disabled = false;
+        document.getElementById("uploading-overlay").style.display = "block";
         toggleActivateRecordButton();
 
         console.log('frames captured: ' + video_frames.length + ' => ' +
