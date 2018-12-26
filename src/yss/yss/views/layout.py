@@ -69,7 +69,7 @@ class MainLayout(object):
         return yss.likes.has_liked(self.request, target)
 
     def localize_created(self, resource):
-        tzname = self.request.user.tzname
+        tzname = getattr(self.request.user, 'tzname', 'UTC')
         return resource.created.replace(tzinfo=pytz.timezone(tzname))
 
     def short_created_local(self, resource):
