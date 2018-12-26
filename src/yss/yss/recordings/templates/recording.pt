@@ -37,9 +37,12 @@
                   <tbody>
                     <tal:block repeat="item other_recordings">
                       <tr>
-                        <td><img src="${item.performer.photo_url}"/></td>
                         <td>
-                          <a href="${request.resource_url(item)}">${item.performer.title}</a>
+                          <img src="${item.performer.photo_url}" height="24"/>
+                          <a style="margin-left: 20px;" href="${request.resource_url(item.performer)}">${item.performer.title}</a>
+                        </td>
+                        <td>
+                          <a href="${request.resource_url(item)}">${layout.short_created_local(item)}</a>
                         </td>
                         <td>Likes: ${item.num_likes}</td>
                       </tr>

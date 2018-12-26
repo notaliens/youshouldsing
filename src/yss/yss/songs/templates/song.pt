@@ -10,7 +10,7 @@
         </div>
         <div class="panel-body">
           <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-4">
               Likes: <span id="like-count">${num_likes}</span>
               <tal:if tal:condition="layout.can_like(context)">
                 <a id="like-button" href="@@like" style="padding-left: 10px;"
@@ -32,10 +32,14 @@
                 </script>
               </tal:if>
             </div>
-            <div tal:condition="can_record" class="col-md-6">
-              <a href="./record">Record this song</a>
+            <div tal:condition="can_record" class="col-md-8">
+              <button type="button"
+                      class="btn btn-danger btn-md btn-block"
+                      style="margin-bottom: 15px;"
+                      onclick="location.href='${request.resource_url(context, 'record')}'"
+                      >Record This Song</button>
             </div>
-            <div tal:condition="not: can_record" class="col-md-6">
+            <div tal:condition="not: can_record" class="col-md-8">
               Log in to record this song
             </div>
           </div>

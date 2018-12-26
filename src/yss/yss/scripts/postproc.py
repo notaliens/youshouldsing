@@ -6,6 +6,8 @@ import time
 import transaction
 import logging
 
+from pyramid.traversal import find_root
+
 from sh import ffmpeg, sox
 from ZODB.blob import Blob
 
@@ -15,7 +17,6 @@ from pyramid.paster import (
     )
 from pyramid.traversal import find_resource
 from yss.utils import get_redis
-from yss.interfaces import framerate
 
 from io import StringIO
 
@@ -58,26 +59,24 @@ def main(argv=sys.argv):
                 redis.rpush('yss.new-recordings', path)
                 raise
 
-
-
 def postprocess(recording):
+    root = find_root(recording)
+    framerate = root.framerate
     tmpdir = recording.tmpfolder
     curdir = os.getcwd()
     try:
         print ('Changing dir to %s' % tmpdir)
         os.chdir(tmpdir)
         committed = recording.song.blob.committed()
-        # change sample rate of mic audio to match the sample
-        # rate of the source song XXX this probably should be done
-        # in javascript somehow, but this is probably where we
-        # will apply reverb anyway, so the cost is already kinda sunk
         err = StringIO()
         sox(
             "-V",
             "--clobber",
             "audio.wav",
             "-r", "44100",
-            "rerated.wav",
+            "reverbed.wav",
+            "reverb",
+            "45",
             _err=err,
         )
         # stderr will contain the duration that we can use to trim the file
@@ -98,7 +97,7 @@ def postprocess(recording):
         sox(
             "-V",
             "--clobber",
-            "-m", "rerated.wav",
+            "-m", "reverbed.wav",
             "-t", "mp3",
             "-v", "0.15",
             committed,

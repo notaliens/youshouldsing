@@ -90,4 +90,3 @@ genre_choices = (
     ('Blues', 'Blues'),
 )
 
-framerate = 1

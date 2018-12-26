@@ -4,9 +4,13 @@ import random
 import shutil
 
 from pyramid.response import FileResponse
-from pyramid.traversal import resource_path
+from pyramid.traversal import (
+    resource_path,
+    find_root,
+    )
 from pyramid.view import view_config
 from pyramid.settings import asbool
+from pyramid.httpexceptions import HTTPBadRequest
 
 from substanced.util import (
     find_index,
@@ -20,7 +24,6 @@ from yss.utils import get_redis
 from yss.interfaces import (
     IRecording,
     IRecordings,
-    framerate
     )
 
 import yss.likes
@@ -34,6 +37,7 @@ random.seed()
 )
 def recording_app(song, request):
     recording_id = generate_recording_id({})
+    framerate = find_root(song).framerate
     return {
         "recording_id": recording_id,
         "mp3_url": request.resource_url(song, 'mp3'),
@@ -172,10 +176,12 @@ class RecordingView(object):
     permission='view'
 )
 def stream_movie(recording, request):
-    return FileResponse(
-        recording.blob.committed(),
-        content_type='video/mp4'
+    if recording.blob:
+        return FileResponse(
+            recording.blob.committed(),
+            content_type='video/mp4'
         )
+    return HTTPBadRequest('Video still processing')
 
 
 class RecordingsView(object):

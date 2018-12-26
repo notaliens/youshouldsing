@@ -23,6 +23,7 @@ def main(global_config, **settings):
     config.include('substanced')
     config.include('pyramid_layout')
     config.include('velruse.providers.twitter')
+    config.include('.root')
     config.include('.evolve')
     config.include('.catalog')
     config.add_twitter_login_from_settings(prefix='velruse.twitter.')
