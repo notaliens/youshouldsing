@@ -3,6 +3,8 @@
   - csrf
 
   - configure auditing
+
+  - should probably use browser timezone instead of user-specified SDI timezone
   
 - Login:
 
@@ -28,8 +30,8 @@
 
 - Homepage:
 
-  Featured recordings should take into account number of likes vs.
-  number of views and perhaps number of comments.
+  Featured recordings should take into account number of likes vs.  number of
+  views, whether it's "members only", and perhaps number of comments.
 
 - Profile:
 
@@ -60,6 +62,9 @@
 - Record:
 
   - Allow choosing no cam
+  - Mic volume does strange stuff on Linux (it adjusts the input level
+    for the chosen device, which you can see reflected in the system
+    UI, but it doesn't adjust it correctly).
   - Scrub on playonly
   - Better video
   - Keep intermediate tempfiles around for remixing
@@ -85,5 +90,6 @@
 - JS:
 
   - Upgrade bootstrap and jquery (or ditch and go with the new hotness,
-    whatever those are).
-
+    whatever those are).  NB: newest bootstrap uses SASS instead of LESS,
+    so would need to switch over to that.  Currently using latest
+    bootstrap that used LESS (3.4.0).
