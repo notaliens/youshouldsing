@@ -14,18 +14,16 @@
 
           <div class="row">
 
-            <div id="recording-video" style="float: left">
-              <video tal:condition="processed"
-                     width="320" height="240" controls>
+            <div id="recording-video">
+              <video id="thevideo" width="640" height="400" controls style="display: ${processed and 'block' or 'none'};">>
                 <source src="${video_url}" type="video/mp4"/>
               </video>
-              <div class="alert alert-success" role="alert"
+              <div class="alert alert-success" role="alert" id="processing"
                    tal:condition="not processed">
                 Recording is still being mixed.  Once it is finished,
                 being mixed, you will see it here.
               </div>
             </div>
-
           </div>
 
           <div class="row" tal:condition="other_recordings">
@@ -151,7 +149,9 @@
              "url":"${request.resource_url(context, 'has_processed')}",
              "success": function(data) {
                if (data['processed']) {
-                 location.reload();
+                 $('#thevideo').load();
+                 $('#thevideo').show();
+                 $('#processing').hide();
                }
                else {
                  setTimeout(processcheck,5000);
@@ -164,7 +164,7 @@
       </script>
     </div>
 
-    <div class="col-md-4" tal:condition="False">
+    <div class="col-md-4">
 
       <div class="panel panel-primary">
 
