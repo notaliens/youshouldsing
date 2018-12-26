@@ -115,25 +115,20 @@ var rtc_recorder = (function(exports, karaoke, recording_id, framerate) {
     window.AudioContext = window.AudioContext || window.webkitAudioContext;
     window.URL = window.URL || window.webkitURL;
 
-    var CANVAS_WIDTH = 320;
-    var CANVAS_HEIGHT = 240;
     var video = $('video')[0];
     var audioSelect = $('select#audioSource')[0];
     var videoSelect = $('select#videoSource')[0];
-    video.width = CANVAS_WIDTH;
-    video.height = CANVAS_HEIGHT;
-    var canvas = document.createElement('canvas'); // offscreen canvas.
-    canvas.width = CANVAS_WIDTH;
-    canvas.height = CANVAS_HEIGHT;
+    video.width = 320;
+    video.height = 240;
     var rafId = null;
     var startTime = null;
     var endTime = null;
     var audio_context;
-    var audio_recorder;
     var tagTime = Date.now();
     var recording = false;
-    var video_frames;
+    var recorder;
     var thestream;
+    var chunks;
 
     function toggleActivateRecordButton() {
         var b = $('#record-me')[0];
@@ -141,6 +136,24 @@ var rtc_recorder = (function(exports, karaoke, recording_id, framerate) {
         b.classList.toggle('recording');
         b.disabled = !b.disabled;
     }
+
+    function gotDevices(deviceInfos) {
+        for (var i = 0; i !== deviceInfos.length; ++i) {
+            var deviceInfo = deviceInfos[i];
+            var option = document.createElement('option');
+            option.value = deviceInfo.deviceId;
+            if (deviceInfo.kind === 'audioinput') {
+                option.text = deviceInfo.label ||
+                    'microphone ' + (audioSelect.length + 1);
+                audioSelect.appendChild(option);
+            } else if (deviceInfo.kind === 'videoinput') {
+                option.text = deviceInfo.label || 'camera ' +
+                    (videoSelect.length + 1);
+                videoSelect.appendChild(option);
+            }
+        }
+    }
+
 
     function getStream() {
         if (thestream) {
@@ -162,28 +175,14 @@ var rtc_recorder = (function(exports, karaoke, recording_id, framerate) {
         navigator.mediaDevices.getUserMedia(constraints).then(gotStream);
     }
 
-    function gotDevices(deviceInfos) {
-        for (var i = 0; i !== deviceInfos.length; ++i) {
-            var deviceInfo = deviceInfos[i];
-            var option = document.createElement('option');
-            option.value = deviceInfo.deviceId;
-            if (deviceInfo.kind === 'audioinput') {
-                option.text = deviceInfo.label ||
-                    'microphone ' + (audioSelect.length + 1);
-                audioSelect.appendChild(option);
-            } else if (deviceInfo.kind === 'videoinput') {
-                option.text = deviceInfo.label || 'camera ' +
-                    (videoSelect.length + 1);
-                videoSelect.appendChild(option);
-            }
-        }
-    }
-
-
     function gotStream(stream) {
         thestream = stream;
         video.srcObject = stream;
         video.controls = false;
+        recorder = new MediaRecorder(stream, {
+            mimeType: "video/webm;codecs=h264"
+        });
+
         audio_context = new AudioContext();
 
         var micinput = audio_context.createMediaStreamSource(stream);
@@ -233,18 +232,12 @@ var rtc_recorder = (function(exports, karaoke, recording_id, framerate) {
             colorPids(average);
         };
 
-        audio_recorder = new Recorder(micinput); // from recorder.js
-
         var finishVideoSetup_ = function() {
             // Note: video.onloadedmetadata doesn't fire in Chrome when using
             // getUserMedia so we have to use setTimeout. See crbug.com/110938.
             setTimeout(function() {
                 video.width = 320;//video.clientWidth;
                 video.height = 240;// video.clientHeight;
-                // Canvas is 1/2 for performance. Otherwise, getImageData()
-                // readback is awful 100ms+ as 640x480.
-                canvas.width = video.width;
-                canvas.height = video.height;
             }, 1000);
         };
 
@@ -252,10 +245,7 @@ var rtc_recorder = (function(exports, karaoke, recording_id, framerate) {
     }
 
     function record() {
-        if (audio_recorder === undefined) { return; }
-        var ctx = canvas.getContext('2d');
-        var CANVAS_HEIGHT = canvas.height;
-        var CANVAS_WIDTH = canvas.width;
+        if (recorder === undefined) { return; }
 
         karaoke.reset();
         karaoke.play();
@@ -268,27 +258,25 @@ var rtc_recorder = (function(exports, karaoke, recording_id, framerate) {
         $('#stop-me')[0].disabled = false;
         $('#play-me').hide();
 
-        audio_recorder.record();
-        video_frames = [];
-        function captureFrame() {
-            if (recording) {
-                frame_time = 1000 / framerate;
-                window.setTimeout(captureFrame, frame_time);
+        chunks = [];
+        recorder.addEventListener('dataavailable', function(e) {
+            if (e.data.size > 0) {
+                chunks.push(e.data);
             }
-
-            ctx.drawImage(video, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-            video_frames.push(canvas.toDataURL('image/png'));
-        }
-        captureFrame();
+        });
+        recorder.addEventListener('stop', function(e) {
+            // dataavailable is guaranteed to have been called by this point
+            uploadVideo();
+        });
+        recorder.start();
     }
 
     function stop() {
-        if (audio_recorder === undefined) { return; }
         thestream.getTracks().forEach(function(track) {
             track.stop();
         });
+        if (recorder === undefined) { return; }
         karaoke.pause();
-        audio_recorder.stop();
         recording = false;
         endTime = Date.now();
         $('#stop-me')[0].disabled = true;
@@ -297,68 +285,28 @@ var rtc_recorder = (function(exports, karaoke, recording_id, framerate) {
         $('select#videoSource')[0].disabled = false;
         $('#uploading-overlay')[0].style.display = "block";
         toggleActivateRecordButton();
-
-        console.log('frames captured: ' + video_frames.length + ' => ' +
-                    (video_frames.length / framerate) + 's video');
-
-        embedVideoPreview();
+        recorder.stop();
     }
 
-    function embedVideoPreview(opt_url) {
-        var audioDeferred = jQuery.Deferred();
-
-        audio_recorder.exportWAV(function(blob) {
-            var fd = new FormData();
-            fd.append('recording_id', recording_id);
-            fd.append('data', blob);
-            fd.append('filename', "audio.wav");
-            jQuery.ajax({
-                type: 'POST',
-                url: window.location,
-                data: fd,
-                processData: false,
-                contentType: false
-            }).done(function(data) {
-                audioDeferred.resolve();
-                console.log(data);
-            });
-        });
-
+    function uploadVideo() {
+        var blob = new Blob(chunks);
+        chunks = [];
         var fd = new FormData();
         fd.append('recording_id', recording_id);
-        for (var i in video_frames) {
-            fd.append('framedata', video_frames[i]);
-        }
-
-        var videoDeferred = jQuery.ajax({
-            type: 'POST',
+        fd.append('data', blob);
+        fd.append('finished', '1');
+        jQuery.ajax({
+            type:'POST',
             url: window.location,
             data: fd,
             processData: false,
             contentType: false
-        }).done(function(data) {
-            console.log(data);
-        });
-        jQuery.when(audioDeferred, videoDeferred).then(function(a1, a2) {
-            var fd = new FormData();
-            fd.append('recording_id', recording_id);
-            fd.append('finished', '1');
-            jQuery.ajax({
-                type: 'POST',
-                url: window.location,
-                data: fd,
-                processData: false,
-                contentType: false
-            }).done(function(data) {
-                window.location = data;
-            });
-        });
+        }).done(function(data) { window.location = data; });
+
     }
 
     function initEvents() {
         $('#record-me')[0].addEventListener('click', record);
-        //$('#stop-me')[0].addEventListener(
-        //   'click', function () { document.location = document.location });
         $('#stop-me')[0].addEventListener('click', stop);
         $('#play-me')[0].addEventListener('click', karaoke.playtoggle);
     }

@@ -67,14 +67,23 @@ def postprocess(recording):
     try:
         print ('Changing dir to %s' % tmpdir)
         os.chdir(tmpdir)
-        committed = recording.song.blob.committed()
+        # sox can't deal with opus audio, so transcode to mp3
+        ffmpeg(
+            "-y",
+            "-i", "recording.webm",
+            "-vn", # no video
+            "-ar", "44100",
+            "-ab", "128k",
+            "-y", # clobber
+            "micdry.mp3"
+            )
         err = StringIO()
         sox(
             "-V",
             "--clobber",
-            "audio.wav",
+            "micdry.mp3",
             "-r", "44100",
-            "reverbed.wav",
+            "micverb.mp3",
             "reverb",
             "45",
             _err=err,
@@ -94,33 +103,22 @@ def postprocess(recording):
                 samples = samples.split(' ', 1)[0].strip()
                 samples = int(samples)
                 break
-        sox(
-            "-V",
-            "--clobber",
-            "-m", "reverbed.wav",
-            "-t", "mp3",
-            "-v", "0.15",
-            committed,
-            "mixed.wav",
-            "trim" if samples is not None else "",
-            "0s" if samples is not None else "",
-            f"{samples}s" if samples is not None else "",
-        )
         ffmpeg(
             "-y",
-            "-i", "mixed.wav",
-            "-f", "image2",
-            "-r", f"{framerate}",
-            "-i", "frame%d.png",
-            "-acodec", "mp3",
+            "-i", "recording.webm",
+            "-i", "micverb.mp3",
+            "-c:v", "vp9",
+            "-c:a", "libopus",
+            "-map", "0:v:0",
+            "-map", "1:a:0",
             "-shortest",
-            "video.mp4"
+            "final.webm"
         )
         recording.blob = Blob()
         with recording.blob.open("w") as saveto:
-            with open("video.mp4", "rb") as savefrom:
+            with open("final.webm", "rb") as savefrom:
                 shutil.copyfileobj(savefrom, saveto)
-        print ("%s/%s" % (tmpdir, "video.mp4"))
+        print ("%s/%s" % (tmpdir, "final.webm"))
         transaction.commit()
         # don't remove tempdir until commit succeeds
         #shutil.rmtree(tmpdir)

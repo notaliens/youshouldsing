@@ -51,53 +51,18 @@ def recording_app(song, request):
     name="record",
     xhr=True,
     renderer='string',
-    permission='yss.record',
-)
-def save_audio(song, request):
-    f = request.params['data'].file
-    recording_id = request.params['recording_id']
-    fname = request.params['filename']
-    tmpdir = get_recording_tempdir(request, recording_id)
-    if not os.path.exists(tmpdir):
-        os.mkdir(tmpdir)
-    with open(os.path.join(tmpdir, fname), 'wb') as output:
-        shutil.copyfileobj(f, output)
-    return 'OK'
-
-
-@view_config(
-    content_type='Song',
-    name="record",
-    xhr=True,
-    renderer='string',
-    request_param='framedata',
-    permission='yss.record',
-)
-def save_video(song, request):
-    recording_id = request.params['recording_id']
-    tmpdir = get_recording_tempdir(request, recording_id)
-    if not os.path.exists(tmpdir):
-        os.mkdir(tmpdir)
-    fname = os.path.join(tmpdir, 'frame%d.png')
-    for i, data in enumerate(request.params.getall('framedata')):
-        preamble = 'data:image/png;base64,'
-        assert data.startswith(preamble), data
-        data = base64.b64decode(data[len(preamble):])
-        with open(fname % i, 'wb') as fp:
-            fp.write(data)
-    return 'OK'
-
-
-@view_config(
-    content_type='Song',
-    name="record",
-    xhr=True,
-    renderer='string',
     request_param='finished',
     permission='yss.record',
 )
 def finish_recording(song, request):
+    f = request.params['data'].file
     recording_id = request.params['recording_id']
+    tmpdir = get_recording_tempdir(request, recording_id)
+    if not os.path.exists(tmpdir):
+        os.mkdir(tmpdir)
+    fname = 'recording.webm'
+    with open(os.path.join(tmpdir, fname), 'wb') as output:
+        shutil.copyfileobj(f, output)
     tmpdir = get_recording_tempdir(request, recording_id)
     recording = request.registry.content.create('Recording', tmpdir)
     recordings = request.root['recordings']
@@ -107,8 +72,8 @@ def finish_recording(song, request):
     recording.song = song
 
     redis = get_redis(request)
-    print ("finished", tmpdir, resource_path(recording))
     redis.rpush("yss.new-recordings", resource_path(recording))
+    print ("finished", tmpdir, resource_path(recording))
     return request.resource_url(recording)
 
 def get_recording_tempdir(request, recording_id):
@@ -179,7 +144,7 @@ def stream_movie(recording, request):
     if recording.blob:
         return FileResponse(
             recording.blob.committed(),
-            content_type='video/mp4'
+            content_type='video/webm'
         )
     return HTTPBadRequest('Video still processing')
 
