@@ -4,6 +4,7 @@ import shutil
 import sys
 import time
 import transaction
+import logging
 
 from sh import ffmpeg, sox
 from ZODB.blob import Blob
@@ -17,6 +18,8 @@ from yss.utils import get_redis
 from yss.interfaces import framerate
 
 from io import StringIO
+
+logger = logging.getLogger('postproc')
 
 def main(argv=sys.argv):
     def usage(msg):
@@ -45,10 +48,16 @@ def main(argv=sys.argv):
         transaction.abort()
         try:
             recording = find_resource(root, path)
-            postprocess(recording)
-        except:
-            redis.rpush('yss.new-recordings', path)
-            raise
+        except KeyError:
+            logger.warning('Cold not find %s' % path)
+            
+        else:
+            try:
+                postprocess(recording)
+            except:
+                redis.rpush('yss.new-recordings', path)
+                raise
+
 
 
 def postprocess(recording):
