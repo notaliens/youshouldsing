@@ -109,7 +109,7 @@ def finish_recording(song, request):
 
 def get_recording_tempdir(request, recording_id):
     postproc_dir = request.registry.settings['yss.postproc_dir']
-    if '..' in recording_id or '/' in recording_id or '\\' in recording_id:
+    if set(recording_id).difference(set(idchars)):
         # don't allow filesystem shenanigans
         raise RuntimeError('bad recording id')
     return os.path.abspath(os.path.join(postproc_dir, recording_id))
