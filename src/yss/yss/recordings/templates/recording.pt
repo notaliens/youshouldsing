@@ -19,9 +19,11 @@
                      width="320" height="240" controls>
                 <source src="${video_url}" type="video/mp4"/>
               </video>
-              <p tal:condition="not processed">
-                Processing... please reload in a bit.
-              </p>
+              <div class="alert alert-success" role="alert"
+                   tal:condition="not processed">
+                Recording is still being mixed.  Once it is finished,
+                being mixed, you will see it here.
+              </div>
             </div>
 
           </div>
@@ -141,9 +143,28 @@
         </div>
       </div>
 
+      <script type="text/javascript" tal:condition="not processed">
+       var processcheck = function() {
+         console.log('checking if recording processed');
+         $.ajax(
+           {
+             "url":"${request.resource_url(context, 'has_processed')}",
+             "success": function(data) {
+               if (data['processed']) {
+                 location.reload();
+               }
+               else {
+                 setTimeout(processcheck,5000);
+             }
+           }
+         }
+       );
+       }
+       setTimeout(processcheck, 5000);
+      </script>
     </div>
 
-    <div class="col-md-4">
+    <div class="col-md-4" tal:condition="False">
 
       <div class="panel panel-primary">
 

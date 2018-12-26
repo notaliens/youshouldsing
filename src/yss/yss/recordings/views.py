@@ -157,6 +157,15 @@ class RecordingView(object):
             'processed': bool(recording.blob),
             }
 
+    @view_config(
+        context=IRecording,
+        name='has_processed',
+        renderer='json',
+        permission='view',
+    )
+    def has_processed(self):
+        return {'processed':bool(self.context.blob)}
+
 @view_config(
     content_type='Recording',
     name='movie',
