@@ -129,10 +129,11 @@ var rtc_recorder = (function(exports, karaoke, recording_id, framerate) {
     var startTime = null;
     var endTime = null;
     var audio_context;
-    var recorder;
+    var audio_recorder;
     var tagTime = Date.now();
     var recording = false;
     var video_frames;
+    var thestream;
 
     function toggleActivateRecordButton() {
         var b = $('#record-me')[0];
@@ -142,8 +143,8 @@ var rtc_recorder = (function(exports, karaoke, recording_id, framerate) {
     }
 
     function getStream() {
-        if (window.stream) {
-            window.stream.getTracks().forEach(function(track) {
+        if (thestream) {
+            thestream.getTracks().forEach(function(track) {
                 track.stop();
             });
         }
@@ -180,7 +181,7 @@ var rtc_recorder = (function(exports, karaoke, recording_id, framerate) {
 
 
     function gotStream(stream) {
-        window.stream = stream;
+        thestream = stream;
         video.srcObject = stream;
         video.controls = false;
         audio_context = new AudioContext();
@@ -232,7 +233,7 @@ var rtc_recorder = (function(exports, karaoke, recording_id, framerate) {
             colorPids(average);
         };
 
-        recorder = new Recorder(micinput);
+        audio_recorder = new Recorder(micinput); // from recorder.js
 
         var finishVideoSetup_ = function() {
             // Note: video.onloadedmetadata doesn't fire in Chrome when using
@@ -251,8 +252,7 @@ var rtc_recorder = (function(exports, karaoke, recording_id, framerate) {
     }
 
     function record() {
-        if (recorder === undefined) { return; }
-        var elapsedTime = $('#elasped-time')[0];
+        if (audio_recorder === undefined) { return; }
         var ctx = canvas.getContext('2d');
         var CANVAS_HEIGHT = canvas.height;
         var CANVAS_WIDTH = canvas.width;
@@ -268,7 +268,7 @@ var rtc_recorder = (function(exports, karaoke, recording_id, framerate) {
         $('#stop-me')[0].disabled = false;
         $('#play-me').hide();
 
-        recorder.record();
+        audio_recorder.record();
         video_frames = [];
         function captureFrame() {
             if (recording) {
@@ -283,19 +283,19 @@ var rtc_recorder = (function(exports, karaoke, recording_id, framerate) {
     }
 
     function stop() {
-        if (recorder === undefined) { return; }
-        window.stream.getTracks().forEach(function(track) {
+        if (audio_recorder === undefined) { return; }
+        thestream.getTracks().forEach(function(track) {
             track.stop();
         });
         karaoke.pause();
-        recorder.stop();
-        endTime = Date.now();
+        audio_recorder.stop();
         recording = false;
+        endTime = Date.now();
         $('#stop-me')[0].disabled = true;
         $('#play-me').show();
         $('select#audioSource')[0].disabled = false;
         $('select#videoSource')[0].disabled = false;
-        document.getElementById("uploading-overlay").style.display = "block";
+        $('#uploading-overlay')[0].style.display = "block";
         toggleActivateRecordButton();
 
         console.log('frames captured: ' + video_frames.length + ' => ' +
@@ -307,7 +307,7 @@ var rtc_recorder = (function(exports, karaoke, recording_id, framerate) {
     function embedVideoPreview(opt_url) {
         var audioDeferred = jQuery.Deferred();
 
-        recorder.exportWAV(function(blob) {
+        audio_recorder.exportWAV(function(blob) {
             var fd = new FormData();
             fd.append('recording_id', recording_id);
             fd.append('data', blob);
