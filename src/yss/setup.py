@@ -23,6 +23,7 @@ requires = [
     'audioread',
     'titlecase',
     'pytz',
+    'pyramid_redis_sessions',
     ]
 
 setup(name='yss',

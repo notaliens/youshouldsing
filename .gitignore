@@ -22,6 +22,7 @@ src/wxpython/
 src/lesswatcher/
 src/bootswatch/
 src/bootstrap/
+src/pyramid_redis_sessions
 var/
 tmp/
 etc/supervisord.conf

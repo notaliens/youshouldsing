@@ -6,6 +6,8 @@ from substanced import root_factory
 from .authpolicy import YSSAuthenticationPolicy
 from yss.performers.views.login import authentication_type
 
+from pyramid_redis_sessions import session_factory_from_settings
+
 def main(global_config, **settings):
     mimetypes.add_type('application/font-woff', '.woff')
     secret = settings['substanced.secret']
@@ -15,6 +17,8 @@ def main(global_config, **settings):
         root_factory=root_factory,
         authentication_policy=authn_policy,
     )
+    session_factory = session_factory_from_settings(settings)
+    config.set_session_factory(session_factory)
 
     config.include('substanced')
     config.include('pyramid_layout')
