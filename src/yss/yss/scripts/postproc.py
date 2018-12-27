@@ -82,20 +82,30 @@ def postprocess(recording):
             "micdry.mp3"
             )
         err = StringIO()
-        sox(
+        samples = None
+        soxargs = [
             "-V",
             "--clobber",
             "micdry.mp3",
             "-r", "44100",
-            "micverb.mp3",
-            "reverb",
-            "45",
+            "micwet.mp3",
+        ]
+        # compressor always enabled
+        soxargs.extend(
+            "compand 0.3,1 -90,-90,-70,-70,-60,-20,0,0 -5 0 0.2".split(' ')
+            )
+        if 'effect-reverb' in recording.effects:
+            soxargs.extend(["reverb", "45"])
+        if 'effect-chorus' in recording.effects:
+            s = "chorus 0.6 0.9 50.0 0.4 0.25 2.0 -t 60.0 0.32 0.4 1.3 -s"
+            soxargs.extend(s.split(' '))
+        sox(
+            soxargs,
             _err=err,
         )
         # stderr will contain the duration that we can use to trim the file
         # to its proper length in the next sox command, which does the
         # mixing
-        samples = None
         errlines = err.getvalue().split('\n')
         for line in errlines:
             if line.startswith('Duration'):
@@ -107,19 +117,20 @@ def postprocess(recording):
                 samples = samples.split(' ', 1)[0].strip()
                 samples = int(samples)
                 break
+                    
         song_audio_filename = recording.song.blob.committed()
-        sox(
+        soxargs = [
             "-V",
             "--clobber",
-            "-m", "micverb.mp3",
+            "-m", "micwet.mp3",
             "-t", "mp3",
             "-v", "0.15",
             song_audio_filename,
             "mixed.mp3",
-            "trim" if samples is not None else "",
-            "0s" if samples is not None else "",
-            f"{samples}s" if samples is not None else "",
-        )
+        ]
+        if samples:
+            soxargs.extend(['trim', '0s', f'{samples}s'])
+        sox(soxargs)
         ffmpeg(
             "-y",
             "-i", dry_webm,

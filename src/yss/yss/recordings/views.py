@@ -43,6 +43,11 @@ def recording_app(song, request):
     }
 
 
+known_effects = [
+    'effect-reverb',
+    'effect-chorus',
+    ]
+
 @view_config(
     content_type='Song',
     name="record",
@@ -61,6 +66,9 @@ def finish_recording(song, request):
     recording.performer = request.user.performer
     recording.song = song
     recording.dry_blob = Blob()
+    recording.effects = tuple([ # not currently propsheet-exposed
+        x for x in request.params.getall('effects') if x in known_effects
+    ])
     with recording.dry_blob.open("w") as saveto:
         shutil.copyfileobj(f, saveto)
     redis = get_redis(request)

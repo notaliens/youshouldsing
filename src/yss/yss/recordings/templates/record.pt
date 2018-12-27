@@ -33,6 +33,21 @@
                        step="0.01"/>
               </div>
             </div>
+            <div>
+              <span style="padding-right: 10px;"><b>Effects</b></span>
+              <span class="form-check">
+                <input class="form-check-input effects" type="checkbox" value="" id="effect-reverb" checked>
+                <label class="form-check-label" for="effect-reverb">
+                  Reverb
+                </label>
+              </span>              
+              <span class="form-check">
+                <input class="form-check-input effects" type="checkbox" value="" id="effect-chorus">
+                <label class="form-check-label" for="effect-chorus">
+                  Chorus
+                </label>
+              </span>              
+            </div>
           </div>
         </div>
       </div>

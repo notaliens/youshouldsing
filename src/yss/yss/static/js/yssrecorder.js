@@ -291,6 +291,13 @@ var rtc_recorder = (function(exports, karaoke) {
         var blob = new Blob(chunks);
         chunks = [];
         var fd = new FormData();
+        effects = $('.effects');
+        for (var i = 0; i < effects.length; i++) {
+            effect = effects[i];
+            if (effect.checked) {
+                fd.append('effects', effect.id);
+            }
+        }
         fd.append('data', blob);
         fd.append('finished', '1');
         jQuery.ajax({
