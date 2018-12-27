@@ -33,6 +33,14 @@
                   Mic Level
               </label>
             </div>
+          </div>
+        </div>
+        <div class="panel panel-warning">
+          <div class="panel-heading">
+            <h3 class="panel-title">Recording</h3>
+          </div>
+          <div class="panel-body">
+            
             <div>
               <span style="padding-right: 10px;"><b>Effects</b></span>
               <span class="form-check">
