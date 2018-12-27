@@ -49,10 +49,10 @@
               </span>
             </div>
             <div>
-              <input id="vocalboost" type="range" min="0" max="1" value="0"
+              <input id="musicvolume" type="range" min="0" max="1" value="0.5"
                      step="0.01"/>
-              <label class="form-check-label" for="vocalboost">
-                  Vocal Boost
+              <label class="form-check-label" for="musicvolume">
+                  Music Volume
               </label>
             </div>
           </div>

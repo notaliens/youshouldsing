@@ -70,11 +70,12 @@ def finish_recording(song, request):
         x for x in request.params.getall('effects') if x in known_effects
     ])
     try:
-        vocalboost = float(request.params['vocalboost'])
-        if (vocalboost < 0) or (vocalboost > 1):
+        musicvolume = float(request.params['musicvolume'])
+        if (musicvolume < 0) or (musicvolume > 1):
             raise TypeError
-        recording.vocalboost = vocalboost
+        recording.musicvolume = musicvolume
     except (TypeError, ValueError):
+        # use default musicvolume of 0 set at class level
         pass
     with recording.dry_blob.open("w") as saveto:
         shutil.copyfileobj(f, saveto)

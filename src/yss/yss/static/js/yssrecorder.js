@@ -298,7 +298,7 @@ var rtc_recorder = (function(exports, karaoke) {
                 fd.append('effects', effect.id);
             }
         }
-        fd.append('vocalboost', $('#vocalboost')[0].value);
+        fd.append('musicvolume', $('#musicvolume')[0].value);
         fd.append('data', blob);
         fd.append('finished', '1');
         jQuery.ajax({

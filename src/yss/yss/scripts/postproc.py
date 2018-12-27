@@ -119,13 +119,13 @@ def postprocess(recording):
                 break
                     
         song_audio_filename = recording.song.blob.committed()
-        vocalboost = recording.vocalboost
+        musicvolume = recording.musicvolume
         soxargs = [
             "-V",
             "--clobber",
             "-m", "micwet.mp3",
             "-t", "mp3",
-            "-v", f"{float(vocalboost)}",
+            "-v", f"{float(musicvolume)}", # applies to song_audio_filename (0.5 is default on slider)
             song_audio_filename,
             "mixed.mp3",
             "remix", "-m", "1,2", "2,1", # center vocals (see https://stackoverflow.com/questions/14950823/sox-exe-mixing-mono-vocals-with-stereo-music)
