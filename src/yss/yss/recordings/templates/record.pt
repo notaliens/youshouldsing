@@ -119,7 +119,7 @@
     <script type="text/javascript">
      // karaoke and rtc_recorder are exported by yssrecorder
      kar = karaoke("${mp3_url}", ${timings});
-     rtc_recorder(window, kar);
+     rtc_recorder(window, kar, ${max_framerate});
     </script>
   </div>
 

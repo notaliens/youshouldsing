@@ -37,9 +37,11 @@ random.seed()
     renderer="templates/record.pt"
 )
 def recording_app(song, request):
+    root = find_root(song)
     return {
         "mp3_url": request.resource_url(song, 'mp3'),
         "timings": song.timings,
+        "max_framerate": root.max_framerate,
     }
 
 

@@ -97,7 +97,7 @@ var karaoke = (function(mp3_url, timings) {
     };
 });
 
-var rtc_recorder = (function(exports, karaoke) {
+var rtc_recorder = (function(exports, karaoke, max_framerate) {
     exports.URL = exports.URL || exports.webkitURL;
 
     exports.requestAnimationFrame = exports.requestAnimationFrame ||
@@ -173,7 +173,7 @@ var rtc_recorder = (function(exports, karaoke) {
             vidconstraint = {
                 "width": { exact: "640" },
                 "height": { exact: "480"},
-                "frameRate": { min: 5, max: 20 },
+                "frameRate": { min: 5, max: max_framerate },
                 "deviceId": { exact: videoSelect.value}
             };
             constraints.video = vidconstraint;

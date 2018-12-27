@@ -18,9 +18,9 @@ from substanced.util import set_acl
 
 class RootSchema(Schema):
     """ The schema representing site properties. """
-    framerate = colander.SchemaNode(
+    max_framerate = colander.SchemaNode(
         colander.Int(),
-        title="Framerate",
+        title="Max Frame Rate",
         missing=1,
         )
 
@@ -45,7 +45,7 @@ def root_added(event):
     root['songs'] = registry.content.create('Songs')
     root['performers'] = registry.content.create('Performers')
     root['recordings'] = registry.content.create('Recordings')
-    root.framerate = 1
+    root.max_framerate = 30
     timings_json = pkg_resources.resource_string(
         'yss', 'blackbird.json').decode('utf-8')
     song = registry.content.create(

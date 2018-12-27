@@ -61,10 +61,13 @@
 
 - Record:
 
+  - Safari (mobile or desktop) doesn't support MediaRecorder.
+    https://www.gmass.co/blog/record-audio-mobile-web-page-ios-android/
   - Mic volume slider has no effect.
   - Scrub on playonly
   - Unhelpful errors when camera is already used (e.g. by OBS).
   - Handle conflict errors in postprocessing.
+  - Latency handling.
   - Maybe instead of building some system to arbitrarily time-align
     source audio and mic audio after latency, just let people clap
     a pattern.
