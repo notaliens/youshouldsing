@@ -85,12 +85,10 @@
     </div>
     <div class="row" style="padding-bottom: 10px;">
       <div class="col-md-12">
-        <button id="play-me" style="width: 8em;"><i 
-              class="glyphicon glyphicon-play"> </i> Play</button>
-        <button id="record-me" style="width: 8em;"><i 
-              class="glyphicon glyphicon-record"> </i> Record</button>
-        <button id="stop-me" style="width: 8em;" disabled><i
-              class="glyphicon glyphicon-stop"> </i> Stop</button>
+        <button id="play-me" style="width: 8em;" class="btn btn-primary"><i 
+              class="fas fa-play"> </i> Play</button>
+        <button id="record-me" style="width: 8em;" class="btn btn-danger"><i 
+              class="fas fa-microphone"> </i> Record</button>
       </div>
     </div>
 

@@ -58,7 +58,7 @@ class MainLayout(object):
     @property
     def batching_macro(self):
         return self.request.sdiapi.get_macro(
-            'yss.views:templates/batching.pt',
+            'yss.root.views:templates/batching.pt',
             'batching'
             )
 

@@ -76,10 +76,12 @@
   - Do less work in postprocessing to produce a mix; currently we
     transcode all over the place.
   - Probably should mix on browser, not on server.
+  - Websocket for mix progress?
+  - Upload progress bar
 
 - Search:
 
-  - Index lyrics into song text index
+  - Index lyrics into song text index.
 
   - Provide an "X" which removes the current filter.
   

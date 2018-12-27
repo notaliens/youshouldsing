@@ -46,11 +46,11 @@ var karaoke = (function(mp3_url, timings) {
         var b = $('#play-me')[0];
         if (paused) {
             play();
-            b.innerHTML = '<i class="glyphicon glyphicon-pause"> </i> Pause';
+            b.innerHTML = '<i class="fas fa-spinner fa-spin"> </i>';
         }
         else {
             pause();
-            b.innerHTML = '<i class="glyphicon glyphicon-play"> </i> Play';
+            b.innerHTML = '<i class="fas fa-play"> </i> Play';
         }
     }
 
@@ -128,21 +128,25 @@ var rtc_recorder = (function(exports, karaoke, max_framerate) {
     var recorder;
     var thestream;
     var chunks;
+    var uploading;
 
     function displayRecordMode() {
-        $('#record-me').attr('disabled', true);
+        $('#record-me')[0].innerHTML = '<i class="fas fa-microphone fa-spin"> </i>';
+        $('#record-me')[0].onclick = stop;
+        $('#record-me').attr('disabled', false);
         $('#play-me').attr('disabled', true);
+        $('#play-me')[0].innerHTML = '<i class="fas fa-play"> </i> Play';
         $('select#videoSource').attr('disabled', true);
         $('select#audioSource').attr('disabled', true);
-        $('#stop-me').attr('disabled', false);
     }
 
     function displayPlayMode() {
+        $('#record-me')[0].innerHTML = '<i class="fas fa-microphone"> </i> Record';
         $('#record-me').attr('disabled', false);
         $('#play-me').attr('disabled', false);
+        $('#play-me')[0].innerHTML = '<i class="fas fa-play"> </i> Play';
         $('select#videoSource').attr('disabled', false);
         $('select#audioSource').attr('disabled', false);
-        $('#stop-me').attr('disabled', true);
     }
 
     function gotDevices(deviceInfos) {
@@ -276,7 +280,10 @@ var rtc_recorder = (function(exports, karaoke, max_framerate) {
         });
         recorder.addEventListener('stop', function(e) {
             // dataavailable is guaranteed to have been called by this point
-            uploadVideo();
+            if (!uploading) {
+                $('#uploading-overlay')[0].style.display = "block";
+                uploadVideo();
+            }
         });
         recorder.start();
     }
@@ -290,11 +297,11 @@ var rtc_recorder = (function(exports, karaoke, max_framerate) {
         karaoke.pause();
         recording = false;
         endTime = Date.now();
-        $('#uploading-overlay')[0].style.display = "block";
         recorder.stop();
     }
 
     function uploadVideo() {
+        uploading = true;
         var blob = new Blob(chunks);
         chunks = [];
         var fd = new FormData();
@@ -319,9 +326,8 @@ var rtc_recorder = (function(exports, karaoke, max_framerate) {
     }
 
     function initEvents() {
-        $('#record-me')[0].addEventListener('click', record);
-        $('#stop-me')[0].addEventListener('click', stop);
-        $('#play-me')[0].addEventListener('click', karaoke.playtoggle);
+        $('#record-me')[0].onclick = record;
+        $('#play-me')[0].onclick = karaoke.playtoggle;
     }
 
     navigator.mediaDevices.enumerateDevices().then(gotDevices).then(getStream);

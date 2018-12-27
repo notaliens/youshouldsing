@@ -43,7 +43,7 @@
               <span class="icon-bar"></span>
             </button>
             <a class="navbar-brand" href="/"><i 
-              class="icon-microphone"> </i> You should sing</a>
+              class="fas fa-microphone fa-sm"> </i> You should sing</a>
           </div>
           <div class="navbar-collapse collapse" id="navbar-main">
 
@@ -67,7 +67,7 @@
                     <li>
                       <a href="${layout.twitter_login_url}"
                          id="twitter-button">
-                        <i class="icon-twitter-sign"> </i>
+                        <i class="fab fa-twitter-square"> </i>
                         Via Twitter
                       </a>
                     </li>

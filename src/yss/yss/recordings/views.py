@@ -20,7 +20,7 @@ from substanced.util import (
 
 from substanced.folder.views import generate_text_filter_terms
 
-from yss.utils import get_redis
+from yss.utils import get_redis, decode_redis_hash
 
 from yss.interfaces import (
     IRecording,
@@ -138,12 +138,17 @@ class RecordingView(object):
 
     @view_config(
         context=IRecording,
-        name='has_processed',
+        name='mixprogress',
         renderer='json',
         permission='view',
     )
-    def has_processed(self):
-        return {'processed':bool(self.context.mixed_blob)}
+    def mixprogress(self):
+        redis = get_redis(self.request)
+        progress = decode_redis_hash(
+            redis.hgetall(f'mixprogress-{self.context.__name__}')
+            )
+        progress['done'] = bool(self.context.mixed_blob) and 1 or 0
+        return progress
 
 @view_config(
     content_type='Recording',
