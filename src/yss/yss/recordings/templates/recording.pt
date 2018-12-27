@@ -20,7 +20,8 @@
               </video>
               <div class="alert alert-success" role="alert" id="processing"
                    tal:condition="not processed">
-                Recording is still being mixed.  Once it is finished,
+                <span class="glyphicon glyphicon-refresh glyphicon-spin"></span>
+                Recording is still being mixed.  Once it is finished
                 being mixed, you will see it here.
               </div>
             </div>

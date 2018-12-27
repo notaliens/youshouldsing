@@ -34,24 +34,23 @@ var karaoke = (function(mp3_url, timings) {
         show.reset();
         player.play();
         paused = false;
-        var b = $('#play-me')[0];
-        b.innerHTML = '<i class="glyphicon glyphicon-pause"> </i> Pause';
     }
 
     function pause() {
         show.reset();
         player.pause();
         paused = true;
-        var b = $('#play-me')[0];
-        b.innerHTML = '<i class="glyphicon glyphicon-play"> </i> Play';
     }
 
     function playtoggle() {
+        var b = $('#play-me')[0];
         if (paused) {
             play();
+            b.innerHTML = '<i class="glyphicon glyphicon-pause"> </i> Pause';
         }
         else {
             pause();
+            b.innerHTML = '<i class="glyphicon glyphicon-play"> </i> Play';
         }
     }
 
