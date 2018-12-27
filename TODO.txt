@@ -62,20 +62,18 @@
 - Record:
 
   - Allow choosing no cam
-  - Mic volume does strange stuff on Linux (it adjusts the input level
-    for the chosen device, which you can see reflected in the system
-    UI, but it doesn't adjust it correctly).
+  - Mic volume slider has no effect.
+  - Add reverb, compression.
   - Scrub on playonly
-  - Better video
   - Keep intermediate tempfiles around for remixing
-  - When we stop before the song ends, stop playing music and display a
-    spinner until page reload.
   - Unhelpful errors when camera is already used (e.g. by OBS).
   - Reverb
   - Handle conflict errors in postprocessing.
   - Maybe instead of building some system to arbitrarily time-align
     source audio and mic audio after latency, just let people clap
     a pattern.
+  - Do less work in postprocessing to produce a mix; currently we
+    transcode all over the place.
 
 - Search:
 
