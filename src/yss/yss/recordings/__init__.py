@@ -43,6 +43,8 @@ class Recording(persistent.Persistent):
     song = reference_source_property(RecordingToSong)
     liked_by = multireference_target_property(PerformerLikesRecording)
     liked_by_ids = multireference_targetid_property(PerformerLikesRecording)
+    effects = ()
+    vocalboost = 0
 
     def __init__(self, tmpfolder):
         self.dry_blob = None

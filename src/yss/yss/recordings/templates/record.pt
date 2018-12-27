@@ -26,12 +26,12 @@
               <div class="mic-vol-block"></div>
             </div>
 
-            <div class="sliderbox">
-              <div class="sliderlabel">Mic Volume</div>
-              <div class="slider">
-                <input id="micLevel" type="range" min="0" max="1" value="1"
-                       step="0.01"/>
-              </div>
+            <div>
+              <input id="micLevel" type="range" min="0" max="1" value="1"
+                     step="0.01"/>
+              <label class="form-check-label" for="micLevel">
+                  Mic Level
+              </label>
             </div>
             <div>
               <span style="padding-right: 10px;"><b>Effects</b></span>
@@ -46,7 +46,14 @@
                 <label class="form-check-label" for="effect-chorus">
                   Chorus
                 </label>
-              </span>              
+              </span>
+            </div>
+            <div>
+              <input id="vocalboost" type="range" min="0" max="1" value="0"
+                     step="0.01"/>
+              <label class="form-check-label" for="vocalboost">
+                  Vocal Boost
+              </label>
             </div>
           </div>
         </div>

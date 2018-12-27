@@ -69,6 +69,13 @@ def finish_recording(song, request):
     recording.effects = tuple([ # not currently propsheet-exposed
         x for x in request.params.getall('effects') if x in known_effects
     ])
+    try:
+        vocalboost = float(request.params['vocalboost'])
+        if (vocalboost < 0) or (vocalboost > 1):
+            raise TypeError
+        recording.vocalboost = vocalboost
+    except (TypeError, ValueError):
+        pass
     with recording.dry_blob.open("w") as saveto:
         shutil.copyfileobj(f, saveto)
     redis = get_redis(request)

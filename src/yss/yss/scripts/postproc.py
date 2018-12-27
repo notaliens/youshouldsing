@@ -119,20 +119,22 @@ def postprocess(recording):
                 break
                     
         song_audio_filename = recording.song.blob.committed()
+        vocalboost = recording.vocalboost
         soxargs = [
             "-V",
             "--clobber",
             "-m", "micwet.mp3",
             "-t", "mp3",
-            "-v", "0.15",
+            "-v", f"{float(vocalboost)}",
             song_audio_filename,
             "mixed.mp3",
+            "remix", "-m", "1,2", "2,1", # center vocals (see https://stackoverflow.com/questions/14950823/sox-exe-mixing-mono-vocals-with-stereo-music)
         ]
         if samples:
             soxargs.extend(['trim', '0s', f'{samples}s'])
         sox(soxargs)
         ffmpeg(
-            "-y",
+            "-y", # clobber
             "-i", dry_webm,
             "-i", "mixed.mp3",
             # vp8/opus combination supported by both FF and chrome
