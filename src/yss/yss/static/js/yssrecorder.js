@@ -43,7 +43,7 @@ var karaoke = (function(mp3_url, timings) {
         player.pause();
         paused = true;
         var b = $('#play-me')[0];
-        b.innerHTML = '<i class="glyphicon glyphicon-play"> </i> Play ';
+        b.innerHTML = '<i class="glyphicon glyphicon-play"> </i> Play';
     }
 
     function playtoggle() {
