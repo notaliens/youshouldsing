@@ -60,20 +60,17 @@ def main(argv=sys.argv):
                 raise
 
 def postprocess(recording):
-    root = find_root(recording)
-    framerate = root.framerate
     tmpdir = recording.tmpfolder
     curdir = os.getcwd()
     try:
         print ('Changing dir to %s' % tmpdir)
         os.chdir(tmpdir)
-        # sox can't deal with opus audio, so transcode to mp3
+        # sox can't deal with opus audio, so temp transcode to mp3
         ffmpeg(
             "-y",
             "-i", "recording.webm",
             "-vn", # no video
             "-ar", "44100",
-            "-ab", "128k",
             "-y", # clobber
             "micdry.mp3"
             )
@@ -103,11 +100,25 @@ def postprocess(recording):
                 samples = samples.split(' ', 1)[0].strip()
                 samples = int(samples)
                 break
+        song_audio_filename = recording.song.blob.committed()
+        sox(
+            "-V",
+            "--clobber",
+            "-m", "micverb.mp3",
+            "-t", "mp3",
+            "-v", "0.15",
+            song_audio_filename,
+            "mixed.mp3",
+            "trim" if samples is not None else "",
+            "0s" if samples is not None else "",
+            f"{samples}s" if samples is not None else "",
+        )
         ffmpeg(
             "-y",
             "-i", "recording.webm",
-            "-i", "micverb.mp3",
-            "-c:v", "vp9",
+            "-i", "mixed.mp3",
+            # vp8/opus combination supported by both FF and chrome
+            "-c:v", "vp8",
             "-c:a", "libopus",
             "-map", "0:v:0",
             "-map", "1:a:0",
