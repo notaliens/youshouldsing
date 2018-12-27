@@ -61,19 +61,16 @@
 
 - Record:
 
-  - Allow choosing no cam
   - Mic volume slider has no effect.
-  - Add reverb, compression.
   - Scrub on playonly
-  - Keep intermediate tempfiles around for remixing
   - Unhelpful errors when camera is already used (e.g. by OBS).
-  - Reverb
   - Handle conflict errors in postprocessing.
   - Maybe instead of building some system to arbitrarily time-align
     source audio and mic audio after latency, just let people clap
     a pattern.
   - Do less work in postprocessing to produce a mix; currently we
     transcode all over the place.
+  - Probably should mix on browser, not on server.
 
 - Search:
 

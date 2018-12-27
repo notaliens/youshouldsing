@@ -140,7 +140,7 @@ def postprocess(recording):
             # vp8/opus combination supported by both FF and chrome
             "-c:v", "vp8",
             "-c:a", "libopus",
-            "-map", "0:v:0",
+            "-map", "0:v:0?", # ? at end makes it optional (recs with no video)
             "-map", "1:a:0",
             "-shortest",
             "mixed.webm"

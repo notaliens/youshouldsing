@@ -151,6 +151,10 @@ var rtc_recorder = (function(exports, karaoke) {
                 videoSelect.appendChild(option);
             }
         }
+        nocam_option = document.createElement('option');
+        nocam_option.value = '';
+        nocam_option.text = 'No Camera';
+        videoSelect.appendChild(nocam_option);
     }
 
 
@@ -164,13 +168,16 @@ var rtc_recorder = (function(exports, karaoke) {
             "audio": {
                 "deviceId": {exact: audioSelect.value}
             },
-            "video": {
+        };
+        if (videoSelect.value != '') {
+            vidconstraint = {
                 "width": { exact: "640" },
                 "height": { exact: "480"},
                 "frameRate": { min: 5, max: 20 },
                 "deviceId": { exact: videoSelect.value}
-            }
-        };
+            };
+            constraints.video = vidconstraint;
+        }
         navigator.mediaDevices.getUserMedia(constraints).then(gotStream);
     }
 
