@@ -26,5 +26,5 @@ status:
 	supervisorctl -c etc/supervisord.conf status
 
 devtunnel:
-	ssh -f -N -T -R 0.0.0.0:6549:127.0.0.1:6549 bouncer.repoze.org
+	ssh -f -N -T -o "ExitOnForwardFailure yes" -R 0.0.0.0:6549:127.0.0.1:6549 bouncer.repoze.org
 
