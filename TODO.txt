@@ -24,6 +24,8 @@
 
   - Impersonation.
 
+  - Disqus SSO.
+
 - Song import:
 
   - Handle conflict errors.
