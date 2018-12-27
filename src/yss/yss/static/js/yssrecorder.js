@@ -129,10 +129,20 @@ var rtc_recorder = (function(exports, karaoke, max_framerate) {
     var thestream;
     var chunks;
 
-    function toggleActivateRecordButton() {
-        var b = $('#record-me')[0];
-        b.classList.toggle('recording');
-        b.disabled = !b.disabled;
+    function displayRecordMode() {
+        $('#record-me').attr('disabled', true);
+        $('#play-me').attr('disabled', true);
+        $('select#videoSource').attr('disabled', true);
+        $('select#audioSource').attr('disabled', true);
+        $('#stop-me').attr('disabled', false);
+    }
+
+    function displayPlayMode() {
+        $('#record-me').attr('disabled', false);
+        $('#play-me').attr('disabled', false);
+        $('select#videoSource').attr('disabled', false);
+        $('select#audioSource').attr('disabled', false);
+        $('#stop-me').attr('disabled', true);
     }
 
     function gotDevices(deviceInfos) {
@@ -252,16 +262,11 @@ var rtc_recorder = (function(exports, karaoke, max_framerate) {
     function record() {
         if (recorder === undefined) { return; }
 
+        displayRecordMode();
         karaoke.reset();
         karaoke.play();
         recording = true;
         startTime = Date.now();
-
-        toggleActivateRecordButton();
-        $('select#audioSource')[0].disabled = true;
-        $('select#videoSource')[0].disabled = true;
-        $('#stop-me')[0].disabled = false;
-        $('#play-me')[0].disabled = true;
 
         chunks = [];
         recorder.addEventListener('dataavailable', function(e) {
@@ -281,15 +286,11 @@ var rtc_recorder = (function(exports, karaoke, max_framerate) {
             track.stop();
         });
         if (recorder === undefined) { return; }
+        displayPlayMode();
         karaoke.pause();
         recording = false;
         endTime = Date.now();
-        $('#stop-me')[0].disabled = true;
-        $('#play-me')[0].disabled = false;
-        $('select#audioSource')[0].disabled = false;
-        $('select#videoSource')[0].disabled = false;
         $('#uploading-overlay')[0].style.display = "block";
-        toggleActivateRecordButton();
         recorder.stop();
     }
 
