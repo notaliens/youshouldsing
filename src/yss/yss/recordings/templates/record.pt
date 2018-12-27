@@ -113,7 +113,6 @@
   </div>
 
   <div metal:fill-slot="tail">
-    <script src="${layout.static('js/recorder.js')}"></script>
     <script type="text/javascript" src="${layout.static('js/ricekaraoke.js')}"></script>
     <script type="text/javascript" src="${layout.static('js/simplekaraokedisplay.js')}"></script>
     <script type="text/javascript" src="${layout.static('js/yssrecorder.js')}"></script>
