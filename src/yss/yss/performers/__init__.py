@@ -3,18 +3,30 @@ import deform
 import pytz
 
 from substanced.content import content
+from substanced.event import (
+    subscribe_will_be_removed,
+    subscribe_removed,
+    )
 from substanced.folder import Folder
-from substanced.objectmap import multireference_source_property
-from substanced.objectmap import multireference_target_property
-from substanced.objectmap import multireference_targetid_property
-from substanced.objectmap import reference_source_property
-from substanced.objectmap import reference_target_property
-from substanced.principal import User as BaseUser
-from substanced.principal import UserPropertySheet
-from substanced.principal import UserGroupsPropertySheet
+from substanced.objectmap import (
+    multireference_source_property,
+    multireference_target_property,
+    multireference_targetid_property,
+    reference_source_property,
+    reference_target_property,
+    )
+from substanced.principal import (
+    User as BaseUser,
+    UserPropertySheet,
+    UserGroupsPropertySheet,
+    )
+
 from substanced.property import PropertySheet
 from substanced.schema import Schema
-from substanced.util import renamer
+from substanced.util import (
+    renamer,
+    find_service,
+    )
 
 from zope.interface import implementer
 
@@ -144,3 +156,35 @@ class Performer(Folder):
         return self.user.email
 
     email = property(_email_get, _email_set)
+
+@subscribe_will_be_removed(content_type='Performer')
+def performer_will_be_removed(event):
+    # delete recordings made by the performer when we delete a performer.
+    # see performer_removed for further stupid, where we delete the
+    # principal associated with the performer.
+
+    if event.moving is not None: # it's not really being removed
+        return
+
+    performer = event.object
+
+    for recording in performer.recordings:
+        recording.__parent__.remove(recording.__name__)
+
+
+@subscribe_removed(content_type='Performer')
+def performer_removed(event):
+    # delete principal associated with performer. we can't do this in
+    # performer_will_be_removed because of the PrincipalToACLBearing
+    # relationship source_integrity (the principal hasn't yet been deleted, so
+    # we can't delete the user).  XXX Note that this is insanity, we need
+    # cascading deletes in substanced instead of this ghetto version where we
+    # split these associated ops across events.
+
+    if event.moving is not None:
+        return
+
+    principals = find_service(event.parent, 'principals')
+    users = principals['users']
+    if event.name in users:
+        users.remove(event.name)
