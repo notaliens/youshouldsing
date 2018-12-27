@@ -26,6 +26,7 @@ def main(global_config, **settings):
     config.include('.root')
     config.include('.evolve')
     config.include('.catalog')
+    config.include('.recordings')
     config.add_twitter_login_from_settings(prefix='velruse.twitter.')
     config.add_static_view('static', 'yss:static')
 
