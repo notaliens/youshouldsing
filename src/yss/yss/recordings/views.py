@@ -1,7 +1,8 @@
-import base64
 import os
 import random
 import shutil
+
+from ZODB.blob import Blob
 
 from pyramid.response import FileResponse
 from pyramid.traversal import (
@@ -36,13 +37,9 @@ random.seed()
     renderer="templates/record.pt"
 )
 def recording_app(song, request):
-    recording_id = generate_recording_id({})
-    framerate = find_root(song).framerate
     return {
-        "recording_id": recording_id,
         "mp3_url": request.resource_url(song, 'mp3'),
         "timings": song.timings,
-        "framerate":framerate,
     }
 
 
@@ -55,22 +52,17 @@ def recording_app(song, request):
     permission='yss.record',
 )
 def finish_recording(song, request):
+    recordings = find_root(song)['recordings']
+    recording_id = generate_recording_id(recordings)
     f = request.params['data'].file
-    recording_id = request.params['recording_id']
-    tmpdir = get_recording_tempdir(request, recording_id)
-    if not os.path.exists(tmpdir):
-        os.mkdir(tmpdir)
-    fname = 'recording.webm'
-    with open(os.path.join(tmpdir, fname), 'wb') as output:
-        shutil.copyfileobj(f, output)
     tmpdir = get_recording_tempdir(request, recording_id)
     recording = request.registry.content.create('Recording', tmpdir)
-    recordings = request.root['recordings']
-    name = generate_recording_id(recordings)
-    recordings[name] = recording
+    recordings[recording_id] = recording
     recording.performer = request.user.performer
     recording.song = song
-
+    recording.dry_blob = Blob()
+    with recording.dry_blob.open("w") as saveto:
+        shutil.copyfileobj(f, saveto)
     redis = get_redis(request)
     redis.rpush("yss.new-recordings", resource_path(recording))
     print ("finished", tmpdir, resource_path(recording))
@@ -79,7 +71,7 @@ def finish_recording(song, request):
 def get_recording_tempdir(request, recording_id):
     postproc_dir = request.registry.settings['yss.postproc_dir']
     if set(recording_id).difference(set(idchars)):
-        # don't allow filesystem shenanigans
+        # don't allow filesystem shenanigans if we accept this from a client
         raise RuntimeError('bad recording id')
     return os.path.abspath(os.path.join(postproc_dir, recording_id))
 
@@ -123,7 +115,7 @@ class RecordingView(object):
             'liked_by': recording.liked_by,
             'other_recordings':other_recordings,
             'video_url': self.request.resource_url(recording, 'movie'),
-            'processed': bool(recording.blob),
+            'processed': bool(recording.mixed_blob),
             }
 
     @view_config(
@@ -133,7 +125,7 @@ class RecordingView(object):
         permission='view',
     )
     def has_processed(self):
-        return {'processed':bool(self.context.blob)}
+        return {'processed':bool(self.context.mixed_blob)}
 
 @view_config(
     content_type='Recording',
@@ -141,9 +133,9 @@ class RecordingView(object):
     permission='view'
 )
 def stream_movie(recording, request):
-    if recording.blob:
+    if recording.mixed_blob:
         return FileResponse(
-            recording.blob.committed(),
+            recording.mixed_blob.committed(),
             content_type='video/webm'
         )
     return HTTPBadRequest('Video still processing')

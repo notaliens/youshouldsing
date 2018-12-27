@@ -1,4 +1,4 @@
-var karaoke = (function(mp3_url, timings, recording_id) {
+var karaoke = (function(mp3_url, timings) {
     var numDisplayLines = 4; // Number of lines to do the karaoke with
     var paused = true;
     var show = null;
@@ -35,7 +35,7 @@ var karaoke = (function(mp3_url, timings, recording_id) {
         player.play();
         paused = false;
         var b = $('#play-me')[0];
-        b.textContent = "Pause";
+        b.innerHTML = '<i class="glyphicon glyphicon-pause"> </i> Pause';
     }
 
     function pause() {
@@ -43,7 +43,7 @@ var karaoke = (function(mp3_url, timings, recording_id) {
         player.pause();
         paused = true;
         var b = $('#play-me')[0];
-        b.textContent = "Play";
+        b.innerHTML = '<i class="glyphicon glyphicon-play"> </i> Play ';
     }
 
     function playtoggle() {
@@ -97,7 +97,7 @@ var karaoke = (function(mp3_url, timings, recording_id) {
     };
 });
 
-var rtc_recorder = (function(exports, karaoke, recording_id, framerate) {
+var rtc_recorder = (function(exports, karaoke) {
     exports.URL = exports.URL || exports.webkitURL;
 
     exports.requestAnimationFrame = exports.requestAnimationFrame ||
@@ -132,7 +132,6 @@ var rtc_recorder = (function(exports, karaoke, recording_id, framerate) {
 
     function toggleActivateRecordButton() {
         var b = $('#record-me')[0];
-        b.textContent = b.disabled ? 'Record' : 'Recording...';
         b.classList.toggle('recording');
         b.disabled = !b.disabled;
     }
@@ -166,9 +165,9 @@ var rtc_recorder = (function(exports, karaoke, recording_id, framerate) {
                 "deviceId": {exact: audioSelect.value}
             },
             "video": {
-                "width": { exact: "320" },
-                "height": { exact: "240"},
-                "frameRate": { min: 10, max: 10 },
+                "width": { exact: "640" },
+                "height": { exact: "480"},
+                "frameRate": { min: 5, max: 20 },
                 "deviceId": { exact: videoSelect.value}
             }
         };
@@ -180,7 +179,7 @@ var rtc_recorder = (function(exports, karaoke, recording_id, framerate) {
         video.srcObject = stream;
         video.controls = false;
         recorder = new MediaRecorder(stream, {
-            mimeType: "video/webm;codecs=h264"
+            mimeType: "video/webm;codecs=vp8,opus" // works in FF and chrome
         });
 
         audio_context = new AudioContext();
@@ -256,7 +255,7 @@ var rtc_recorder = (function(exports, karaoke, recording_id, framerate) {
         $('select#audioSource')[0].disabled = true;
         $('select#videoSource')[0].disabled = true;
         $('#stop-me')[0].disabled = false;
-        $('#play-me').hide();
+        $('#play-me')[0].disabled = true;
 
         chunks = [];
         recorder.addEventListener('dataavailable', function(e) {
@@ -280,7 +279,7 @@ var rtc_recorder = (function(exports, karaoke, recording_id, framerate) {
         recording = false;
         endTime = Date.now();
         $('#stop-me')[0].disabled = true;
-        $('#play-me').show();
+        $('#play-me')[0].disabled = false;
         $('select#audioSource')[0].disabled = false;
         $('select#videoSource')[0].disabled = false;
         $('#uploading-overlay')[0].style.display = "block";
@@ -292,7 +291,6 @@ var rtc_recorder = (function(exports, karaoke, recording_id, framerate) {
         var blob = new Blob(chunks);
         chunks = [];
         var fd = new FormData();
-        fd.append('recording_id', recording_id);
         fd.append('data', blob);
         fd.append('finished', '1');
         jQuery.ajax({

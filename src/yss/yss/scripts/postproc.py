@@ -6,8 +6,6 @@ import time
 import transaction
 import logging
 
-from pyramid.traversal import find_root
-
 from sh import ffmpeg, sox
 from ZODB.blob import Blob
 
@@ -54,7 +52,11 @@ def main(argv=sys.argv):
             
         else:
             try:
-                postprocess(recording)
+                if not bool(recording.dry_blob):
+                    # not committed yet
+                    redis.rpush('yss.new_recordings', path)
+                else:
+                    postprocess(recording)
             except:
                 redis.rpush('yss.new-recordings', path)
                 raise
@@ -64,11 +66,16 @@ def postprocess(recording):
     curdir = os.getcwd()
     try:
         print ('Changing dir to %s' % tmpdir)
-        os.chdir(tmpdir)
+        try:
+            os.chdir(tmpdir)
+        except FileNotFoundError:
+            os.makedirs(tmpdir)
+            os.chdir(tmpdir)
+        dry_webm = recording.dry_blob.committed()
         # sox can't deal with opus audio, so temp transcode to mp3
         ffmpeg(
             "-y",
-            "-i", "recording.webm",
+            "-i", dry_webm,
             "-vn", # no video
             "-ar", "44100",
             "-y", # clobber
@@ -115,7 +122,7 @@ def postprocess(recording):
         )
         ffmpeg(
             "-y",
-            "-i", "recording.webm",
+            "-i", dry_webm,
             "-i", "mixed.mp3",
             # vp8/opus combination supported by both FF and chrome
             "-c:v", "vp8",
@@ -123,13 +130,13 @@ def postprocess(recording):
             "-map", "0:v:0",
             "-map", "1:a:0",
             "-shortest",
-            "final.webm"
+            "mixed.webm"
         )
-        recording.blob = Blob()
-        with recording.blob.open("w") as saveto:
-            with open("final.webm", "rb") as savefrom:
+        recording.mixed_blob = Blob()
+        with recording.mixed_blob.open("w") as saveto:
+            with open("mixed.webm", "rb") as savefrom:
                 shutil.copyfileobj(savefrom, saveto)
-        print ("%s/%s" % (tmpdir, "final.webm"))
+        print ("%s/%s" % (tmpdir, "mixed.webm"))
         transaction.commit()
         # don't remove tempdir until commit succeeds
         #shutil.rmtree(tmpdir)

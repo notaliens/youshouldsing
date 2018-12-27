@@ -75,9 +75,12 @@
 
     <div class="row" style="padding-bottom: 10px;">
       <div class="col-md-12">
-        <button id="play-me">Play</button>
-        <button id="record-me">Record</button>
-        <button id="stop-me" disabled>◼</button>
+        <button id="play-me"><i 
+              class="glyphicon glyphicon-play"> </i> Play</button>
+        <button id="record-me"><i 
+              class="glyphicon glyphicon-record"> </i> Record</button>
+        <button id="stop-me" disabled><i
+              class="glyphicon glyphicon-stop"> </i> Stop</button>
       </div>
     </div>
 
@@ -94,8 +97,8 @@
     <script type="text/javascript" src="${layout.static('js/yssrecorder.js')}"></script>
     <script type="text/javascript">
      // karaoke and rtc_recorder are exported by yssrecorder
-     kar = karaoke("${mp3_url}", ${timings}, "${recording_id}");
-     rtc_recorder(window, kar, "${recording_id}", ${framerate});
+     kar = karaoke("${mp3_url}", ${timings});
+     rtc_recorder(window, kar);
     </script>
   </div>
 

@@ -1,13 +1,14 @@
 import persistent
+import shutil
 
 from zope.interface import implementer
 
 from substanced.content import content
+from substanced.event import subscribe_will_be_removed
 from substanced.folder import Folder
 from substanced.objectmap import multireference_target_property
 from substanced.objectmap import multireference_targetid_property
 from substanced.objectmap import reference_source_property
-
 
 from yss.interfaces import (
     IRecording,
@@ -44,7 +45,8 @@ class Recording(persistent.Persistent):
     liked_by_ids = multireference_targetid_property(PerformerLikesRecording)
 
     def __init__(self, tmpfolder):
-        self.blob = None
+        self.dry_blob = None
+        self.mixed_blob = None
         self.tmpfolder = tmpfolder
 
     @property
@@ -58,4 +60,15 @@ class Recording(persistent.Persistent):
     @property
     def num_likes(self):
         return len(self.liked_by_ids)
+
+@subscribe_will_be_removed(content_type='Recording')
+def recording_will_be_removed(event):
+    # delete tempfile data for recording when recording is deleted
+    if event.moving is not None: # it's not really being removed
+        return
+
+    recording = event.object
+
+    shutil.rmtree(recording.tmpfolder, ignore_errors=True)
+
 
