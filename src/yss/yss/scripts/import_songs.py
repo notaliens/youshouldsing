@@ -55,6 +55,7 @@ def main(argv=sys.argv):
 
     try:
         for input_filename in args[1:]:
+            print(input_filename)
             basename, ext = os.path.splitext(os.path.basename(input_filename))
             name = basename.replace('_NifterDotCom', '')
             name = name.replace('_karaoke_songs', '')

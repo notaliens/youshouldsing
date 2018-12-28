@@ -157,6 +157,7 @@ var rtc_recorder = (function(exports, karaoke, max_framerate) {
         $('#play-me')[0].innerHTML = '<i class="fas fa-bullhorn"> </i> Play';
         $('select#videoSource').attr('disabled', true);
         $('select#audioSource').attr('disabled', true);
+        $('.audiocontrol').hide();
     }
 
     function displayPlayMode() {
@@ -285,9 +286,9 @@ var rtc_recorder = (function(exports, karaoke, max_framerate) {
     function record() {
         if (recorder === undefined) { return; }
 
-        displayRecordMode();
         karaoke.reset();
         karaoke.play();
+        displayRecordMode();
         recording = true;
         startTime = Date.now();
 
