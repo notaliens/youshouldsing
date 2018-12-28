@@ -50,7 +50,7 @@ var karaoke = (function(mp3_url, timings) {
         }
         else {
             pause();
-            b.innerHTML = '<i class="fas fa-bullhorn"> </i> Play';
+            b.innerHTML = '<i class="fas fa-bullhorn"> </i> Sing';
         }
     }
 
