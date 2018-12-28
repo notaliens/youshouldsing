@@ -9,6 +9,10 @@
               class="fas fa-bullhorn"> </i> Sing</button>
         <button id="record-me" style="width: 8em;" class="btn btn-danger"><i
               class="fas fa-microphone"> </i> Record</button>
+        <button id="reverse" style="width: 8em; display: none" class="btn btn-warning audiocontrol"><i
+              class="fas fa-backward"> </i></button>
+        <button id="forward" style="width: 8em; display: none" class="btn btn-warning audiocontrol"><i
+              class="fas fa-forward"> </i></button>
       </div>
     </div>
 

@@ -90,7 +90,7 @@ def main(argv=sys.argv):
             result = subprocess.run(
                 command,
                 check=True,
-                capture_output=True,
+#                capture_output=True,
             )
             #altlyrics = result.stdout.decode('utf-8', errors='replace')
             #_, lyrics = altlyrics.split('\n', 1) # drop timidity output

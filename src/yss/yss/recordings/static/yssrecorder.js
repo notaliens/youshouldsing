@@ -31,6 +31,7 @@ var karaoke = (function(mp3_url, timings) {
     }
 
     function play() {
+        $('.audiocontrol').show();
         show.reset();
         player.play();
         paused = false;
@@ -39,6 +40,7 @@ var karaoke = (function(mp3_url, timings) {
     function pause() {
         show.reset();
         player.pause();
+        $('.audiocontrol').hide();
         paused = true;
     }
 
@@ -66,9 +68,26 @@ var karaoke = (function(mp3_url, timings) {
             'karaoke-display', numDisplayLines);
         show = rice.createShow(renderer, numDisplayLines);
 
+        $('#forward')[0].onclick = function() {
+            player.currentTime = player.currentTime + 5;
+        };
+
+        $('#reverse')[0].onclick = function() {
+            back = player.currentTime - 5;
+            if (back < 0) {
+                player.currentTime = 0;
+            }
+            else {
+                player.currentTime = back;
+            }
+        };
+
         player.addEventListener(
             'error', function(e) { alert('Failed to play! ' + e); }, false);
         player.addEventListener('ended', function() {
+            $('#play-me')[0].innerHTML = '<i class="fas fa-bullhorn"> </i> Sing';
+            player.currentTime = 0;
+            $('.audiocontrol').hide();
             reset();
         }, false);
         player.addEventListener('timeupdate', function () {
