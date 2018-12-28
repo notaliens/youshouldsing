@@ -46,11 +46,11 @@ var karaoke = (function(mp3_url, timings) {
         var b = $('#play-me')[0];
         if (paused) {
             play();
-            b.innerHTML = '<i class="fas fa-spinner fa-spin"> </i>';
+            b.innerHTML = '<i class="fas fa-bullhorn fa-spin"> </i>';
         }
         else {
             pause();
-            b.innerHTML = '<i class="fas fa-play"> </i> Play';
+            b.innerHTML = '<i class="fas fa-bullhorn"> </i> Play';
         }
     }
 
@@ -135,7 +135,7 @@ var rtc_recorder = (function(exports, karaoke, max_framerate) {
         $('#record-me')[0].onclick = stop;
         $('#record-me').attr('disabled', false);
         $('#play-me').attr('disabled', true);
-        $('#play-me')[0].innerHTML = '<i class="fas fa-play"> </i> Play';
+        $('#play-me')[0].innerHTML = '<i class="fas fa-bullhorn"> </i> Play';
         $('select#videoSource').attr('disabled', true);
         $('select#audioSource').attr('disabled', true);
     }
@@ -144,7 +144,7 @@ var rtc_recorder = (function(exports, karaoke, max_framerate) {
         $('#record-me')[0].innerHTML = '<i class="fas fa-microphone"> </i> Record';
         $('#record-me').attr('disabled', false);
         $('#play-me').attr('disabled', false);
-        $('#play-me')[0].innerHTML = '<i class="fas fa-play"> </i> Play';
+        $('#play-me')[0].innerHTML = '<i class="fas fa-bullhorn"> </i> Play';
         $('select#videoSource').attr('disabled', false);
         $('select#audioSource').attr('disabled', false);
     }
