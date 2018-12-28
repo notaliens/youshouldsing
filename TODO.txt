@@ -5,6 +5,10 @@
   - configure auditing
 
   - should probably use browser timezone instead of user-specified SDI timezone
+
+- Licensing
+
+  - https://pep.rocks/programs/gem
   
 - Login:
 
@@ -59,7 +63,7 @@
   - Private/public/authenticated viewers (workflow?)
   - Allow/disallow likes
   - Allow/disallow comments
-  - Remix (e.g. no video, adjust latency)
+  - Remix (e.g. no video, adjust latency, adjust music volume, adjust effects)
 
 - Record:
 
@@ -74,10 +78,9 @@
     source audio and mic audio after latency, just let people clap
     a pattern.
   - Do less work in postprocessing to produce a mix; currently we
-    transcode all over the place.
-  - Probably should mix on browser, not on server.
-  - Websocket for mix progress?
-  - Upload progress bar
+    transcode all over the place. Probably really should mix on browser,
+    not on server.
+  - Upload progress bar.
 
 - Search:
 

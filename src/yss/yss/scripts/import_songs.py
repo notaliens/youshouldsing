@@ -61,7 +61,7 @@ def main(argv=sys.argv):
             def errback(msg):
                 print (msg)
             try:
-                kardata, title, artist, syllables, timings = get_timings(
+                kardata, title, artist, lyrics, timings = get_timings(
                     input_filename
                 )
             except UnicodeError:
@@ -92,15 +92,8 @@ def main(argv=sys.argv):
                 check=True,
                 capture_output=True,
             )
-            # XXX lyrics contain too much info (like error msgs and title)
-            # but there is no standard output format; in reality
-            # we should be able to get the lyrics from the parse result
-            # in get_timings.  Handwave: start of words is denoted in the
-            # syllables returned by that thing as words that have spaces
-            # at their beginnings, except not really.  Also, we shouldn't
-            # need to replace while decoding (pinball wizard).
-            lyrics = result.stdout.decode('utf-8', errors='replace')
-            _, lyrics = lyrics.split('\n', 1) # drop timidity output
+            #altlyrics = result.stdout.decode('utf-8', errors='replace')
+            #_, lyrics = altlyrics.split('\n', 1) # drop timidity output
             mp3_filename = os.path.join(outdir, basename+'.mp3')
             command2 = ['lame', output_filename, mp3_filename ]
             subprocess.check_call(command2)
@@ -143,7 +136,6 @@ def get_timings(input_filename):
     lyrics_list = midifile.lyrics.list
     timings = []
     lyrics_text = []
-    prev_line = lyrics_list[0].line # initial value, changes in loop
     first_ms = lyrics_list[0].ms
     current_line = []
     title = ' '.join([x.capitalize() for x in input_filename.split('_')])
@@ -158,7 +150,7 @@ def get_timings(input_filename):
             next_lyric = lyrics_list[i+1]
         except IndexError:
             next_lyric = None
-        if lyric.line != prev_line:
+        if lyric.line != getattr(next_lyric, 'line', None):
             last_ms = lyric.ms
             newline = (
                 float(first_ms)/1000,
@@ -166,14 +158,15 @@ def get_timings(input_filename):
                 current_line,
                 )
             timings.append(newline)
-            prev_line = lyric.line
-            current_line = []
             if next_lyric:
                 first_ms = next_lyric.ms
             else:
                 first_ms = last_ms
-            line_text = ' '.join([syllable.text for syllable in current_line])
-            lyrics_text.append(line_text)
+            line_text = ''.join(
+                [syllable[1] for syllable in current_line]
+            )
+            lyrics_text.append(line_text.rstrip())
+            current_line = []
 
     timings.append(  # why do we append this
         (
