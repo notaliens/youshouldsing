@@ -1,5 +1,8 @@
 from pyramid.response import FileResponse
-from pyramid.view import view_config
+from pyramid.view import (
+    view_config,
+    view_defaults,
+    )
 from pyramid.settings import asbool
 from pyramid.httpexceptions import HTTPBadRequest
 
@@ -19,6 +22,7 @@ from yss.interfaces import (
 
 import yss.likes
 
+@view_defaults(context=IRecording)
 class RecordingView(object):
     def __init__(self, context, request):
         self.context = context
@@ -49,7 +53,6 @@ class RecordingView(object):
             }
 
     @view_config(
-        context=IRecording,
         name='mixprogress',
         renderer='json',
         permission='view',
@@ -62,18 +65,50 @@ class RecordingView(object):
         progress['done'] = bool(self.context.mixed_blob) and 1 or 0
         return progress
 
-@view_config(
-    content_type='Recording',
-    name='movie',
-    permission='view'
-)
-def stream_movie(recording, request):
-    if recording.mixed_blob:
-        return FileResponse(
-            recording.mixed_blob.committed(),
-            content_type='video/webm'
-        )
-    return HTTPBadRequest('Video still processing')
+    @view_config(
+        name='like',
+        renderer='json',
+        permission='yss.like',
+    )
+    def like(self):
+        request = self.request
+        recording = self.context
+        performer = request.user.performer
+        if not performer in recording.liked_by:
+            recording.liked_by.connect([performer])
+        return {'ok': True,
+                'num_likes': recording.num_likes,
+                'can_like':yss.likes.can_like(request, recording),
+        }
+
+    @view_config(
+        name='unlike',
+        renderer='json',
+        permission='yss.like',
+    )
+    def unlike(self):
+        request = self.request
+        recording = self.context
+        performer = request.user.performer
+        if performer in recording.liked_by:
+            recording.liked_by.disconnect([performer])
+        return {'ok': True,
+                'num_likes': recording.num_likes,
+                'can_like':yss.likes.can_like(request, recording),
+        }
+
+    @view_config(
+        name='movie',
+        permission='view'
+    )
+    def stream_movie(self):
+        recording = self.context
+        if recording.mixed_blob:
+            return FileResponse(
+                recording.mixed_blob.committed(),
+                content_type='video/webm'
+            )
+        return HTTPBadRequest('Video still processing')
 
 
 class RecordingsView(object):
@@ -170,33 +205,3 @@ class RecordingsView(object):
             title,
             icon
             )
-
-@view_config(
-    context=IRecording,
-    name='like',
-    renderer='json',
-    permission='yss.like',
-)
-def like_recording(context, request):
-    performer = request.user.performer
-    if not performer in context.liked_by:
-        context.liked_by.connect([performer])
-    return {'ok': True,
-            'num_likes': context.num_likes,
-            'can_like':yss.likes.can_like(request, context),
-            }
-
-@view_config(
-    context=IRecording,
-    name='unlike',
-    renderer='json',
-    permission='yss.like',
-)
-def unlike_recording(context, request):
-    performer = request.user.performer
-    if performer in context.liked_by:
-        context.liked_by.disconnect([performer])
-    return {'ok': True,
-            'num_likes': context.num_likes,
-            'can_like':yss.likes.can_like(request, context),
-            }

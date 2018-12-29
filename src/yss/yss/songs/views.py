@@ -10,12 +10,15 @@ from google.cloud import storage
 from ZODB.blob import Blob
 
 from pyramid.httpexceptions import HTTPBadRequest
-from pyramid.view import view_config
 from pyramid.settings import asbool
 from pyramid.httpexceptions import HTTPFound
 from pyramid.traversal import (
     find_root,
     resource_path,
+    )
+from pyramid.view import (
+    view_config,
+    view_defaults,
     )
 
 from substanced.file import FileNode
@@ -48,6 +51,7 @@ idchars = (
     list(map(chr, range(ord('0'), ord('9') + 1))))
 
 
+@view_defaults(context=ISongs)
 class SongsView(object):
 
     default_sort = 'title'
@@ -122,10 +126,7 @@ class SongsView(object):
         rs = rs.sort(first, reverse=reverse)
         return rs
 
-    @view_config(
-        context=ISongs,
-        renderer='templates/songs.pt'
-    )
+    @view_config(renderer='templates/songs.pt')
     def contents(self):
         request = self.request
         resultset = self.query()
@@ -164,18 +165,18 @@ class SongsView(object):
             icon,
             )
 
-    @mgmt_view(context=ISongs, name='preview')
+    @mgmt_view(name='preview')
     def preview(self):
         return HTTPFound(location=self.request.resource_url(self.context))
 
 
+@view_defaults(context=ISong)
 class SongView(object):
     def __init__(self, context, request):
         self.context = context
         self.request = request
 
     @view_config(
-        context=ISong,
         renderer='templates/song.pt',
         permission='view'
     )
@@ -192,7 +193,6 @@ class SongView(object):
             }
 
     @view_config(
-        context=ISong,
         name='like',
         renderer='json',
         permission='yss.like',
@@ -207,7 +207,6 @@ class SongView(object):
                }
 
     @view_config(
-        context=ISong,
         name='retime',
         permission='yss.retime',
         renderer='templates/retime.pt',
@@ -221,7 +220,6 @@ class SongView(object):
         }
 
     @view_config(
-        context=ISong,
         name='handle_retime',
         permission='yss.retime',
         renderer='json',
@@ -245,7 +243,6 @@ class SongView(object):
         return url
 
     @view_config(
-        context=ISong,
         name='mp3',
         permission='view',
     )
@@ -253,7 +250,6 @@ class SongView(object):
         return self.context.get_response(request=self.request)
 
     @view_config(
-        content_type='Song',
         name="record",
         renderer="templates/record.pt",
         permission='view', # XXX
@@ -268,7 +264,6 @@ class SongView(object):
         }
 
     @view_config(
-        content_type='Song',
         name="record",
         xhr=True,
         renderer='string',
