@@ -239,41 +239,41 @@ class SongView(object):
         blobname = f'{self.context.__name__}.retime' # XXX simultaneous retimes
         gsuri = f'gs://{gbucket}/{blobname}'
 
-        # file_stream = self.request.params['data'].file
+        file_stream = self.request.params['data'].file
 
-        # tmpdir = get_retime_tempdir(self.request, self.context.__name__) # XXX
-        # try:
-        #     os.makedirs(tmpdir)
-        # except FileExistsError:
-        #     pass
-        # webm_filename = os.path.join(tmpdir, 'retime.webm')
-        # opus_filename = os.path.join(tmpdir, 'retime.opus')
+        tmpdir = get_retime_tempdir(self.request, self.context.__name__) # XXX
+        try:
+            os.makedirs(tmpdir)
+        except FileExistsError:
+            pass
+        webm_filename = os.path.join(tmpdir, 'retime.webm')
+        opus_filename = os.path.join(tmpdir, 'retime.opus')
 
-        # logger.info('Converting webm to opus') # XX should just copy audio
+        logger.info('Converting webm to opus') # XX should just copy audio
 
-        # with open(webm_filename, 'wb') as saveto:
-        #     shutil.copyfileobj(file_stream, saveto)
+        with open(webm_filename, 'wb') as saveto:
+            shutil.copyfileobj(file_stream, saveto)
 
-        # ffmpeg(
-        #     "-y",
-        #     "-i", webm_filename,
-        #     "-vn", # no video
-        #     "-ar", "48000",
-        #     "-y", # clobber
-        #     opus_filename,
-        #     )
+        ffmpeg(
+            "-y",
+            "-i", webm_filename,
+            "-vn", # no video
+            "-ar", "48000",
+            "-y", # clobber
+            opus_filename,
+            )
 
-        # logger.info('Finished converting webm to opus')
+        logger.info('Finished converting webm to opus')
 
-        # client = storage.Client(gproject)
-        # bucket = client.bucket(gbucket)
-        # blob = bucket.blob(blobname)
-        # logger.info('Uploading timing track to gcloud...')
-        # blob.upload_from_file(
-        #     open(opus_filename, 'rb'),
-        #     content_type='audio/opus',
-        # )
-        # logger.info('Finished uploading timing track...')
+        client = storage.Client(gproject)
+        bucket = client.bucket(gbucket)
+        blob = bucket.blob(blobname)
+        logger.info('Uploading timing track to gcloud...')
+        blob.upload_from_file(
+            open(opus_filename, 'rb'),
+            content_type='audio/opus',
+        )
+        logger.info('Finished uploading timing track...')
 
         client = speech.SpeechClient()
 
@@ -295,8 +295,6 @@ class SongView(object):
         logger.info('Speech recognition operation completed')
 
         timings = speech_results_to_timings(response.results, 7)
-        import pprint
-        pprint.pprint(timings)
         self.context.alt_timings = timings
 
         return self.request.resource_url(self.context, 'retime')
@@ -426,44 +424,41 @@ def speech_results_to_timings(speech_results, max_words_per_line):
     # Each result is for a consecutive portion of the audio. Iterate through
     # them to get the transcripts for the entire audio file.
     timings = []
+    words = []
     for result in speech_results:
-        words = result.alternatives[0].words
-        line_start = 0
-        line_end = 0
-        word_end = 0
-        word_timings = []
-        for i, word in enumerate(words):
-            start_secs = word.start_time.seconds
-            start_ns = word.start_time.nanos
-            start_ms = round(start_ns/1e+9, 3)
-            word_start = start_secs + start_ms
-            padding = ' '
-            if not line_start:
-                line_start = word_start
-                padding = ''
-            end_secs = word.end_time.seconds
-            end_ns = word.end_time.nanos
-            end_ms = round(end_ns/1e+9, 3)
-            word_end = end_secs + end_ms
-            word_timings.append([word_start, word_end, padding + word.word])
-            if i and (i % max_words_per_line == 0):
-                line_end = word_end
-                adjusted_word_timings = []
-                for word_start, word_end, transcript in word_timings:
-                    adjusted_word_timings.append(
-                        [word_start - line_start, transcript]
-                    )
-                timing = [line_start, line_end, adjusted_word_timings]
-                timings.append(timing)
-                line_start = 0
-                word_timings = []
+        # we'd like to be able to get hints about where lines end
+        # naturally by relying on this result batching, but let's get it
+        # working first
+        words.extend(result.alternatives[0].words)
 
-        line_end = word_end
-        adjusted_word_timings = []
-        for word_start, word_end, transcript in word_timings:
-            adjusted_word_timings.append(
-                [word_start - line_start, transcript]
-            )
-        timing = [line_start, line_end, adjusted_word_timings]
-        timings.append(timing)
+    line_start = 0
+    word_end = 0
+    word_timings = []
+
+    for i, word in enumerate(words):
+        start_secs = word.start_time.seconds
+        start_ns = word.start_time.nanos
+        start_ms = round(start_ns/1e+9, 3)
+        word_start = start_secs + start_ms
+        padding = ' '
+        if line_start is None:
+            line_start = word_start
+            padding = ''
+        end_secs = word.end_time.seconds
+        end_ns = word.end_time.nanos
+        end_ms = round(end_ns/1e+9, 3)
+        word_end = end_secs + end_ms
+
+        word_timings.append([word_start - line_start, padding + word.word])
+
+        needs_line_break = i and (i % max_words_per_line == 0)
+
+        if needs_line_break:
+            timing = [line_start, word_end, word_timings]
+            timings.append(timing)
+            line_start = None
+            word_timings = []
+
+    timings.append([line_start, word_end, word_timings]) # stragglers
+
     return timings
