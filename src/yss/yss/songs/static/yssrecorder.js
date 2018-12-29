@@ -63,10 +63,25 @@ var karaoke = (function(mp3_url, timings) {
 
     function init() {
         // Create the karaoke engine and get a show instance
-        var rice = new RiceKaraoke(RiceKaraoke.simpleTimingToTiming(timings));
-        var renderer = new SimpleKaraokeDisplayEngine(
-            'karaoke-display', numDisplayLines);
-        show = rice.createShow(renderer, numDisplayLines);
+        if (timings) {
+            var rice = new RiceKaraoke(
+                RiceKaraoke.simpleTimingToTiming(timings));
+            var renderer = new SimpleKaraokeDisplayEngine(
+                'karaoke-display', numDisplayLines);
+            show = rice.createShow(renderer, numDisplayLines);
+            player.addEventListener('timeupdate', function () {
+                var ct = player.currentTime;
+                if (ct < lastPosition) {
+                    show.reset();
+                }
+                if (ct >= player.duration) {
+                    reset();
+                }
+                show.render(ct, false);
+                updateStatus();
+                lastPosition = ct;
+            }, false);
+        }
 
         $('#forward')[0].onclick = function() {
             player.currentTime = player.currentTime + 5;
@@ -90,18 +105,6 @@ var karaoke = (function(mp3_url, timings) {
             $('.audiocontrol').hide();
             reset();
         }, false);
-        player.addEventListener('timeupdate', function () {
-            var ct = player.currentTime;
-            if (ct < lastPosition) {
-                show.reset();
-            }
-            if (ct >= player.duration) {
-                reset();
-            }
-            show.render(ct, false);
-            updateStatus();
-            lastPosition = ct;
-        }, false);
     }
 
     init();
@@ -115,7 +118,8 @@ var karaoke = (function(mp3_url, timings) {
     };
 });
 
-var rtc_recorder = (function(exports, karaoke, max_framerate) {
+var rtc_recorder = (function(exports, karaoke, max_framerate, upload_handler) {
+    upload_handler = upload_handler||'';
     exports.URL = exports.URL || exports.webkitURL;
 
     exports.requestAnimationFrame = exports.requestAnimationFrame ||
@@ -134,10 +138,12 @@ var rtc_recorder = (function(exports, karaoke, max_framerate) {
     window.URL = window.URL || window.webkitURL;
 
     var video = $('video')[0];
+    if (video) {
+        video.width = 320;
+        video.height = 240;
+    }
     var audioSelect = $('select#audioSource')[0];
     var videoSelect = $('select#videoSource')[0];
-    video.width = 320;
-    video.height = 240;
     var rafId = null;
     var startTime = null;
     var endTime = null;
@@ -174,20 +180,22 @@ var rtc_recorder = (function(exports, karaoke, max_framerate) {
             var deviceInfo = deviceInfos[i];
             var option = document.createElement('option');
             option.value = deviceInfo.deviceId;
-            if (deviceInfo.kind === 'audioinput') {
+            if (deviceInfo.kind === 'audioinput' && audioSelect) {
                 option.text = deviceInfo.label ||
                     'microphone ' + (audioSelect.length + 1);
                 audioSelect.appendChild(option);
-            } else if (deviceInfo.kind === 'videoinput') {
+            } else if (deviceInfo.kind === 'videoinput' && videoSelect) {
                 option.text = deviceInfo.label || 'camera ' +
                     (videoSelect.length + 1);
                 videoSelect.appendChild(option);
             }
         }
-        nocam_option = document.createElement('option');
-        nocam_option.value = '';
-        nocam_option.text = 'No Camera';
-        videoSelect.appendChild(nocam_option);
+        if (videoSelect) {
+            nocam_option = document.createElement('option');
+            nocam_option.value = '';
+            nocam_option.text = 'No Camera';
+            videoSelect.appendChild(nocam_option);
+        }
     }
 
 
@@ -202,7 +210,7 @@ var rtc_recorder = (function(exports, karaoke, max_framerate) {
                 "deviceId": {exact: audioSelect.value}
             },
         };
-        if (videoSelect.value != '') {
+        if (videoSelect && videoSelect.value != '') {
             vidconstraint = {
                 "width": { exact: "640" },
                 "height": { exact: "480"},
@@ -216,8 +224,10 @@ var rtc_recorder = (function(exports, karaoke, max_framerate) {
 
     function gotStream(stream) {
         thestream = stream;
-        video.srcObject = stream;
-        video.controls = false;
+        if (video) {
+            video.srcObject = stream;
+            video.controls = false;
+        }
         recorder = new MediaRecorder(stream, {
             mimeType: "video/webm;codecs=vp8,opus" // works in FF and chrome
         });
@@ -280,7 +290,9 @@ var rtc_recorder = (function(exports, karaoke, max_framerate) {
             }, 1000);
         };
 
-        finishVideoSetup_();
+        if (video) {
+            finishVideoSetup_();
+        }
     }
 
     function record() {
@@ -332,15 +344,18 @@ var rtc_recorder = (function(exports, karaoke, max_framerate) {
                 fd.append('effects', effect.id);
             }
         }
-        fd.append('musicvolume', $('#musicvolume')[0].value);
+        if ($('#musicvolume')[0]) {
+            fd.append('musicvolume', $('#musicvolume')[0].value);
+        }
         fd.append('data', blob);
         fd.append('finished', '1');
+        url = upload_handler || window.location;
         jQuery.ajax({
             type:'POST',
-            url: window.location,
+            url: url,
             data: fd,
             processData: false,
-            contentType: false
+            contentType: false,
         }).done(function(data) { window.location = data; });
 
     }
@@ -351,8 +366,12 @@ var rtc_recorder = (function(exports, karaoke, max_framerate) {
     }
 
     navigator.mediaDevices.enumerateDevices().then(gotDevices).then(getStream);
-    audioSelect.onchange = getStream;
-    videoSelect.onchange = getStream;
+    if (audioSelect) {
+        audioSelect.onchange = getStream;
+    }
+    if (videoSelect) {
+        videoSelect.onchange = getStream;
+    }
     initEvents();
 
     return {

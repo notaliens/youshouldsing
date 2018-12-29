@@ -1,11 +1,17 @@
 import colander
 import deform.widget
+import logging
 import os
 import random
 import slug
 import shutil
 
+from sh import ffmpeg
+
 from google.cloud import storage
+from google.cloud import speech
+from google.cloud.speech import enums as speech_enums
+from google.cloud.speech import types as speech_types
 
 from ZODB.blob import Blob
 
@@ -50,6 +56,7 @@ idchars = (
     list(map(chr, range(ord('A'), ord('Z') + 1))) +
     list(map(chr, range(ord('0'), ord('9') + 1))))
 
+logger = logging.getLogger('yss')
 
 @view_defaults(context=ISongs)
 class SongsView(object):
@@ -212,35 +219,87 @@ class SongView(object):
         renderer='templates/retime.pt',
     )
     def retime(self):
-        root = find_root(self.context)
+        timings = getattr(self.context, 'alt_timings', None)
+        if timings is None:
+            timings = self.context.timings
         return {
             "mp3_url": self.request.resource_url(self.context, 'mp3'),
-            "timings": self.context.timings,
-            "max_framerate": root.max_framerate,
+            "timings": timings,
         }
 
     @view_config(
-        name='handle_retime',
+        name='finish_retime',
         permission='yss.retime',
-        renderer='json',
+        xhr=True,
+        renderer='string',
     )
-    def handle_retime(self):
-        client = storage.Client(project='XXX')
-        bucket = client.bucket('XXX')
-        blob = bucket.blob('song.opus')
-        file_stream = self.request.params['data'].file
+    def finish_retime(self):
+        gproject = os.environ['YSS_GOOGLE_STORAGE_PROJECT']
+        gbucket = os.environ['YSS_GOOGLE_STORAGE_BUCKET']
+        blobname = f'{self.context.__name__}.retime' # XXX simultaneous retimes
+        gsuri = f'gs://{gbucket}/{blobname}'
 
-        blob.upload_from_string(
-            file_stream,
-            content_type='audio/opus',
+        # file_stream = self.request.params['data'].file
+
+        # tmpdir = get_retime_tempdir(self.request, self.context.__name__) # XXX
+        # try:
+        #     os.makedirs(tmpdir)
+        # except FileExistsError:
+        #     pass
+        # webm_filename = os.path.join(tmpdir, 'retime.webm')
+        # opus_filename = os.path.join(tmpdir, 'retime.opus')
+
+        # logger.info('Converting webm to opus') # XX should just copy audio
+
+        # with open(webm_filename, 'wb') as saveto:
+        #     shutil.copyfileobj(file_stream, saveto)
+
+        # ffmpeg(
+        #     "-y",
+        #     "-i", webm_filename,
+        #     "-vn", # no video
+        #     "-ar", "48000",
+        #     "-y", # clobber
+        #     opus_filename,
+        #     )
+
+        # logger.info('Finished converting webm to opus')
+
+        # client = storage.Client(gproject)
+        # bucket = client.bucket(gbucket)
+        # blob = bucket.blob(blobname)
+        # logger.info('Uploading timing track to gcloud...')
+        # blob.upload_from_file(
+        #     open(opus_filename, 'rb'),
+        #     content_type='audio/opus',
+        # )
+        # logger.info('Finished uploading timing track...')
+
+        client = speech.SpeechClient()
+
+        audio = speech_types.RecognitionAudio(uri=gsuri)
+        config = speech_types.RecognitionConfig(
+            encoding=speech_enums.RecognitionConfig.AudioEncoding.OGG_OPUS,
+            sample_rate_hertz=48000,
+            language_code='en-US',
+            enable_word_time_offsets=True,
         )
 
-        url = blob.public_url
+        operation = client.long_running_recognize(config, audio)
+        # google.api_core.exceptions.GoogleAPICallError: None
+        # Unexpected state: Long-running operation had neither response
+        # nor error set.
 
-        if isinstance(url, bytes):
-            url = url.decode('utf-8')
+        logger.info('Waiting for speech recognition operation to complete...')
+        response = operation.result(timeout=90)
+        logger.info('Speech recognition operation completed')
 
-        return url
+        timings = speech_results_to_timings(response.results, 7)
+        import pprint
+        pprint.pprint(timings)
+        self.context.alt_timings = timings
+
+        return self.request.resource_url(self.context, 'retime')
 
     @view_config(
         name='mp3',
@@ -359,3 +418,52 @@ def get_recording_tempdir(request, recording_id):
         raise RuntimeError('bad recording id')
     return os.path.abspath(os.path.join(postproc_dir, recording_id))
 
+def get_retime_tempdir(request, song_id):
+    retime_dir = request.registry.settings['yss.retime_dir']
+    return os.path.abspath(os.path.join(retime_dir, song_id))
+
+def speech_results_to_timings(speech_results, max_words_per_line):
+    # Each result is for a consecutive portion of the audio. Iterate through
+    # them to get the transcripts for the entire audio file.
+    timings = []
+    for result in speech_results:
+        words = result.alternatives[0].words
+        line_start = 0
+        line_end = 0
+        word_end = 0
+        word_timings = []
+        for i, word in enumerate(words):
+            start_secs = word.start_time.seconds
+            start_ns = word.start_time.nanos
+            start_ms = round(start_ns/1e+9, 3)
+            word_start = start_secs + start_ms
+            padding = ' '
+            if not line_start:
+                line_start = word_start
+                padding = ''
+            end_secs = word.end_time.seconds
+            end_ns = word.end_time.nanos
+            end_ms = round(end_ns/1e+9, 3)
+            word_end = end_secs + end_ms
+            word_timings.append([word_start, word_end, padding + word.word])
+            if i and (i % max_words_per_line == 0):
+                line_end = word_end
+                adjusted_word_timings = []
+                for word_start, word_end, transcript in word_timings:
+                    adjusted_word_timings.append(
+                        [word_start - line_start, transcript]
+                    )
+                timing = [line_start, line_end, adjusted_word_timings]
+                timings.append(timing)
+                line_start = 0
+                word_timings = []
+
+        line_end = word_end
+        adjusted_word_timings = []
+        for word_start, word_end, transcript in word_timings:
+            adjusted_word_timings.append(
+                [word_start - line_start, transcript]
+            )
+        timing = [line_start, line_end, adjusted_word_timings]
+        timings.append(timing)
+    return timings
