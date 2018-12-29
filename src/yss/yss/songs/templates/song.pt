@@ -32,12 +32,18 @@
                 </script>
               </tal:if>
             </div>
-            <div tal:condition="can_record" class="col-md-8">
+            <div tal:condition="can_record" class="col-md-4">
               <button type="button"
                       class="btn btn-danger btn-md btn-block"
-                      style="margin-bottom: 15px;"
                       onclick="location.href='${request.resource_url(context, 'record')}'"
                       >Record This Song</button>
+            </div>
+            <div tal:condition="can_retime" class="col-md-4">
+              <button type="button"
+                      class="btn btn-warning btn-md btn-block"
+                      style="margin-bottom: 15px;"
+                      onclick="location.href='${request.resource_url(context, 'retime')}'"
+                      >Retime Song Lyrics</button>
             </div>
             <div tal:condition="not: can_record" class="col-md-8">
               Log in to record this song

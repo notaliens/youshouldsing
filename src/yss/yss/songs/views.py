@@ -1,11 +1,22 @@
 import colander
 import deform.widget
+import os
+import random
 import slug
+import shutil
+
+from google.cloud import storage
+
+from ZODB.blob import Blob
 
 from pyramid.httpexceptions import HTTPBadRequest
 from pyramid.view import view_config
 from pyramid.settings import asbool
 from pyramid.httpexceptions import HTTPFound
+from pyramid.traversal import (
+    find_root,
+    resource_path,
+    )
 
 from substanced.file import FileNode
 from substanced.form import FormView
@@ -22,11 +33,20 @@ from yss.interfaces import (
     ISongs,
     ISong,
     )
+from yss.utils import get_redis
 
+random.seed()
 
-@mgmt_view(context=ISongs, name='preview')
-def preview_songs(context, request):
-    return HTTPFound(location=request.resource_url(context))
+known_effects = (
+    'effect-reverb',
+    'effect-chorus',
+    )
+
+idchars = (
+    list(map(chr, range(ord('a'), ord('z') + 1))) +
+    list(map(chr, range(ord('A'), ord('Z') + 1))) +
+    list(map(chr, range(ord('0'), ord('9') + 1))))
+
 
 class SongsView(object):
 
@@ -54,7 +74,7 @@ class SongsView(object):
             for term in terms:
                 if lyrics.check_query(term):
                     q = q & lyrics.eq(term)
-                
+
         filter_genre = request.params.get('filter_genre')
         if filter_genre:
             q = q & find_index(context, 'yss', 'genre').eq(filter_genre)
@@ -144,6 +164,11 @@ class SongsView(object):
             icon,
             )
 
+    @mgmt_view(context=ISongs, name='preview')
+    def preview(self):
+        return HTTPFound(location=self.request.resource_url(self.context))
+
+
 class SongView(object):
     def __init__(self, context, request):
         self.context = context
@@ -163,6 +188,7 @@ class SongView(object):
             'liked_by': song.liked_by,
             'recordings':song.recordings,
             'can_record':self.request.has_permission('yss.record', song),
+            'can_retime':self.request.has_permission('yss.retime', song),
             }
 
     @view_config(
@@ -179,6 +205,106 @@ class SongView(object):
         return {'ok': True,
                 'num_likes': self.context.num_likes,
                }
+
+    @view_config(
+        context=ISong,
+        name='retime',
+        permission='yss.retime',
+        renderer='templates/retime.pt',
+    )
+    def retime(self):
+        root = find_root(self.context)
+        return {
+            "mp3_url": self.request.resource_url(self.context, 'mp3'),
+            "timings": self.context.timings,
+            "max_framerate": root.max_framerate,
+        }
+
+    @view_config(
+        context=ISong,
+        name='handle_retime',
+        permission='yss.retime',
+        renderer='json',
+    )
+    def handle_retime(self):
+        client = storage.Client(project='XXX')
+        bucket = client.bucket('XXX')
+        blob = bucket.blob('song.opus')
+        file_stream = self.request.params['data'].file
+
+        blob.upload_from_string(
+            file_stream,
+            content_type='audio/opus',
+        )
+
+        url = blob.public_url
+
+        if isinstance(url, bytes):
+            url = url.decode('utf-8')
+
+        return url
+
+    @view_config(
+        context=ISong,
+        name='mp3',
+        permission='view',
+    )
+    def stream_mp3(self):
+        return self.context.get_response(request=self.request)
+
+    @view_config(
+        content_type='Song',
+        name="record",
+        renderer="templates/record.pt",
+        permission='view', # XXX
+    )
+    def recording_app(self):
+        song = self.context
+        root = find_root(song)
+        return {
+            "mp3_url": self.request.resource_url(song, 'mp3'),
+            "timings": song.timings,
+            "max_framerate": root.max_framerate,
+        }
+
+    @view_config(
+        content_type='Song',
+        name="record",
+        xhr=True,
+        renderer='string',
+        request_param='finished',
+        permission='yss.record',
+    )
+    def finish_recording(self):
+        song = self.context
+        request = self.request
+        recordings = find_root(song)['recordings']
+        recording_id = generate_recording_id(recordings)
+        f = request.params['data'].file
+        tmpdir = get_recording_tempdir(request, recording_id)
+        recording = request.registry.content.create('Recording', tmpdir)
+        recordings[recording_id] = recording
+        recording.performer = request.user.performer
+        recording.song = song
+        recording.dry_blob = Blob()
+        recording.effects = tuple([ # not currently propsheet-exposed
+            x for x in request.params.getall('effects') if x in known_effects
+        ])
+        try:
+            musicvolume = float(request.params['musicvolume'])
+            if (musicvolume < 0) or (musicvolume > 1):
+                raise TypeError
+            recording.musicvolume = musicvolume
+        except (TypeError, ValueError):
+            # use default musicvolume of 0 set at class level
+            pass
+        with recording.dry_blob.open("w") as saveto:
+            shutil.copyfileobj(f, saveto)
+        redis = get_redis(request)
+        redis.rpush("yss.new-recordings", resource_path(recording))
+        print ("finished", tmpdir, resource_path(recording))
+        return request.resource_url(recording)
+
 
 class AddSongSchema(Schema):
     title = colander.SchemaNode(colander.String())
@@ -224,12 +350,17 @@ class AddSongView(FormView):
         self.context[name] = song
         return HTTPFound(self.request.sdiapi.mgmt_path(self.context))
 
-@view_config(
-    context=ISong,
-    name='mp3',
-    permission='view',
-)
-def stream_mp3(context, request):
-    return context.get_response(request=request)
+def generate_recording_id(recordings):
+    while True:
+        id = ''.join([random.choice(idchars) for _ in range(8)])
+        if id not in recordings:
+            break
+    return id
 
+def get_recording_tempdir(request, recording_id):
+    postproc_dir = request.registry.settings['yss.postproc_dir']
+    if set(recording_id).difference(set(idchars)):
+        # don't allow filesystem shenanigans if we accept this from a client
+        raise RuntimeError('bad recording id')
+    return os.path.abspath(os.path.join(postproc_dir, recording_id))
 

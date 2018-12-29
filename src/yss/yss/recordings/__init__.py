@@ -72,6 +72,3 @@ def recording_will_be_removed(event):
     recording = event.object
 
     shutil.rmtree(recording.tmpfolder, ignore_errors=True)
-
-def includeme(config):
-    config.add_static_view('record', 'yss.recordings:static')

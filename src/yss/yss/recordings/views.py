@@ -1,14 +1,4 @@
-import os
-import random
-import shutil
-
-from ZODB.blob import Blob
-
 from pyramid.response import FileResponse
-from pyramid.traversal import (
-    resource_path,
-    find_root,
-    )
 from pyramid.view import view_config
 from pyramid.settings import asbool
 from pyramid.httpexceptions import HTTPBadRequest
@@ -28,84 +18,6 @@ from yss.interfaces import (
     )
 
 import yss.likes
-
-random.seed()
-
-@view_config(
-    content_type='Song',
-    name="record",
-    renderer="templates/record.pt"
-)
-def recording_app(song, request):
-    root = find_root(song)
-    return {
-        "mp3_url": request.resource_url(song, 'mp3'),
-        "timings": song.timings,
-        "max_framerate": root.max_framerate,
-    }
-
-
-known_effects = [
-    'effect-reverb',
-    'effect-chorus',
-    ]
-
-@view_config(
-    content_type='Song',
-    name="record",
-    xhr=True,
-    renderer='string',
-    request_param='finished',
-    permission='yss.record',
-)
-def finish_recording(song, request):
-    recordings = find_root(song)['recordings']
-    recording_id = generate_recording_id(recordings)
-    f = request.params['data'].file
-    tmpdir = get_recording_tempdir(request, recording_id)
-    recording = request.registry.content.create('Recording', tmpdir)
-    recordings[recording_id] = recording
-    recording.performer = request.user.performer
-    recording.song = song
-    recording.dry_blob = Blob()
-    recording.effects = tuple([ # not currently propsheet-exposed
-        x for x in request.params.getall('effects') if x in known_effects
-    ])
-    try:
-        musicvolume = float(request.params['musicvolume'])
-        if (musicvolume < 0) or (musicvolume > 1):
-            raise TypeError
-        recording.musicvolume = musicvolume
-    except (TypeError, ValueError):
-        # use default musicvolume of 0 set at class level
-        pass
-    with recording.dry_blob.open("w") as saveto:
-        shutil.copyfileobj(f, saveto)
-    redis = get_redis(request)
-    redis.rpush("yss.new-recordings", resource_path(recording))
-    print ("finished", tmpdir, resource_path(recording))
-    return request.resource_url(recording)
-
-def get_recording_tempdir(request, recording_id):
-    postproc_dir = request.registry.settings['yss.postproc_dir']
-    if set(recording_id).difference(set(idchars)):
-        # don't allow filesystem shenanigans if we accept this from a client
-        raise RuntimeError('bad recording id')
-    return os.path.abspath(os.path.join(postproc_dir, recording_id))
-
-idchars = (
-    list(map(chr, range(ord('a'), ord('z') + 1))) +
-    list(map(chr, range(ord('A'), ord('Z') + 1))) +
-    list(map(chr, range(ord('0'), ord('9') + 1))))
-
-
-def generate_recording_id(recordings):
-    while True:
-        id = ''.join([random.choice(idchars) for _ in range(8)])
-        if id not in recordings:
-            break
-    return id
-
 
 class RecordingView(object):
     def __init__(self, context, request):

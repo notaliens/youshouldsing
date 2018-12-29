@@ -24,6 +24,8 @@ requires = [
     'titlecase',
     'pytz',
     'pyramid_redis_sessions',
+    'google-cloud-storage',
+    'google-cloud-speech',
     ]
 
 setup(name='yss',

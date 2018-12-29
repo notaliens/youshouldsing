@@ -117,9 +117,9 @@
   </div>
 
   <div metal:fill-slot="tail">
-    <script type="text/javascript" src="${layout.static('yss.recordings:static/ricekaraoke.js')}"></script>
-    <script type="text/javascript" src="${layout.static('yss.recordings:static/simplekaraokedisplay.js')}"></script>
-    <script type="text/javascript" src="${layout.static('yss.recordings:static/yssrecorder.js')}"></script>
+    <script type="text/javascript" src="${layout.static('yss.songs:static/ricekaraoke.js')}"></script>
+    <script type="text/javascript" src="${layout.static('yss.songs:static/simplekaraokedisplay.js')}"></script>
+    <script type="text/javascript" src="${layout.static('yss.songs:static/yssrecorder.js')}"></script>
     <script type="text/javascript">
      // karaoke and rtc_recorder are exported by yssrecorder
      kar = karaoke("${mp3_url}", ${timings});

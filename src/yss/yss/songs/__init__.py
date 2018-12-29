@@ -107,3 +107,5 @@ class Song(File):
         seconds = int(self.duration) % 60
         return '%s:%02d' % (minutes, seconds)
 
+def includeme(config):
+    config.add_static_view('songstatic', 'yss.songs:static')
