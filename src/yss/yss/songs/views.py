@@ -222,9 +222,11 @@ class SongView(object):
         timings = getattr(self.context, 'alt_timings', None)
         if timings is None:
             timings = self.context.timings
+        formatted_timings = format_timings(timings)
         return {
             "mp3_url": self.request.resource_url(self.context, 'mp3'),
             "timings": timings,
+            "formatted_timings":formatted_timings,
         }
 
     @view_config(
@@ -415,6 +417,22 @@ def get_recording_tempdir(request, recording_id):
         # don't allow filesystem shenanigans if we accept this from a client
         raise RuntimeError('bad recording id')
     return os.path.abspath(os.path.join(postproc_dir, recording_id))
+
+def format_timings(timings):
+    formatted = []
+    twodecs = '%.2f'
+    for start, end, words in timings:
+        formatted_start = twodecs % start
+        formatted_end = twodecs % end
+        formatted_words = []
+        for wordstart, word in words:
+            formatted_words.append(
+                [twodecs % wordstart,
+                 word]
+                )
+        formatted.append([formatted_start, formatted_end, formatted_words])
+    import pprint
+    return pprint.pformat(formatted, width=50)
 
 def get_retime_tempdir(request, song_id):
     retime_dir = request.registry.settings['yss.retime_dir']
