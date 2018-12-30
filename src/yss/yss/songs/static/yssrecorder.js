@@ -351,6 +351,26 @@ var rtc_recorder = (function(exports, karaoke, max_framerate, upload_handler) {
         fd.append('finished', '1');
         url = upload_handler || window.location;
         jQuery.ajax({
+            xhr: function() {
+                var xhr = new window.XMLHttpRequest();
+                xhr.upload.addEventListener("progress", function(evt) {
+                    if (evt.lengthComputable && $('#upload-progress')) {
+                        var percentComplete = evt.loaded / evt.total;
+                        if (percentComplete === 1) {
+                            $('#afterupload-spinner').show();
+                        }
+                        fmt = Math.round(percentComplete*100);
+                        $('#upload-progress').text(fmt + '%');
+                        $('#upload-progress').attr('aria-valuenow',
+                                                   (percentComplete*100));
+                        $('#upload-progress').attr(
+                            'style',
+                            'width: ' + fmt +'%; min-width: 1em;'
+                        );
+                    }
+                }, false);
+                return xhr;
+            },
             type:'POST',
             url: url,
             data: fd,

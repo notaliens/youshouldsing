@@ -1,5 +1,6 @@
 import colander
 import deform.widget
+import json
 import logging
 import os
 import random
@@ -419,11 +420,13 @@ def get_recording_tempdir(request, recording_id):
     return os.path.abspath(os.path.join(postproc_dir, recording_id))
 
 def format_timings(timings):
+    if isinstance(timings, str):
+        timings = json.loads(timings)
     formatted = []
     twodecs = '%.2f'
     for start, end, words in timings:
-        formatted_start = twodecs % start
-        formatted_end = twodecs % end
+        formatted_start = twodecs % (start or 0)
+        formatted_end = twodecs % (end or 0)
         formatted_words = []
         for wordstart, word in words:
             formatted_words.append(
@@ -477,6 +480,7 @@ def speech_results_to_timings(speech_results, max_words_per_line):
             line_start = None
             word_timings = []
 
-    timings.append([line_start, word_end, word_timings]) # stragglers
+    if line_start is not None: # if we didn't catch it at a modulo
+        timings.append([line_start, word_end, word_timings]) # stragglers
 
     return timings

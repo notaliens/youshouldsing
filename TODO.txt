@@ -34,6 +34,10 @@
 
   - Handle conflict errors.
 
+- Song
+
+  Add to singlist
+
 - Homepage:
 
   Featured recordings should take into account number of likes vs.  number of
@@ -50,6 +54,7 @@
   - Delete/edit recordings
   - Timezone
   - Flash message on edit
+  - Singlist
 
 - View recording:
 
@@ -76,11 +81,12 @@
   - Latency handling.
   - Maybe instead of building some system to arbitrarily time-align
     source audio and mic audio after latency, just let people clap
-    a pattern.
+    a pattern.  https://medium.com/@almeidneto/sound-pattern-recognition-with-python-9aff69edce5d
   - Do less work in postprocessing to produce a mix; currently we
     transcode all over the place. Probably really should mix on browser,
     not on server.
   - Upload progress bar.
+  - Remove recorded song from singlist.
 
 - Search:
 
