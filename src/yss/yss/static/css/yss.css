@@ -7023,6 +7023,7 @@ code {
 #karaoke-display {
   font-size: 150%;
   text-align: center;
+  text-transform: uppercase;
 }
 #buttons {
   float: left;
