@@ -99,8 +99,8 @@ class RecordingView(object):
         recording = self.context
         needs_remix = False
 
-        known_effects = ('effect-chorus', 'effect-reverb') # centralize
-        desired_effects = tuple([ # not currently propsheet-exposed
+        known_effects = ('effect-chorus', 'effect-reverb') # XXX centralize
+        desired_effects = tuple([
             x for x in request.params.getall('effects') if x in known_effects
         ])
 
@@ -108,9 +108,16 @@ class RecordingView(object):
             needs_remix = True
             recording.effects = tuple(desired_effects)
 
-        musicvolume = request.params.get('musivcolume', 0.5)
-
         # need to validate musicvolume and return an error
+
+        try:
+            musicvolume = request.params.get('musicvolume', 0.5)
+            musicvolume = float(musicvolume)
+            if 0 > musicvolume > 1:
+                raise ValueError
+        except (TypeError, ValueError):
+            request.session.flash('Bad musicvolume', 'danger')
+            return request.resource_url(self.context, 'remix')
 
         if str(musicvolume) != str(recording.musicvolume):
             needs_remix = True
