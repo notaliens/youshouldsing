@@ -5,6 +5,7 @@ from pyramid.view import (
     )
 from pyramid.settings import asbool
 from pyramid.httpexceptions import HTTPBadRequest
+from pyramid.traversal import resource_path
 
 from substanced.util import (
     find_index,
@@ -42,6 +43,8 @@ class RecordingView(object):
             other_recording is not recording and
             self.request.has_permission('view', other_recording)
             ]
+        processed = recording.mixed_blob and not recording.remixing
+        has_edit_permission = self.request.has_permission('yss.edit', recording)
         return {
             'title':recording.title,
             'performer':recording.performer,
@@ -49,7 +52,8 @@ class RecordingView(object):
             'liked_by': recording.liked_by,
             'other_recordings':other_recordings,
             'video_url': self.request.resource_url(recording, 'movie'),
-            'processed': bool(recording.mixed_blob),
+            'processed': int(processed),
+            'has_edit_permission':int(has_edit_permission),
             }
 
     @view_config(
@@ -59,11 +63,65 @@ class RecordingView(object):
     )
     def mixprogress(self):
         redis = get_redis(self.request)
+        recording = self.context
         progress = decode_redis_hash(
             redis.hgetall(f'mixprogress-{self.context.__name__}')
             )
-        progress['done'] = bool(self.context.mixed_blob) and 1 or 0
+        progress['done'] = (
+            (recording.mixed_blob and not recording.remixing) and 1 or 0
+            )
         return progress
+
+    @view_config(
+        name='remix',
+        renderer='templates/remix.pt',
+        permission='yss.edit',
+        )
+    def remix(self):
+        # XXX check if dry blob is still around
+        return {
+            'submit_handler': self.request.resource_url(
+                self.context, 'finish_remix'),
+            'musicvolume': self.context.musicvolume,
+            'effects':self.context.effects,
+            'stream_url':self.request.resource_url(
+                self.context, 'movie'),
+            'already':self.context.remixing,
+            }
+
+    @view_config(
+        name='finish_remix',
+        permission='yss.edit',
+        renderer='string',
+    )
+    def finish_remix(self):
+        request = self.request
+        recording = self.context
+        needs_remix = False
+
+        known_effects = ('effect-chorus', 'effect-reverb') # centralize
+        desired_effects = tuple([ # not currently propsheet-exposed
+            x for x in request.params.getall('effects') if x in known_effects
+        ])
+
+        if set(desired_effects) != set(recording.effects):
+            needs_remix = True
+            recording.effects = tuple(desired_effects)
+
+        musicvolume = request.params.get('musivcolume', 0.5)
+
+        # need to validate musicvolume and return an error
+
+        if str(musicvolume) != str(recording.musicvolume):
+            needs_remix = True
+            recording.musicvolume = musicvolume
+
+        if needs_remix:
+            recording.remixing = True
+            redis = get_redis(request)
+            redis.rpush("yss.new-recordings", resource_path(self.context))
+
+        return request.resource_url(self.context)
 
     @view_config(
         name='like',

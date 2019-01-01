@@ -175,6 +175,7 @@ def postprocess(recording, redis):
             with open("mixed.webm", "rb") as savefrom:
                 shutil.copyfileobj(savefrom, saveto)
         print ("%s/%s" % (tmpdir, "mixed.webm"))
+        recording.remixing = False
         transaction.commit()
         redis.hmset(
             progress_key, {'pct':100, 'status':'Finished'}

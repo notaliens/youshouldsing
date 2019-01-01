@@ -45,6 +45,7 @@ class Recording(persistent.Persistent):
     liked_by_ids = multireference_targetid_property(PerformerLikesRecording)
     effects = ()
     musicvolume = 0
+    remixing = False
 
     def __init__(self, tmpfolder):
         self.dry_blob = None
@@ -72,3 +73,6 @@ def recording_will_be_removed(event):
     recording = event.object
 
     shutil.rmtree(recording.tmpfolder, ignore_errors=True)
+
+def includeme(config):
+    config.add_static_view('recordingstatic', 'yss.recordings:static')

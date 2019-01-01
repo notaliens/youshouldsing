@@ -6,7 +6,7 @@
     <div class="row" style="padding-bottom: 10px;">
       <div class="col-md-12">
         <button id="play-me" style="width: 8em;" class="btn btn-primary"><i
-              class="fas fa-bullhorn"> </i> Sing</button>
+              class="fas fa-bullhorn"> </i> Listen</button>
         <button id="record-me" style="width: 8em;" class="btn btn-danger"><i
               class="fas fa-microphone"> </i> Record</button>
         <button id="reverse" style="width: 8em; display: none" class="btn btn-warning audiocontrol"><i
@@ -18,14 +18,12 @@
     
     <div class="row">
       <div class="col-md-12">
-        <div class="well">
-          <div id="player" style="display: none" tal:condition="timings">
-            <div id="karaoke-wrapper">
-              <div id="karaoke-display"></div>
-            </div>
+        <div id="player" style="display: none" tal:condition="timings">
+          <div id="karaoke-wrapper">
+            <div id="karaoke-display"></div>
           </div>
-          <div id="status" style="padding-bottom: 5px;">0:00</div>
         </div>
+        <div id="status" style="padding-bottom: 5px;">0:00</div>
       </div>
       
     </div>
@@ -53,7 +51,7 @@
               <div class="mic-vol-block"></div>
             </div>
             
-            <div>
+            <div style="display: none">
               <input id="micLevel" type="range" min="0" max="1" value="1"
                      step="0.01"/>
               <label class="form-check-label" for="micLevel">

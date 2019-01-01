@@ -294,7 +294,7 @@ class SongView(object):
         # nor error set.
 
         logger.info('Waiting for speech recognition operation to complete...')
-        response = operation.result(timeout=90)
+        response = operation.result(timeout=7200)
         logger.info('Speech recognition operation completed')
 
         timings = speech_results_to_timings(response.results, 7)

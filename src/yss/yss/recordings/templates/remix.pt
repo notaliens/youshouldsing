@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html metal:use-macro="main_template">
+
+  <div metal:fill-slot="main_content" class="container">
+
+    <div class="row" style="padding-bottom: 10px;">
+      <div class="col-md-12">
+        <button id="play-me" style="width: 8em;" class="btn btn-primary"><i
+              class="fas fa-bullhorn"> </i> Listen</button>
+        <button id="remix-me" style="width: 8em; display: ${already and 'none' or 'inline'};" class="btn btn-danger"><i
+              class="fas fa-microphone"> </i> Remix</button>
+        <button id="reverse" style="width: 8em; display: none" class="btn btn-warning audiocontrol"><i
+              class="fas fa-backward"> </i></button>
+        <button id="forward" style="width: 8em; display: none" class="btn btn-warning audiocontrol"><i
+              class="fas fa-forward"> </i></button>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-12">
+
+        <div class="panel panel-warning">
+          <div class="panel-heading">
+            <h3 class="panel-title">Recording</h3>
+          </div>
+          <div class="panel-body">
+
+            <div>
+              <span style="padding-right: 10px;"><b>Effects</b></span>
+              <span class="form-check">
+                <input class="form-check-input effects" type="checkbox" value="" id="effect-reverb" name="effect-reverb" tal:attributes="checked 'effect-reverb' in effects">
+                <label class="form-check-label" for="effect-reverb">
+                  Reverb
+                </label>
+              </span>
+              <span class="form-check">
+                <input class="form-check-input effects" type="checkbox" value="" id="effect-chorus" name="effect-chorus" tal:attributes="checked 'effect-chorus' in effects">
+                <label class="form-check-label" for="effect-chorus">
+                  Chorus
+                </label>
+              </span>
+            </div>
+            <div>
+              <input id="musicvolume" name="musicvolume" type="range" min="0" max="1" value="${musicvolume}"
+                     step="0.01"/>
+              <label class="form-check-label" for="musicvolume">
+                  Relative Music Volume
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div metal:fill-slot="tail">
+    <script type="text/javascript" src="${layout.static('yss.recordings:static/yssmixer.js')}"></script>
+    <script type="text/javascript">
+     // exported by yssmixer
+     yssmixer("${stream_url}", "${submit_handler}")
+    </script>
+  </div>
+
+</html>

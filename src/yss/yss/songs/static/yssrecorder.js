@@ -52,7 +52,7 @@ var karaoke = (function(mp3_url, timings) {
         }
         else {
             pause();
-            b.innerHTML = '<i class="fas fa-bullhorn"> </i> Sing';
+            b.innerHTML = '<i class="fas fa-bullhorn"> </i> Listen';
         }
     }
 
@@ -100,7 +100,7 @@ var karaoke = (function(mp3_url, timings) {
         player.addEventListener(
             'error', function(e) { alert('Failed to play! ' + e); }, false);
         player.addEventListener('ended', function() {
-            $('#play-me')[0].innerHTML = '<i class="fas fa-bullhorn"> </i> Sing';
+            $('#play-me')[0].innerHTML = '<i class="fas fa-bullhorn"> </i> Listen';
             player.currentTime = 0;
             $('.audiocontrol').hide();
             reset();
@@ -160,7 +160,7 @@ var rtc_recorder = (function(exports, karaoke, max_framerate, upload_handler) {
         $('#record-me')[0].onclick = stop;
         $('#record-me').attr('disabled', false);
         $('#play-me').attr('disabled', true);
-        $('#play-me')[0].innerHTML = '<i class="fas fa-bullhorn"> </i> Play';
+        $('#play-me')[0].innerHTML = '<i class="fas fa-bullhorn"> </i> Listen';
         $('select#videoSource').attr('disabled', true);
         $('select#audioSource').attr('disabled', true);
         $('.audiocontrol').hide();
@@ -170,7 +170,7 @@ var rtc_recorder = (function(exports, karaoke, max_framerate, upload_handler) {
         $('#record-me')[0].innerHTML = '<i class="fas fa-microphone"> </i> Record';
         $('#record-me').attr('disabled', false);
         $('#play-me').attr('disabled', false);
-        $('#play-me')[0].innerHTML = '<i class="fas fa-bullhorn"> </i> Play';
+        $('#play-me')[0].innerHTML = '<i class="fas fa-bullhorn"> </i> Listen';
         $('select#videoSource').attr('disabled', false);
         $('select#audioSource').attr('disabled', false);
     }
@@ -236,7 +236,7 @@ var rtc_recorder = (function(exports, karaoke, max_framerate, upload_handler) {
 
         var micinput = audio_context.createMediaStreamSource(stream);
 
-        // mic level
+        // mic level (control disabled for now)
         modulatorInput = audio_context.createGain();
         modulatorGain = audio_context.createGain();
         modulatorGain.gain.value = 1.0;

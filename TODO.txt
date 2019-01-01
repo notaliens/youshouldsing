@@ -6,6 +6,8 @@
 
   - should probably use browser timezone instead of user-specified SDI timezone
 
+  - Relstorage
+
 - Licensing
 
   - https://pep.rocks/programs/gem
@@ -36,12 +38,29 @@
 
 - Song
 
-  Add to singlist
+  - Add to singlist
+  - Song timings editor (post-speech)
+  - Postprocess retimings (cope with API call error unexpected state when
+    file is deleted too)
+  - Song timing word endings don't seem to be right... see whiter shade.
+  - Crowdsource lyric retimings... allow uploader to accept lyric timing
+    suggestions.
+  - Recognize dupe song metadata and group together on other recordings page.
 
 - Homepage:
 
   Featured recordings should take into account number of likes vs.  number of
   views, whether it's "members only", and perhaps number of comments.
+
+  We need to index the number of times a song has been recorded.  This is
+  a rough measure of its popularity.
+
+  Public recordings tend to get about 20 hits per year for a not-currently-hot
+  song.  Private recordings maybe 5-10.
+
+  song_popularity = num_recordings on scale of 0 to 100 over site lifetime
+
+  use song popularity as a handicap
 
 - Profile:
 
@@ -62,13 +81,18 @@
   - Dropdown for other recordings instead of inline table.
   - "Likes disabled" instead of "0 performers have liked this recording"
     when like permission is not available.
+  - Remix should be just another tab on view-recording.
 
 - Edit recording:
 
-  - Private/public/authenticated viewers (workflow?)
+  - Private/public/authenticated/group viewers (workflow?)
   - Allow/disallow likes
   - Allow/disallow comments
-  - Remix (e.g. no video, adjust latency, adjust music volume, adjust effects)
+
+- Remix recording
+
+  - no video
+  - adjust latency
 
 - Record:
 
@@ -85,8 +109,10 @@
   - Do less work in postprocessing to produce a mix; currently we
     transcode all over the place. Probably really should mix on browser,
     not on server.
-  - Upload progress bar.
   - Remove recorded song from singlist.
+  - Recordings should probably be inside the performer folder so we
+    can set e.g. 'yss.edit' permission only on the performer instead
+    of on each recording she creates.
 
 - Search:
 
