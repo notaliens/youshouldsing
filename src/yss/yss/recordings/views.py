@@ -21,6 +21,8 @@ from yss.interfaces import (
     IRecordings,
     )
 
+from pyramid.decorator import reify
+
 import yss.likes
 
 @view_defaults(context=IRecording)
@@ -29,12 +31,52 @@ class RecordingView(object):
         self.context = context
         self.request = request
 
+    @reify
+    def is_processed(self):
+        recording = self.context
+        return recording.mixed_blob and not recording.remixing
+
+    @reify
+    def has_edit_permission(self):
+        recording = self.context
+        has_edit_permission = self.request.has_permission('yss.edit', recording)
+        return has_edit_permission
+
+    def tabs(self):
+        state = self.request.view_name
+        recording = self.context
+        processed = self.is_processed
+        tabs = []
+        if self.has_edit_permission:
+            tabs.append(
+                {'title':'View',
+                 'id':'button-view',
+                 'url':self.request.resource_url(recording),
+                 'class':(state == '') and 'active' or '',
+                 'enabled':True,
+                 })
+            tabs.append(
+                {'title':'Edit',
+                 'id':'button-edit',
+                 'url':self.request.resource_url(recording, 'edit'),
+                 'class':(state == 'edit') and 'active' or '',
+                 'enabled':True,
+                 })
+            tabs.append(
+                {'title':'Remix',
+                 'id':'button-remix',
+                 'url':self.request.resource_url(recording, 'remix'),
+                 'class':(state == 'remix') and 'active' or '',
+                 'enabled':processed,
+                 })
+        return tabs
+
     @view_config(
         context=IRecording,
         renderer='templates/recording.pt',
         permission='view',
     )
-    def __call__(self):
+    def view(self):
         recording = self.context
         # XXX compute other_recordings more efficiently
         other_recordings = [
@@ -43,8 +85,6 @@ class RecordingView(object):
             other_recording is not recording and
             self.request.has_permission('view', other_recording)
             ]
-        processed = recording.mixed_blob and not recording.remixing
-        has_edit_permission = self.request.has_permission('yss.edit', recording)
         return {
             'title':recording.title,
             'performer':recording.performer,
@@ -52,8 +92,8 @@ class RecordingView(object):
             'liked_by': recording.liked_by,
             'other_recordings':other_recordings,
             'video_url': self.request.resource_url(recording, 'movie'),
-            'processed': int(processed),
-            'has_edit_permission':int(has_edit_permission),
+            'processed': int(self.is_processed),
+            'has_edit_permission':int(self.has_edit_permission),
             }
 
     @view_config(

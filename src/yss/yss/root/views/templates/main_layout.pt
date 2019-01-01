@@ -106,6 +106,21 @@
 
       </div>
       <div id="main_content">
+        <div tal:define="tabs view.tabs()|[]" tal:omit-tag="">
+          <div tal:condition="tabs" class="row" style="padding-bottom: 5px;">
+            <div class="col-md-12">
+              <ul tal:condition="tabs" class="nav nav-tabs">
+                <li tal:repeat="tab tabs"
+                    role="presentation"
+                    id="${tab['id']}" class="${tab['class']}"
+                    style="${tab['enabled'] and ' ' or 'display: none;'}">
+                  <a href="${tab['url']}">${tab['title']}</a>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
         <metal:slot define-slot="main_content">
           Sing here.
         </metal:slot>

@@ -5,18 +5,19 @@
     <div class="row">
 
       <div class="col-md-12">
-        
+
         <div class="panel panel-primary">
-          
+
           <div class="panel-heading">
           ${title} by ${performer.title|None}
           </div>
-          
+
           <div class="panel-body">
-            
+
             <div class="row">
-              
+
               <div id="recording-video">
+
                 <video id="thevideo" width="640" height="400" controls style="display: ${processed and 'block' or 'none'};">
                   <source src="${video_url}" type="video/mp4"/>
                 </video>
@@ -28,18 +29,15 @@
                 </div>
               </div>
             </div>
-            
+
             <div class="row" tal:condition="other_recordings">
-              <div class="well" id="remix-button" style="display: ${(processed and has_edit_permission) and 'block' or 'none'}">
-                <a href="${request.resource_url(context, 'remix')}">Remix this song</a>
-              </div>
               <div class="panel panel-default">
                 <div class="panel-heading">
                 Other recordings of this song
                 </div>
                 <div class="panel-body">
                   <table class="table table-striped table-condensed">
-                    
+
                     <tbody>
                       <tal:block repeat="item other_recordings">
                         <tr>
@@ -55,13 +53,13 @@
                       </tal:block>
                     </tbody>
                   </table>
-                  
+
                 </div>
               </div>
-              
-              
+
+
             </div>
-            
+
             <div class="row" id="like-table" tal:define="can_like layout.can_like(context); has_liked layout.has_liked(context)">
               <div class="panel panel-default">
                 <div class="panel-heading">
@@ -85,7 +83,7 @@
                   </span>
                   <span id="like-count">${num_likes} performer${num_likes==1 and " has liked this recording" or "s have liked this recording"}</span>
                   <script type="text/javascript">
-                   
+
                    $("#like-button").click(function () {
                      $.ajax('${request.resource_url(context)}@@like')
                       .success(function(data) {
@@ -95,7 +93,7 @@
                        else {
                          message = data['num_likes'] + ' performers have liked this recording';
                        }
-                       
+
                        $('#like-count').text(message);
                        $('#like-button').hide();
                        $('#unlike-button').show();
@@ -104,8 +102,8 @@
                        });
                        return false;
                      });
-                       
-                       
+
+
                        $("#unlike-button").click(function () {
                          $.ajax('${request.resource_url(context)}@@unlike')
                       .success(function(data) {
@@ -115,7 +113,7 @@
                            else {
                              message = data['num_likes'] + ' performers have liked this recording';
                            }
-                           
+
                            $('#like-count').text(message);
                            $('#unlike-button').hide();
                            if (data['can_like']) {
@@ -128,10 +126,10 @@
                          });
                   </script>
                 </div>
-                
+
                 <div class="panel-body">
                   <table class="table table-striped table-condensed">
-                    
+
                     <tbody>
                       <tr tal:repeat="item liked_by">
                         <td><img src="${item.photo_url}"/></td>
@@ -141,12 +139,12 @@
                       </tr>
                     </tbody>
                   </table>
-                  
+
                 </div>
               </div>
-              
+
             </div>
-            
+
           </div>
         </div>
 
@@ -163,7 +161,7 @@
                    $('#thevideo').show();
                    $('#processing').hide();
                    if (has_edit_permission) {
-                     $('#remix-button').show();
+                     $('#button-remix').show();
                      };
                  }
                  else {
@@ -185,17 +183,17 @@
     </div>
 
     <div class="row" tal:condition="False">
-    
+
       <div class="col-md-12">
-        
+
         <div class="panel panel-primary">
-          
+
           <div class="panel-heading">
           Discussion
           </div>
-          
+
           <div class="panel-body">
-            
+
             <div class="row">
               <div id="disqus_thread"></div>
               <script type="text/javascript">
@@ -204,7 +202,7 @@
                var disqus_id = '${context.__oid__}';
                var disqus_title = '${context.title}: ${context.performer.title|None}';
                var disqus_url = '${request.resource_url(context)}';
-               
+
                /* * * DON'T EDIT BELOW THIS LINE * * */
                (function() {
                  var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
@@ -214,17 +212,17 @@
               </script>
               <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
               <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
-              
+
             </div>
-            
+
           </div>
-          
+
         </div>
-        
+
       </div>
 
     </div>
-    
+
   </div>
 
 </div>

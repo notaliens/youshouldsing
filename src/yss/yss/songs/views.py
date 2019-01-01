@@ -23,6 +23,7 @@ from pyramid.traversal import (
     find_root,
     resource_path,
     )
+from pyramid.decorator import reify
 from pyramid.view import (
     view_config,
     view_defaults,
@@ -184,11 +185,37 @@ class SongView(object):
         self.context = context
         self.request = request
 
+    @reify
+    def has_retime_permission(self):
+        song = self.context
+        return self.request.has_permission('yss.retime', song)
+
+    def tabs(self):
+        state = self.request.view_name
+        song = self.context
+        tabs = []
+        if self.has_retime_permission:
+            tabs.append(
+                {'title':'View',
+                 'id':'button-view',
+                 'url':self.request.resource_url(song),
+                 'class':(state == '') and 'active' or '',
+                 'enabled':True,
+                 })
+            tabs.append(
+                {'title':'Retime',
+                 'id':'button-retime',
+                 'url':self.request.resource_url(song, 'retime'),
+                 'class':(state == 'retime') and 'active' or '',
+                 'enabled':True,
+                 })
+        return tabs
+
     @view_config(
         renderer='templates/song.pt',
         permission='view'
     )
-    def __call__(self):
+    def view(self):
         song = self.context
         return {
             'title':song.title,
@@ -197,7 +224,7 @@ class SongView(object):
             'liked_by': song.liked_by,
             'recordings':song.recordings,
             'can_record':self.request.has_permission('yss.record', song),
-            'can_retime':self.request.has_permission('yss.retime', song),
+            'can_retime':self.has_retime_permission,
             }
 
     @view_config(
