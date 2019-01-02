@@ -8,7 +8,6 @@
           <div class="panel-heading">
             <div style="float:right">
               <img src="${photo_url}" />
-              <p tal:condition="can_edit"><a href="@@edit">Edit</a></p>
             </div>
             <p style="float: right; padding-right: 2em">
               <span tal:condition="age">${age} - </span>

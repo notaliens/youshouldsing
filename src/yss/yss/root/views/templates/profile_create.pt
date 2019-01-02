@@ -1,0 +1,16 @@
+<div metal:use-macro="main_template">
+
+  <div metal:fill-slot="main_content" class="container">
+
+    <div class="row">
+      <div class="col-md-12">
+        <div class="panel-heading">
+           Create a profile
+        </div>
+        <div class="panel-body">
+           ${structure:form}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
