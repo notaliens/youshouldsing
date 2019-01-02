@@ -26,6 +26,7 @@ def recent_recordings(context, request, limit=10):
     q = find_index(context, 'system', 'content_type').eq('Recording')
     q = q & find_index(context, 'system', 'allowed').allows(
         request, 'view')
+    q = q & find_index(context, 'yss', 'performer_id').eq(context.__oid__)
     created = find_index(context, 'yss', 'created')
     resultset = q.execute()
     return resultset.sort(created, reverse=True, limit=limit)

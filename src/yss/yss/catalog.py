@@ -18,7 +18,7 @@ class Indexes(object):
     artist = Field()
     num_likes = Field()
     num_recordings = Field()
-    creator_id = Field()
+    performer_id = Field()
     created = Field()
     performer = Field()
     duration = Field() # in seconds
@@ -60,8 +60,8 @@ class IndexViews(object):
     def num_recordings(self, default):
         return getattr(self.resource, 'num_recordings', default)
 
-    def creator_id(self, default):
-        return getattr(self.resource, 'creator_id', default)
+    def performer_id(self, default):
+        return getattr(self.resource.performer, '__oid__', default)
 
     def created(self, default):
         created = getattr(self.resource, 'created', None)
@@ -109,8 +109,9 @@ def includeme(config):  # pragma: no cover
     config.add_indexview(
         IndexViews,
         catalog_name='yss',
-        index_name='creator_id',
-        attr='creator_id',
+        index_name='performer_id',
+        attr='performer_id',
+        context=IRecording,
         )
     config.add_indexview(
         IndexViews,

@@ -103,7 +103,8 @@ def create_profile(context, request):
             principals = find_service(context, 'principals')
             root = find_root(context)
             username = appstruct['username']
-            user = principals.add_user(username, registry=registry)
+            userid = request.session['userid']
+            user = principals.add_user(userid, registry=registry)
             performer = registry.content.create('Performer')
             root['performers'][username] = performer
             # NB: performer.user required before setting tzname and email

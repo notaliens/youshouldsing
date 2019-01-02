@@ -22,8 +22,7 @@
 
   - Facebook login
 
-  - Provide an interstitial page before a performer is created that
-    allows a user to choose his username, change his photo, etc.
+  - Photo url -> photo
 
   - How do we deal with someone forgetting which service he used to
     login with?  How do we deal with it if a user wants to log in
@@ -35,6 +34,10 @@
   - Impersonation.
 
   - Disqus SSO.
+
+  - Birthdate, not age.
+
+  - Show username/photo in navbar when logged in.
 
 - Song import:
 
@@ -75,8 +78,8 @@
   - Divulge performer likes
   - Divulge real name
   - Delete/edit recordings
+  - Change password
   - Timezone
-  - Flash message on edit
   - Singlist
 
 - View recording:
@@ -86,6 +89,7 @@
   - "Likes disabled" instead of "0 performers have liked this recording"
     when like permission is not available.
   - Remix should be just another tab on view-recording.
+  - "Other recordings you might like if you like this one"
 
 - Edit recording:
 
@@ -119,6 +123,7 @@
     can set e.g. 'yss.edit' permission only on the performer instead
     of on each recording she creates.
   - Description
+  - Relative music volume doesn't work.
 
 - Search:
 
