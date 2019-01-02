@@ -8,6 +8,10 @@
 
   - Relstorage
 
+  - i18n
+
+  - datadog
+
 - Licensing
 
   - https://pep.rocks/programs/gem
@@ -88,6 +92,7 @@
   - Private/public/authenticated/group viewers (workflow?)
   - Allow/disallow likes
   - Allow/disallow comments
+  - Description
 
 - Remix recording
 
@@ -113,6 +118,7 @@
   - Recordings should probably be inside the performer folder so we
     can set e.g. 'yss.edit' permission only on the performer instead
     of on each recording she creates.
+  - Description
 
 - Search:
 

@@ -21,6 +21,7 @@ from yss.interfaces import (
     RecordingToSong,
     RelatedPropertySheet,
     genre_choices,
+    language_choices,
     )
 
 class SongSchema(FilePropertiesSchema):
@@ -30,13 +31,19 @@ class SongSchema(FilePropertiesSchema):
     artist = colander.SchemaNode(colander.String())
     genre = colander.SchemaNode(
         colander.String(),
-        widget=deform.widget.SelectWidget(values=genre_choices),
+        widget=deform.widget.Select2Widget(values=genre_choices),
     )
     duration = colander.SchemaNode(
         colander.Int(),
         missing=colander.null,
         title='Duration in seconds',
         widget = deform.widget.TextInputWidget(readonly=True),
+        )
+    remixing = colander.SchemaNode(
+        colander.Bool(),
+        missing=colander.null,
+        title='Remixing',
+        widget = deform.widget.CheckboxWidget(),
         )
     lyrics = colander.SchemaNode(
         colander.String(),
@@ -46,6 +53,15 @@ class SongSchema(FilePropertiesSchema):
         colander.String(),
         widget=deform.widget.TextAreaWidget(style="height: 200px;"),
         )
+    alt_timings = colander.SchemaNode(
+        colander.String(),
+        missing='',
+        widget=deform.widget.TextAreaWidget(style="height: 200px;"),
+        )
+    language = colander.SchemaNode(
+        colander.String(),
+        widget=deform.widget.Select2Widget(values=language_choices),
+    )
 
 class SongPropertySheet(PropertySheet):
     schema = SongSchema()
@@ -80,13 +96,18 @@ class Song(File):
     liked_by = multireference_target_property(PerformerLikesSong)
     liked_by_ids = multireference_targetid_property(PerformerLikesSong)
     duration = 0
+    language = 'en-US'
+    alt_timings = ''
+    retiming_blob = None
+    retiming = False
 
     def __init__(self, title, artist, lyrics, timings, audio_stream,
-                 audio_mimetype='audio/mpeg'):
+                 audio_mimetype='audio/mpeg', language='en-US'):
         File.__init__(self, audio_stream, audio_mimetype, title)
         self.artist = artist
         self.lyrics = lyrics
         self.timings = timings
+        self.language = language
 
     @property
     def num_likes(self):

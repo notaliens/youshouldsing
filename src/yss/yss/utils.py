@@ -1,3 +1,5 @@
+import json
+import pprint
 import redis
 
 def get_redis(request):
@@ -17,3 +19,19 @@ def decode_redis_hash(d):
             v = v.decode('utf-8')
         decoded[newkey] = v
     return decoded
+
+def format_timings(timings):
+    timings = json.loads(timings)
+    formatted = []
+    twodecs = '%.3f'
+    for start, end, words in timings:
+        formatted_start = twodecs % (start or 0)
+        formatted_end = twodecs % (end or 0)
+        formatted_words = []
+        for wordstart, word in words:
+            formatted_words.append(
+                [twodecs % wordstart,
+                 word]
+                )
+        formatted.append([formatted_start, formatted_end, formatted_words])
+    return pprint.pformat(formatted, width=50)

@@ -54,6 +54,7 @@ setup(name='yss',
       [console_scripts]
       import_songs = yss.scripts.import_songs:main
       postproc = yss.scripts.postproc:main
+      retimer = yss.scripts.retime:main
       """,
       )
 

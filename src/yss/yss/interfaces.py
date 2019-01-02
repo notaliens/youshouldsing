@@ -90,3 +90,62 @@ genre_choices = (
     ('Blues', 'Blues'),
 )
 
+# for use with speech recognition, see https://cloud.google.com/speech-to-text/docs/languages
+_languages = """
+English en-US
+French fr-FR
+German de-DE
+Danish da-DK
+Czech cs-CZ
+Catalan ca-ES
+Spanish es-ES
+Basque eu-ES
+Italian it-IT
+Latvian lv-LV
+Hungarian hu-HU
+Dutch nl-NL
+Polish pl-PL
+Portugese pt-PT
+Slovak sk-SK
+Slovenian sk-SK
+Romanian ro-RO
+Japanese ja-JP
+Mandarin cmn-Hans-CN
+Cantonese yue-Hant-HK
+Hindi hi-IN
+Arabic ar-EG
+Thai th-TH
+Korean ko-KR
+Russian ru-RU
+Bulgarian bg-BG
+Greek el-GR
+Armenian hy-AM
+Indonesian id-ID
+Malay ms-MY
+Bengali bn-IN
+Catalan ca-ES
+Filipino fil-PH
+Javanese jv-ID
+Khmer km-KH
+Finnish fi-FI
+Swedish sv-SE
+Vietnamese vi-VN
+Turkish tr-TR
+Urdu ur-PK
+Hebrew he-IL
+Ukrainian uk-UA
+"""
+
+languages = []
+for lang in _languages.split('\n'):
+    lang = lang.strip()
+    if not lang:
+        continue
+    name, code = lang.split(' ', 1)
+    languages.append({'name':name, 'code':code})
+
+language_choices = [
+    ('', '- Select -'),
+    ]
+for language in languages:
+    language_choices.append((language['code'], language['name']))

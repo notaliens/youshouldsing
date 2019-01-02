@@ -40,6 +40,7 @@ def main(argv=sys.argv):
     root = env['root']
     redis = get_redis(env['request'])
     while True:
+        logger.info('Waiting for another recording')
         path = redis.blpop('yss.new-recordings', 0)[1] # blocking pop
         path = path.decode('utf-8')
         time.sleep(1)
@@ -53,7 +54,7 @@ def main(argv=sys.argv):
             try:
                 if not bool(recording.dry_blob):
                     # not committed yet
-                    redis.rpush('yss.new_recordings', path)
+                    redis.rpush('yss.new-recordings', path)
                 else:
                     postprocess(recording, redis)
             except:
@@ -192,5 +193,3 @@ def postprocess(recording, redis):
         recording.postproc_failure = True # currently not exposed
     finally:
         os.chdir(curdir)
-
-

@@ -61,8 +61,11 @@ var karaoke = (function(mp3_url, timings) {
         player.currentTime = 0;
     }
 
-    function init() {
+    function init(new_timings) {
         // Create the karaoke engine and get a show instance
+        if (new_timings) {
+            timings = new_timings;
+        }
         if (timings) {
             var rice = new RiceKaraoke(
                 RiceKaraoke.simpleTimingToTiming(timings));
@@ -114,7 +117,8 @@ var karaoke = (function(mp3_url, timings) {
         play: play,
         pause: pause,
         reset: reset,
-        playtoggle: playtoggle
+        playtoggle: playtoggle,
+        init: init
     };
 });
 
