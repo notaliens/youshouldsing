@@ -1,141 +1,141 @@
 <div metal:use-macro="main_template">
 
-  <div metal:fill-slot="main_content">
+  <div metal:fill-slot="main_content" class="container">
 
-    <div class="col-md-12">
-      <div class="panel panel-default">
-        <tal:if tal:condition="not form">
-         <div class="panel-heading">
-           <div style="float:right">
-            <img src="${photo_url}" />
-            <p tal:condition="can_edit"><a href="@@edit.html">Edit</a></p>
-           </div>
-           <p style="float: right; padding-right: 2em">
+    <div class="row">
+      <div class="col-md-12">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <div style="float:right">
+              <img src="${photo_url}" />
+              <p tal:condition="can_edit"><a href="@@edit">Edit</a></p>
+            </div>
+            <p style="float: right; padding-right: 2em">
               <span tal:condition="age">${age} - </span>
 
               <span tal:condition="sex">${sex} - </span>
 
               <span tal:condition="genre">${genre}</span>
-           </p>
-           <h3>${title}</h3>
-         </div>
-         <div class="panel-body">
-              Likes: <span id="like-count">${num_likes}</span>
-              <tal:if tal:condition="layout.can_like(context)">
-                <a id="like-button" href="@@like" style="padding-left: 10px;"
-                 ><i class="glyphicon glyphicon-thumbs-up"> </i></a>
-                <script type="text/javascript">
-                 $("#like-button").click(function () {
-                    $.ajax('@@like')
+            </p>
+            <h3>${title}</h3>
+          </div>
+        </div>
+        <div class="panel-body">
+          <span id="like-count">Likes ${num_likes}</span>
+          <tal:if tal:condition="layout.can_like(context)">
+            <a id="like-button" href="@@like" style="padding-left: 10px;"
+               ><i class="glyphicon glyphicon-thumbs-up"> </i></a>
+            <script type="text/javascript">
+             $("#like-button").click(function () {
+               $.ajax('@@like')
                     .success(function(data) {
-                        var counter = $('#like-count'),
-                            thumb = $('#like-button');
-                        counter.text(data['num_likes']);
-                        thumb.hide();
-                    })
-                    .fail(function() {
-                        alert('Failed to add like');
-                    });
-                    return false;
-                 });
-                </script>
-              </tal:if>
+                 var counter = $('#like-count'),
+                 thumb = $('#like-button');
+                 counter.text(data['num_likes']);
+                 thumb.hide();
+               })
+                      .fail(function() {
+                 alert('Failed to add like');
+               });
+               return false;
+             });
+            </script>
+          </tal:if>
 
-         </div>
-         <div class="panel-heading">
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12">
+        <div class="panel-heading">
           Recent Recordings
-         </div>
-         <div class="panel-body">
-           <table tal:condition="recent_recordings|None" 
-                  class="table table-striped table-condensed">
+        </div>
+        <div class="panel-body">
+          <table tal:condition="recent_recordings|None"
+                 class="table table-striped table-condensed">
 
-             <thead>
-               <tr>
-                 <th width="25%">
+            <thead>
+              <tr>
+                <th width="25%">
                    Original Artist
-                 </th>
-                 <th width="25%">
+                </th>
+                <th width="25%">
                    Title
-                 </th>
-                 <th width="20%">
+                </th>
+                <th width="20%">
                    Genre
-                 </th>
-                 <th width="15%">
+                </th>
+                <th width="15%">
                    Likes
-                 </th>
-                 <th width="20%">
+                </th>
+                <th width="20%">
                    Recorded
-                 </th>
-               </tr>
-             </thead>
-             
-             <tbody>
-               <tr tal:repeat="item recent_recordings">
-                 <td>${item.song.artist}</td>
-                 <td>
+                </th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr tal:repeat="item recent_recordings">
+                <td>${item.song.artist}</td>
+                <td>
                   <a href="${request.resource_url(item.song)}">${item.song.title}</a>
-                 </td>
-                 <td>${item.song.genre or 'Unknown'}</td>
-                 <td>${item.num_likes}</td>
-                 <td><a href="${request.resource_url(item)}">${layout.short_created_local(item)}</a></td>
-               </tr>
-             </tbody>
-           </table>
-           <div style="padding-top: 10px;"
-                tal:condition="not recent_recordings">
+                </td>
+                <td>${item.song.genre or 'Unknown'}</td>
+                <td>${item.num_likes}</td>
+                <td><a href="${request.resource_url(item)}">${layout.short_created_local(item)}</a></td>
+              </tr>
+            </tbody>
+          </table>
+          <div style="padding-top: 10px;"
+               tal:condition="not recent_recordings">
              No recordings found.
-           </div>
-         </div>
-        </tal:if>
-        <tal:if tal:condition="form">
-         <div class="panel-heading">
-           Account settings
-         </div>
-         <div class="panel-body">
-           ${structure:form}
-         </div>
-        </tal:if>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12">
 
-         <div class="panel-heading">
+        <div class="panel-heading">
           Likes Songs
-         </div>
-         <div class="panel-body">
-           <table tal:condition="likes_songs|None" 
-                  class="table table-striped table-condensed">
+        </div>
+        <div class="panel-body">
+          <table tal:condition="likes_songs|None"
+                 class="table table-striped table-condensed">
 
-             <thead>
-               <tr>
-                 <th width="25%">
+            <thead>
+              <tr>
+                <th width="25%">
                    Original Artist
-                 </th>
-                 <th width="25%">
+                </th>
+                <th width="25%">
                    Title
-                 </th>
-                 <th width="20%">
+                </th>
+                <th width="20%">
                    Genre
-                 </th>
-                 <th width="15%">
+                </th>
+                <th width="15%">
                    Likes
-                 </th>
-               </tr>
-             </thead>
-             
-             <tbody>
-               <tr tal:repeat="item likes_songs">
-                 <td>${item.artist}</td>
-                 <td>
+                </th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr tal:repeat="item likes_songs">
+                <td>${item.artist}</td>
+                <td>
                   <a href="${request.resource_url(item)}">${item.title}</a>
-                 </td>
-                 <td>${item.genre or 'Unknown'}</td>
-                 <td>${item.num_likes}</td>
-               </tr>
-             </tbody>
-           </table>
-           <div style="padding-top: 10px;"
-                tal:condition="not form and not likes_songs">
+                </td>
+                <td>${item.genre or 'Unknown'}</td>
+                <td>${item.num_likes}</td>
+              </tr>
+            </tbody>
+          </table>
+          <div style="padding-top: 10px;"
+               tal:condition="not likes_songs">
              No songs liked.
-           </div>
-         </div>
+          </div>
+        </div>
       </div>
 
     </div>

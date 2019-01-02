@@ -42,8 +42,8 @@ def velruse_login_complete_view(context, request):
         performer.age = colander.null
         performer.sex = None
         performer.genre = None
-        set_acl(performer, [(Allow, user.__oid__, ['yss.edit-profile'])])
-        location = request.resource_url(performer, 'edit.html')
+        set_acl(performer, [(Allow, user.__oid__, ['yss.edit'])])
+        location = request.resource_url(performer, 'edit')
     else:
         location = request.resource_url(root['performers'][username])
     headers = remember(request, get_oid(user))

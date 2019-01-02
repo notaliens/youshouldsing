@@ -1,29 +1,41 @@
 <!DOCTYPE html>
 <html metal:use-macro="main_template">
 
-  <div metal:fill-slot="main_content">
-
-    <div class="row" style="padding-bottom: 10px;">
-      <div class="col-md-12">
-        <button id="play-me" style="width: 8em;" class="btn btn-primary"><i
-              class="fas fa-bullhorn"> </i> Listen</button>
-        <button id="record-me" style="width: 8em;" class="btn btn-danger"><i
-              class="fas fa-microphone"> </i> Record</button>
-        <button id="reverse" style="width: 8em; display: none" class="btn btn-warning audiocontrol"><i
-              class="fas fa-backward"> </i></button>
-        <button id="forward" style="width: 8em; display: none" class="btn btn-warning audiocontrol"><i
-              class="fas fa-forward"> </i></button>
-      </div>
-    </div>
-
+  <div metal:fill-slot="main_content" class="container">
     <div class="row">
       <div class="col-md-12">
-        <div id="player" style="display: none">
-          <div id="karaoke-wrapper">
-            <div id="karaoke-display"></div>
+
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <i>${context.title}</i> in the style of ${context.artist}
+          </div>
+          <div class="panel-body">
+            <div class="row" style="padding-bottom: 10px;">
+              <div class="col-md-12">
+
+                <button id="play-me" style="width: 8em;" class="btn btn-primary"><i
+              class="fas fa-bullhorn"> </i> Listen</button>
+                <button id="record-me" style="width: 8em;" class="btn btn-danger"><i
+              class="fas fa-microphone"> </i> Record</button>
+                <button id="reverse" style="width: 8em; display: none" class="btn btn-warning audiocontrol"><i
+              class="fas fa-backward"> </i></button>
+                <button id="forward" style="width: 8em; display: none" class="btn btn-warning audiocontrol"><i
+              class="fas fa-forward"> </i></button>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-12">
+                <div id="player" style="display: none">
+                  <div id="karaoke-wrapper">
+                    <div id="karaoke-display"></div>
+                  </div>
+                </div>
+                <div id="status" style="padding-bottom: 5px;">0:00</div>
+              </div>
+            </div>
           </div>
         </div>
-        <div id="status" style="padding-bottom: 5px;">0:00</div>
       </div>
 
     </div>
@@ -65,7 +77,7 @@
             <h3 class="panel-title">Recording</h3>
           </div>
           <div class="panel-body">
-            
+
             <div>
               <span style="padding-right: 10px;"><b>Effects</b></span>
               <span class="form-check">
@@ -73,7 +85,7 @@
                 <label class="form-check-label" for="effect-reverb">
                   Reverb
                 </label>
-              </span>              
+              </span>
               <span class="form-check">
                 <input class="form-check-input effects" type="checkbox" value="" id="effect-chorus">
                 <label class="form-check-label" for="effect-chorus">
@@ -116,7 +128,7 @@
           <i class="fas fa-spinner fa-spin" style="display:none;"
              id="afterupload-spinner"> </i>
         </div>
-        
+
       </div>
     </div>
 

@@ -1,29 +1,39 @@
 <!DOCTYPE html>
 <html metal:use-macro="main_template">
 
-  <div metal:fill-slot="main_content">
-    <div id="display" style="display: ${processed and 'block' or 'none'}">
-      <div class="row" style="padding-bottom: 10px;">
-        <div class="col-md-12">
-          <button id="play-me" style="width: 8em;" class="btn btn-primary"><i
-              class="fas fa-bullhorn"> </i> Listen</button>
-          <button id="record-me" style="width: 8em;" class="btn btn-danger"><i
-              class="fas fa-microphone"> </i> Record</button>
-          <button id="reverse" style="width: 8em; display: none" class="btn btn-warning audiocontrol"><i
-              class="fas fa-backward"> </i></button>
-          <button id="forward" style="width: 8em; display: none" class="btn btn-warning audiocontrol"><i
-              class="fas fa-forward"> </i></button>
-        </div>
-      </div>
+  <div metal:fill-slot="main_content" class="container">
+    <div class="row">
+      <div class="col-md-12">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <i>${context.title}</i> in the style of ${context.artist}
+          </div>
+          <div class="panel-body">
+            <div class="row" style="padding-bottom: 10px;">
 
-      <div class="row" tal:condition="timings">
-        <div class="col-md-12">
-          <div id="player" style="display: none">
-            <div id="karaoke-wrapper">
-              <div id="karaoke-display"></div>
+              <div id="display" style="display: ${processed and 'block' or 'none'}">
+                <button id="play-me" style="width: 8em;" class="btn btn-primary"><i
+              class="fas fa-bullhorn"> </i> Listen</button>
+                <button id="record-me" style="width: 8em;" class="btn btn-danger"><i
+              class="fas fa-microphone"> </i> Record</button>
+                <button id="reverse" style="width: 8em; display: none" class="btn btn-warning audiocontrol"><i
+              class="fas fa-backward"> </i></button>
+                <button id="forward" style="width: 8em; display: none" class="btn btn-warning audiocontrol"><i
+              class="fas fa-forward"> </i></button>
+              </div>
+            </div>
+
+            <div class="row" tal:condition="timings">
+              <div class="col-md-12">
+                <div id="player" style="display: none">
+                  <div id="karaoke-wrapper">
+                    <div id="karaoke-display"></div>
+                  </div>
+                </div>
+                <div id="status" style="padding-bottom: 5px;">0:00</div>
+              </div>
             </div>
           </div>
-          <div id="status" style="padding-bottom: 5px;">0:00</div>
         </div>
 
       </div>
@@ -77,23 +87,27 @@
           </div>
         </div>
       </div>
+    </div>
 
-      <div id="uploading-overlay">
-        <div id="uploading-overlay-text">
-          <i><b>Uploading</b></i>
+    <div class="row" tal:condition="not processed">
+      <div class="col-md-12">
+
+        <div class="well" id="processing">
           <div class="progress">
-            <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%; min-width: 1em;" id="upload-progress">0%</div>
-            <i class="fas fa-spinner fa-spin" id="afterupload-spinner"
-               style="display:none;"> </i>
+            <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%; min-width: 10em;" id="progress">Awaiting processing</div>
           </div>
         </div>
       </div>
-
     </div>
-    <div class="well" id="processing"
-         tal:condition="not processed">
-      <div class="progress">
-        <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%; min-width: 10em;" id="progress">Awaiting processing</div>
+
+    <div id="uploading-overlay">
+      <div id="uploading-overlay-text">
+        <i><b>Uploading</b></i>
+        <div class="progress">
+          <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%; min-width: 1em;" id="upload-progress">0%</div>
+          <i class="fas fa-spinner fa-spin" id="afterupload-spinner"
+             style="display:none;"> </i>
+        </div>
       </div>
     </div>
   </div>

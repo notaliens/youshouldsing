@@ -2,9 +2,13 @@
 import colander
 import deform
 
+from pyramid.decorator import reify
 from pyramid.httpexceptions import HTTPBadRequest
 from pyramid.settings import asbool
-from pyramid.view import view_config
+from pyramid.view import (
+    view_config,
+    view_defaults,
+    )
 from substanced.folder.views import generate_text_filter_terms
 from substanced.util import (
     Batch,
@@ -26,70 +30,46 @@ def recent_recordings(context, request, limit=10):
     resultset = q.execute()
     return resultset.sort(created, reverse=True, limit=limit)
 
-@view_config(
-    context=IPerformer,
-    renderer='templates/profile.pt',
-    permission='view',
-)
-def profile_view(context, request):
-    return {
-        'username': context.__name__,
-        'title': getattr(context, 'title', ''),
-        'email': getattr(context, 'email', ''),
-        'photo_url': getattr(context, 'photo_url', ''),
-        'age': getattr(context, 'age', colander.null),
-        'sex': getattr(context, 'sex', None),
-        'genre': getattr(context, 'genre', None),
-        'tzname': getattr(context, 'tzname', 'UTC'),
-        'form': None,
-        'recent_recordings': recent_recordings(context, request),
-        'num_likes': context.num_likes,
-        'likes_songs': context.likes_songs,
-        'can_edit': getattr(request.user, 'performer', None) is context,
-    }
+@view_defaults(context=IPerformer)
+class PerformerViews(object):
+    def __init__(self, context, request):
+        self.context = context
+        self.request = request
 
-@view_config(
-    context=IPerformer,
-    name='like',
-    renderer='json',
-    permission='yss.like',
-)
-def like_profile(context, request):
-    performer = request.user.performer
-    if performer in context.liked_by:
-        raise HTTPBadRequest("Already")
-    context.liked_by.connect([performer])
-    return {'ok': True,
-            'num_likes': context.num_likes,
-            }
+    @reify
+    def has_edit_permission(self):
+        performer = self.context
+        return self.request.has_permission('yss.edit', performer)
 
-@view_config(
-    context=IPerformer,
-    renderer='templates/profile.pt',
-    name='edit.html',
-    permission='yss.edit-profile',
-)
-def profile_edit_form(context, request):
-    schema = PerformerProfileSchema().bind(request=request, context=context)
-    form = deform.Form(schema, buttons=('Save',))
-    rendered = None
-    if 'Save' in request.POST:
-        controls = request.POST.items()
-        try:
-            appstruct = form.validate(controls)
-        except deform.ValidationFailure as e:
-            rendered = e.render()
-        else:
-            context.title = appstruct['title']
-            context.email = appstruct['email']
-            context.photo_url = appstruct['photo_url']
-            context.age = appstruct['age']
-            context.sex = appstruct['sex']
-            context.genre = appstruct['genre']
-            context.tzname = appstruct['tzname']
-    else:
-        appstruct = {
-            'csrf_token': request.session.get_csrf_token(),
+    def tabs(self):
+        state = self.request.view_name
+        performer = self.context
+        tabs = []
+        if self.has_edit_permission:
+            tabs.append(
+                {'title':'View',
+                 'id':'button-view',
+                 'url':self.request.resource_url(performer),
+                 'class':state == '' and 'active' or '',
+                 'enabled':True,
+                 })
+            tabs.append(
+                {'title':'Edit',
+                 'id':'button-edit',
+                 'url':self.request.resource_url(performer, 'edit'),
+                 'class':state=='edit' and 'active' or '',
+                 'enabled':True,
+                 })
+        return tabs
+
+    @view_config(
+        renderer='templates/profile.pt',
+        permission='view',
+    )
+    def view(self):
+        context = self.context
+        request = self.request
+        return {
             'username': context.__name__,
             'title': getattr(context, 'title', ''),
             'email': getattr(context, 'email', ''),
@@ -97,13 +77,73 @@ def profile_edit_form(context, request):
             'age': getattr(context, 'age', colander.null),
             'sex': getattr(context, 'sex', None),
             'genre': getattr(context, 'genre', None),
-            'tzname':getattr(context, 'tzname', None),
+            'tzname': getattr(context, 'tzname', 'UTC'),
+            'form': None,
+            'recent_recordings': recent_recordings(context, request),
+            'num_likes': context.num_likes,
+            'likes_songs': context.likes_songs,
+            'can_edit': getattr(request.user, 'performer', None) is context,
         }
-    if rendered is None:
-        rendered = form.render(appstruct, readonly=False)
-    return {
-        'form': rendered,
-    }
+
+    @view_config(
+        name='like',
+        renderer='json',
+        permission='yss.like',
+    )
+    def like_profile(self):
+        request = self.request
+        context = self.context
+        performer = request.user.performer
+        if performer in context.liked_by:
+            raise HTTPBadRequest("Already")
+        context.liked_by.connect([performer])
+        return {'ok': True,
+                'num_likes': context.num_likes,
+                }
+
+    @view_config(
+        renderer='templates/profile_edit.pt',
+        name='edit',
+        permission='yss.edit',
+    )
+    def profile_edit_form(self):
+        context = self.context
+        request = self.request
+        schema = PerformerProfileSchema().bind(request=request, context=context)
+        form = deform.Form(schema, buttons=('Save',))
+        rendered = None
+        if 'Save' in request.POST:
+            controls = request.POST.items()
+            try:
+                appstruct = form.validate(controls)
+            except deform.ValidationFailure as e:
+                rendered = e.render()
+            else:
+                context.title = appstruct['title']
+                context.email = appstruct['email']
+                context.photo_url = appstruct['photo_url']
+                context.age = appstruct['age']
+                context.sex = appstruct['sex']
+                context.genre = appstruct['genre']
+                context.tzname = appstruct['tzname']
+                request.session.flash('Profile edited', 'info')
+        else:
+            appstruct = {
+                'csrf_token': request.session.get_csrf_token(),
+                'username': context.__name__,
+                'title': getattr(context, 'title', ''),
+                'email': getattr(context, 'email', ''),
+                'photo_url': getattr(context, 'photo_url', ''),
+                'age': getattr(context, 'age', colander.null),
+                'sex': getattr(context, 'sex', None),
+                'genre': getattr(context, 'genre', None),
+                'tzname':getattr(context, 'tzname', None),
+            }
+        if rendered is None:
+            rendered = form.render(appstruct, readonly=False)
+        return {
+            'form': rendered,
+        }
 
 
 class PerformersView(object):
@@ -203,4 +243,3 @@ class PerformersView(object):
             title,
             icon
             )
-
