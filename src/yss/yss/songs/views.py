@@ -38,8 +38,6 @@ from yss.interfaces import (
     )
 from yss.utils import get_redis, decode_redis_hash, format_timings
 
-random.seed()
-
 known_effects = (
     'effect-reverb',
     'effect-chorus',
@@ -191,14 +189,21 @@ class SongView(object):
                 {'title':'View',
                  'id':'button-view',
                  'url':self.request.resource_url(song),
-                 'class':(state == '') and 'active' or '',
+                 'class':state == '' and 'active' or '',
+                 'enabled':True,
+                 })
+            tabs.append(
+                {'title':'Record',
+                 'id':'button-recordview',
+                 'url':self.request.resource_url(song, 'record'),
+                 'class':state=='record' and 'active' or '',
                  'enabled':True,
                  })
             tabs.append(
                 {'title':'Retime',
                  'id':'button-retime',
                  'url':self.request.resource_url(song, 'retime'),
-                 'class':(state == 'retime') and 'active' or '',
+                 'class':state == 'retime' and 'active' or '',
                  'enabled':True,
                  })
         return tabs

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html metal:use-macro="main_template">
 
-  <div metal:fill-slot="main_content" class="container">
+  <div metal:fill-slot="main_content">
     <div id="display" style="display: ${processed and 'block' or 'none'}">
       <div class="row" style="padding-bottom: 10px;">
         <div class="col-md-12">

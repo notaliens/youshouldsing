@@ -1,6 +1,6 @@
 <div metal:use-macro="main_template">
 
-  <div metal:fill-slot="main_content" class="container">
+  <div metal:fill-slot="main_content">
 
     <div class="row" style="margin-bottom: 10px;">
       <div tal:condition="batch"

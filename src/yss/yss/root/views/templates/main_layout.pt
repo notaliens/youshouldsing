@@ -105,7 +105,7 @@
         </div>
 
       </div>
-      <div id="main_content">
+      <div id="main_content" class="container">
         <div tal:define="tabs view.tabs()|[]" tal:omit-tag="">
           <div tal:condition="tabs" class="row" style="padding-bottom: 5px;">
             <div class="col-md-12">
