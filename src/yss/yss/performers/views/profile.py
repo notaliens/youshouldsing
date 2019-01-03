@@ -14,6 +14,7 @@ from substanced.util import (
     Batch,
     find_index,
     )
+from substanced.schema import Schema
 
 from yss.interfaces import (
     IPerformer,
@@ -61,6 +62,13 @@ class PerformerViews(object):
                  'class':state=='edit' and 'active' or '',
                  'enabled':True,
                  })
+            tabs.append(
+                {'title':'Privacy',
+                 'id':'button-privacy',
+                 'url':self.request.resource_url(performer, 'privacy'),
+                 'class':state=='privacy' and 'active' or '',
+                 'enabled':True,
+                 })
         return tabs
 
     @view_config(
@@ -85,8 +93,16 @@ class PerformerViews(object):
             'form': None,
             'recent_recordings': recent_recordings(context, request),
             'num_likes': context.num_likes,
-            'likes_songs': context.likes_songs,
+            'likes_songs': context.likes_songs, # XXX security
             'can_edit': getattr(request.user, 'performer', None) is context,
+            'divulge_song_likes': context.divulge_song_likes,
+            'divulge_performer_likes': context.divulge_performer_likes,
+            'divulge_recording_likes': context.divulge_recording_likes,
+            'divulge_age': context.divulge_age,
+            'divulge_realname':context.divulge_realname,
+            'divulge_location':context.divulge_location,
+            'divulge_genre':context.divulge_genre,
+            'divulge_sex':context.divulge_sex,
         }
 
     @view_config(
@@ -151,6 +167,74 @@ class PerformerViews(object):
             'form': rendered,
         }
 
+    @view_config(
+        renderer='templates/profile_privacy.pt',
+        name='privacy',
+        permission='yss.edit',
+    )
+    def profile_privacy_form(self):
+        context = self.context
+        request = self.request
+        schema = PerformerProfilePrivacySchema().bind(
+            request=request, context=context)
+        form = deform.Form(schema, buttons=('Save',))
+        rendered = None
+        if 'Save' in request.POST:
+            controls = request.POST.items()
+            try:
+                appstruct = form.validate(controls)
+            except deform.ValidationFailure as e:
+                rendered = e.render()
+            else:
+                def tf(val):
+                    return val == 'true' and True or False
+                context.divulge_age =  tf(appstruct['divulge_age'])
+                context.divulge_realname = tf(appstruct['divulge_realname'])
+                context.divulge_sex = tf(appstruct['divulge_sex'])
+                context.divulge_song_likes = tf(appstruct['divulge_song_likes'])
+                context.divulge_performer_likes = tf(appstruct[
+                    'divulge_performer_likes'])
+                context.divulge_location = tf(appstruct['divulge_location'])
+                context.divulge_recording_likes = tf(appstruct[
+                    'divulge_recording_likes'])
+                context.divulge_genre = tf(appstruct['divulge_genre'])
+                request.session.flash('Profile privacy edited', 'info')
+        else:
+            def tf(val):
+                return val and 'true' or 'false'
+            divulge_age = tf(getattr(context, 'divulge_age', True))
+            divulge_realname = tf(getattr(context, 'divulge_realname', False))
+            divulge_sex = tf(getattr(context, 'divulge_sex', True))
+            divulge_location = tf(getattr(context, 'divulge_location', True))
+            divulge_song_likes = tf(
+                getattr(context, 'divulge_song_likes', True)
+            )
+            divulge_performer_likes = tf(
+                getattr(context,'divulge_performer_likes', True)
+            )
+            divulge_recording_likes = tf(
+                getattr(context,'divulge_recording_likes', True)
+                )
+            divulge_genre = tf(
+                getattr(context,'divulge_genre', True)
+                )
+            appstruct = {
+                'csrf_token': request.session.get_csrf_token(),
+                'divulge_age':divulge_age,
+                'divulge_realname':divulge_realname,
+                'divulge_sex':divulge_sex,
+                'divulge_location':divulge_location,
+                'divulge_song_likes':divulge_song_likes,
+                'divulge_performer_likes':divulge_performer_likes,
+                'divulge_recording_likes':divulge_recording_likes,
+                'divulge_genre':divulge_genre,
+            }
+        if rendered is None:
+            rendered = form.render(appstruct, readonly=False)
+        return {
+            'form': rendered,
+        }
+    
 
 class PerformersView(object):
     default_sort = 'date'
@@ -249,3 +333,67 @@ class PerformersView(object):
             title,
             icon
             )
+
+binary_choices = (
+    ('true', 'Yes'),
+    ('false', 'No'),
+    )
+
+class PerformerProfilePrivacySchema(Schema):
+    divulge_age = colander.SchemaNode(
+        colander.String(),
+        validator=colander.OneOf([x[0] for x in binary_choices]),
+        widget=deform.widget.RadioChoiceWidget(values=binary_choices),
+        title='Divulge your age',
+        default='true',
+        )
+    divulge_realname = colander.SchemaNode(
+        colander.String(),
+        validator=colander.OneOf([x[0] for x in binary_choices]),
+        widget=deform.widget.RadioChoiceWidget(values=binary_choices),
+        title='Divulge your real name',
+        default='false',
+        )
+    divulge_sex = colander.SchemaNode(
+        colander.String(),
+        validator=colander.OneOf([x[0] for x in binary_choices]),
+        widget=deform.widget.RadioChoiceWidget(values=binary_choices),
+        title='Divulge your gender',
+        default='true',
+        )
+    divulge_location = colander.SchemaNode(
+        colander.String(),
+        validator=colander.OneOf([x[0] for x in binary_choices]),
+        widget=deform.widget.RadioChoiceWidget(values=binary_choices),
+        title='Divulge your location',
+        default='true',
+        )
+    divulge_song_likes = colander.SchemaNode(
+        colander.String(),
+        validator=colander.OneOf([x[0] for x in binary_choices]),
+        widget=deform.widget.RadioChoiceWidget(values=binary_choices),
+        title='Divulge the songs you like',
+        default='true',
+        )
+    divulge_performer_likes = colander.SchemaNode(
+        colander.String(),
+        validator=colander.OneOf([x[0] for x in binary_choices]),
+        widget=deform.widget.RadioChoiceWidget(values=binary_choices),
+        title='Divulge the performers you like',
+        default='false',
+        )
+    divulge_recording_likes = colander.SchemaNode(
+        colander.String(),
+        validator=colander.OneOf([x[0] for x in binary_choices]),
+        widget=deform.widget.RadioChoiceWidget(values=binary_choices),
+        title='Divulge the recordings you like',
+        default='false',
+        )
+    divulge_genre = colander.SchemaNode(
+        colander.String(),
+        validator=colander.OneOf([x[0] for x in binary_choices]),
+        widget=deform.widget.RadioChoiceWidget(values=binary_choices),
+        title='Divulge your favorite genre',
+        default='true',
+        )
+        

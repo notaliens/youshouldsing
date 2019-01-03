@@ -142,6 +142,14 @@ class Performer(Folder):
     likes_performers = multireference_source_property(PerformerLikesPerformer)
     likes_songs = multireference_source_property(PerformerLikesSong)
     likes_recordings = multireference_source_property(PerformerLikesRecording)
+    divulge_age = True
+    divulge_realname = False
+    divulge_sex = True
+    divulge_location = True
+    divulge_song_likes = True
+    divulge_performer_likes = True
+    divulge_recording_likes = True
+    divulge_genre = True
 
     @property
     def num_likes(self):

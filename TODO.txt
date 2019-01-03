@@ -96,7 +96,6 @@
   - Dropdown for other recordings instead of inline table.
   - "Likes disabled" instead of "0 performers have liked this recording"
     when like permission is not available.
-  - Remix should be just another tab on view-recording.
   - "Other recordings you might like if you like this one"
 
 - Edit recording:
