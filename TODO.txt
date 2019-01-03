@@ -30,9 +30,6 @@
     login with?  How do we deal with it if a user wants to log in
     to the same yss account using two different oauth providers?
 
-  - Allow "real" logout (currently when you logout and log back in, it logs
-    you in as the last account you used with that provder).
-
   - Impersonation.
 
   - Disqus SSO.

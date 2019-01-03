@@ -73,6 +73,7 @@ class PerformerViews(object):
         return {
             'username': context.__name__,
             'title': getattr(context, 'title', ''),
+            'name': context.__name__,
             'email': getattr(context, 'email', ''),
             'photo_url': getattr(context, 'photo_url', ''),
             'birthdate': getattr(context, 'birthdate', colander.null),
@@ -188,16 +189,16 @@ class PerformersView(object):
 
     def sort_by(self, rs, token, reverse):
         context = self.context
-        title = find_index(context, 'yss', 'title')
+        name = find_index(context, 'system', 'name')
         num_likes = find_index(context, 'yss', 'num_likes')
         genre = find_index(context, 'yss', 'genre')
         created = find_index(context, 'yss', 'created')
         sorting = {
             #'date':(created, likes, title, genre),
             'date':(created,),
-            'title':(title, num_likes, genre, created),
-            'genre':(genre, title, num_likes, created),
-            'likes':(num_likes, title, genre, created),
+            'name':(name, num_likes, genre, created),
+            'genre':(genre, name, num_likes, created),
+            'likes':(num_likes, name, genre, created),
             }
         indexes = sorting.get(token, sorting[self.default_sort])
         for idx in indexes[1:]:

@@ -18,7 +18,7 @@
 
               <span tal:condition="genre">${genre}</span>
             </p>
-            <h3>${title}</h3>
+            <h3>${name}</h3>
           </div>
         </div>
         <div class="panel-body">

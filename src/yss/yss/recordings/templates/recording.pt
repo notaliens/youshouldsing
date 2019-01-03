@@ -9,7 +9,7 @@
         <div class="panel panel-primary">
 
           <div class="panel-heading">
-          ${title} by ${performer.title|None}
+          ${title} by ${performer.__name__|None}
           </div>
 
           <div class="panel-body">

@@ -49,7 +49,7 @@
                        ><img src="${item.performer.photo_url}" 
                              height="20"
                              style="padding-right: 10px;"
-                             />${item.performer.title}</a>
+                             />${item.performer.__name__}</a>
                   </td>
                   <td>
                     <a href="${request.resource_url(item.song)}">${item.song.title}</a>
