@@ -47,6 +47,10 @@
 
   - Non-oauth signups.
 
+- Artist
+
+  - Create artist page that shows all songs by an artist
+
 - Song import:
 
   - Handle conflict errors.
