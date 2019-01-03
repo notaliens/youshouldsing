@@ -24,6 +24,10 @@ class MainLayout(object):
     def twitter_login_url(self):
         return login_url(self.request, 'twitter')
 
+    @reify
+    def google_login_url(self):
+        return login_url(self.request, 'google')
+
     def tabs(self):
         request = self.request
         context = self.context
