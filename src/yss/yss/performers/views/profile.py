@@ -93,7 +93,9 @@ class PerformerViews(object):
             'form': None,
             'recent_recordings': recent_recordings(context, request),
             'num_likes': context.num_likes,
-            'likes_songs': context.likes_songs, # XXX security
+            'likes_songs': self.sfilter(context.likes_songs),
+            'likes_performers': self.sfilter(context.likes_performers),
+            'likes_recordings': self.sfilter(context.likes_recordings),
             'can_edit': getattr(request.user, 'performer', None) is context,
             'divulge_song_likes': context.divulge_song_likes,
             'divulge_performer_likes': context.divulge_performer_likes,
@@ -104,6 +106,13 @@ class PerformerViews(object):
             'divulge_genre':context.divulge_genre,
             'divulge_sex':context.divulge_sex,
         }
+
+    def sfilter(self, resources):
+        allowed = []
+        for resource in resources:
+            if self.request.has_permission('view', resource):
+                allowed.append(resource)
+        return allowed
 
     @view_config(
         name='like',

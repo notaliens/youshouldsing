@@ -150,6 +150,7 @@ class Performer(Folder):
     divulge_performer_likes = True
     divulge_recording_likes = True
     divulge_genre = True
+    _photo_url = None
 
     @property
     def num_likes(self):
@@ -172,6 +173,16 @@ class Performer(Folder):
         return self.user.email
 
     email = property(_email_get, _email_set)
+
+    def _photo_url_set(self, photo_url):
+        self._photo_url = photo_url
+
+    def _photo_url_get(self):
+        if not self._photo_url:
+            return '/static/img/generic-singer-icon.png'
+        return self._photo_url
+
+    photo_url = property(_photo_url_get, _photo_url_set)
 
     @property
     def age(self):

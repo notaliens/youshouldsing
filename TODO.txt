@@ -16,6 +16,8 @@
 
   - privacy policy
 
+  - caching
+
 - Licensing
 
   - https://pep.rocks/programs/gem
@@ -80,6 +82,11 @@
   - Delete/edit recordings
   - Change password
   - Singlist
+  - Change photo
+  - Likes songs / likes performers / likes recordings / recent recordings should
+    be tabs and batched
+  - Description
+  - Delete account
 
 - View recording:
 
