@@ -36,8 +36,6 @@
 
   - Disqus SSO.
 
-  - Show username/photo in navbar when logged in.
-
   - Show which authorizer (google/twitter/etc) in profile somehow.
 
   - Require user to validate email address.

@@ -7,6 +7,9 @@ from pyramid.location import inside
 from velruse import login_url
 
 import yss.likes
+from yss.interfaces import PerformerToUser
+
+from substanced.util import find_objectmap
 
 @layout_config(template="templates/main_layout.pt")
 class MainLayout(object):
@@ -58,6 +61,11 @@ class MainLayout(object):
                 d['class'] = active
                 tab_data.append(d)
         return tab_data
+
+    def performer_for_user(self, user):
+        objectmap = find_objectmap(user)
+        performer = list(objectmap.sources(user, PerformerToUser))[0]
+        return performer
 
     @property
     def batching_macro(self):
