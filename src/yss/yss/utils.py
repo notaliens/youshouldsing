@@ -35,3 +35,10 @@ def format_timings(timings):
                 )
         formatted.append([formatted_start, formatted_end, formatted_words])
     return pprint.pformat(formatted, width=50)
+
+def authentication_type(request):
+    if request.user is not None:
+        if request.user.__name__.startswith('twitter.com_'):
+            return 'twitter'
+        if request.user.__name__.startswith('accounts.google.com_'):
+            return 'google'

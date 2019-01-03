@@ -80,10 +80,3 @@ class LoginViews(object):
             'provider_name': context.provider_name,
             'reason': context.reason,
         }
-
-def authentication_type(request):
-    if request.user is not None:
-        if request.user.__name__.startswith('twitter.com_'):
-            return 'twitter'
-        if request.user.__name__.startswith('accounts.google.com_'):
-            return 'google'

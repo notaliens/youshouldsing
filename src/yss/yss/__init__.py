@@ -5,8 +5,8 @@ import random
 from pyramid.config import Configurator
 from substanced import root_factory
 
-from .authpolicy import YSSAuthenticationPolicy
-from yss.performers.views.login import authentication_type
+from yss.authpolicy import YSSAuthenticationPolicy
+from yss.utils import authentication_type
 
 from pyramid_redis_sessions import session_factory_from_settings
 
