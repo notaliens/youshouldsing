@@ -1,0 +1,11 @@
+<div metal:use-macro="main_template">
+
+  <div metal:fill-slot="main_content" class="container">
+
+    <div class="row">
+      <div class="col-sm-12">
+        <pre>${tos}</pre>
+      </div>
+    </div>
+  </div>
+</div>

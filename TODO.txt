@@ -12,6 +12,10 @@
 
   - datadog
 
+  - terms of service
+
+  - privacy policy
+
 - Licensing
 
   - https://pep.rocks/programs/gem
@@ -38,6 +42,9 @@
   - Show username/photo in navbar when logged in.
 
   - Require user to validate email address.
+
+  - Know what happens when we need to change consumer secret or details about
+    app in developer settings.
 
 - Song import:
 
@@ -127,6 +134,7 @@
     of on each recording she creates.
   - Description
   - Relative music volume doesn't work.
+  - Duet
 
 - Search:
 

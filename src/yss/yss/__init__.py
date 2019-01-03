@@ -27,7 +27,7 @@ def main(global_config, **settings):
     config.include('substanced')
     config.include('pyramid_layout')
     config.include('velruse.providers.twitter')
-    #config.include('velruse.providers.google')
+    config.include('velruse.providers.google_oauth2')
     config.include('.root')
     config.include('.evolve')
     config.include('.catalog')
@@ -37,10 +37,10 @@ def main(global_config, **settings):
         consumer_key=os.environ['YSS_TWITTER_LOGIN_CONSUMER_KEY'],
         consumer_secret=os.environ['YSS_TWITTER_LOGIN_CONSUMER_SECRET'],
     )
-    #config.add_google_login(
-    #    consumer_key=os.environ['YSS_GOOGLE_LOGIN_CONSUMER_KEY'],
-    #    consumer_secret=os.environ['YSS_GOOGLE_LOGIN_CONSUMER_SECRET'],
-    #    )
+    config.add_google_oauth2_login(
+        consumer_key=os.environ['YSS_GOOGLE_LOGIN_CONSUMER_KEY'],
+        consumer_secret=os.environ['YSS_GOOGLE_LOGIN_CONSUMER_SECRET'],
+        )
     config.add_static_view('static', 'yss:static')
 
     config.add_request_method(
