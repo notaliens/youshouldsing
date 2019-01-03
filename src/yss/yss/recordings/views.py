@@ -34,7 +34,7 @@ class RecordingView(object):
     @reify
     def is_processed(self):
         recording = self.context
-        return recording.mixed_blob and not recording.remixing
+        return bool(recording.mixed_blob and not recording.remixing)
 
     @reify
     def has_edit_permission(self):
