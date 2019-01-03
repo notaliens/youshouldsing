@@ -22,8 +22,6 @@
   
 - Login:
 
-  - Google login
-
   - Facebook login
 
   - Photo url -> photo
@@ -41,10 +39,14 @@
 
   - Show username/photo in navbar when logged in.
 
+  - Show which authorizer (google/twitter/etc) in profile somehow.
+
   - Require user to validate email address.
 
   - Know what happens when we need to change consumer secret or details about
     app in developer settings.
+
+  - Non-oauth signups.
 
 - Song import:
 

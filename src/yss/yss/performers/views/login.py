@@ -83,6 +83,7 @@ class LoginViews(object):
 
 def authentication_type(request):
     if request.user is not None:
-        return 'twitter'
-
-
+        if request.user.__name__.startswith('twitter.com_'):
+            return 'twitter'
+        if request.user.__name__.startswith('accounts.google.com_'):
+            return 'google'

@@ -27,16 +27,16 @@
                   <th width="30%">
                     ${structure:view.sort_tag('title', 'Title')}
                   </th>
-                  <th width="20%">
+                  <th width="15%">
                     ${structure:view.sort_tag('genre', 'Genre')}
                   </th>
-                  <th width="10%">
+                  <th width="8%">
                     ${structure:view.sort_tag('num_likes', 'Likes')}
                   </th>
-                  <th width="10%">
+                  <th width="8%">
                     ${structure:view.sort_tag('num_recordings', 'Records')}
                   </th>
-                  <th width="10%">
+                  <th width="19%">
                     ${structure:view.sort_tag('duration', 'Duration')}
                   </th>
                 </tr>
