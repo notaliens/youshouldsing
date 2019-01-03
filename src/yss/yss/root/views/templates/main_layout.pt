@@ -81,7 +81,7 @@
                 </form>
               </li>
               <li tal:condition="request.user">
-                <img src="${layout.performer_for_user(request.user).photo_url}" height="24" style="padding-top:10px;"/>
+                <img src="${layout.performer_photo_url()}" height="24" width="24" style="padding-top:10px;"/>
               </li>
               <li tal:condition="request.user">
                 <form class="navbar-form">

@@ -31,6 +31,13 @@ class MainLayout(object):
     def google_login_url(self):
         return login_url(self.request, 'google')
 
+    def performer_photo_url(self, performer=None):
+        if performer is None:
+            objectmap = find_objectmap(self.context)
+            user = self.request.user
+            performer = list(objectmap.sources(user, PerformerToUser))[0]
+        return self.request.resource_url(performer['photo'])
+
     def tabs(self):
         request = self.request
         context = self.context
@@ -61,11 +68,6 @@ class MainLayout(object):
                 d['class'] = active
                 tab_data.append(d)
         return tab_data
-
-    def performer_for_user(self, user):
-        objectmap = find_objectmap(user)
-        performer = list(objectmap.sources(user, PerformerToUser))[0]
-        return performer
 
     @property
     def batching_macro(self):

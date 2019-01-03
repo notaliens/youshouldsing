@@ -84,11 +84,16 @@
   - Delete/edit recordings
   - Change password
   - Singlist
-  - Change photo
   - Likes songs / likes performers / likes recordings / recent recordings should
     be tabs and batched
   - Description
   - Delete account
+  - Deleting a profile should delete its associated user (otherwise, problems
+    when someone relogs in using that oauth account)
+  - Disallow animated gifs as photos
+  - Disallow non-square images as photos
+  - Rescale or reject large photo images
+  - Accept gravatar image as initial photo from oauth
 
 - View recording:
 

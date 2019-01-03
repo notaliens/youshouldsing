@@ -2,6 +2,9 @@ import json
 import pprint
 import redis
 
+from substanced.util import get_oid
+
+
 def get_redis(request):
     settings = request.registry.settings
     host = settings.get('redis.host', 'localhost')
@@ -42,3 +45,16 @@ def authentication_type(request):
             return 'twitter'
         if request.user.__name__.startswith('accounts.google.com_'):
             return 'google'
+
+def get_photodata(context, request):
+    photo = context['photo']
+    uid = str(get_oid(photo))
+    photodata = dict(
+        fp=None, # this cant be the real fp or will be written to tmpstore
+        uid=uid,
+        filename='',
+        size = photo.get_size(),
+    )
+    if photo.mimetype.startswith('image/'):
+        photodata['preview_url'] = request.resource_url(photo)
+    return photodata

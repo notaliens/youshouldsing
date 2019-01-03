@@ -9,6 +9,7 @@ from substanced.schema import Schema
 
 from pyramid.view import view_config
 from substanced.util import find_service, set_acl, get_oid
+from substanced.file import FileNode
 
 from pyramid.security import Allow
 from pyramid.httpexceptions import HTTPFound
@@ -16,7 +17,12 @@ from pyramid.httpexceptions import HTTPFound
 from yss.interfaces import (
     sex_choices,
     genre_choices,
+    IPerformerPhoto,
 )
+
+from yss.utils import get_photodata
+
+from zope.interface import alsoProvides
 
 _ZONES = pytz.all_timezones
 
@@ -67,12 +73,7 @@ class CreatePerformerSchema(Schema):
         validator=colander.OneOf(_ZONES),
         default='UTC',
         )
-    photo_url = colander.SchemaNode(
-        colander.String(),
-        title='Photo URL',
-        missing='',
-        validator=colander.url,
-        )
+    photo = FileNode(title='Photo')
     birthdate = colander.SchemaNode(
         colander.Date(),
         title='Birth Date',
@@ -112,6 +113,15 @@ def create_profile(context, request):
             user = principals.add_user(userid, registry=registry)
             performer = registry.content.create('Performer')
             root['performers'][username] = performer
+            photo = registry.content.create('File')
+            alsoProvides(photo, IPerformerPhoto) # for view lookup
+            performer['photo'] = photo
+            phdata = appstruct['photo']
+            fp = phdata.get('fp')
+            if fp:
+                fp.seek(0)
+                photo.upload(fp)
+                photo.mimetype = phdata['mimetype']
             # NB: performer.user required before setting tzname and email
             performer.user = user
             performer.title = appstruct['title']
@@ -120,7 +130,6 @@ def create_profile(context, request):
             performer.sex = appstruct['sex']
             performer.genre = appstruct['genre']
             performer.tzname = appstruct['tzname']
-            performer.photo_url = appstruct['photo_url']
             performer.location = appstruct['location']
             set_acl(performer, [(Allow, user.__oid__, ['yss.edit'])])
             headers = remember(request, get_oid(user))
@@ -131,7 +140,7 @@ def create_profile(context, request):
             'username': request.session.get('profilename'),
             'title': request.session.get('realname', ''),
             'email': '',
-            'photo_url': request.session.get('photo_url', ''),
+            'photo':colander.null,
             'birthdate': colander.null,
             'sex': colander.null,
             'genre': colander.null,

@@ -25,6 +25,9 @@ class IPerformers(Interface):
 class IPerformer(Interface):
     """ Marker interface for an individual performer folder """
 
+class IPerformerPhoto(Interface):
+    """ Marker interface for a performer photo """
+
 class PerformerLikesPerformer(ReferenceType):
     """ Map a "like" from a performer to another performer.
     """

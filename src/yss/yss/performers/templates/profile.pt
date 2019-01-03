@@ -7,7 +7,7 @@
         <div class="panel panel-default">
           <div class="panel-heading">
             <div style="float:right">
-              <img src="${photo_url}" height="40px;"/>
+              <img src="${layout.performer_photo_url(context)}" height="40" width="40"/>
             </div>
             <p style="float: right; padding-right: 2em">
               <span tal:condition="age and divulge_age">${age} - </span>

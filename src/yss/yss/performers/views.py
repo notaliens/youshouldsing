@@ -19,9 +19,12 @@ from substanced.schema import Schema
 from yss.interfaces import (
     IPerformer,
     IPerformers,
+    IPerformerPhoto,
     )
 
 from yss.performers import PerformerProfileSchema
+
+from yss.utils import get_photodata
 
 def recent_recordings(context, request, limit=10):
     q = find_index(context, 'system', 'content_type').eq('Recording')
@@ -83,7 +86,6 @@ class PerformerViews(object):
             'title': getattr(context, 'title', ''),
             'name': context.__name__,
             'email': getattr(context, 'email', ''),
-            'photo_url': getattr(context, 'photo_url', ''),
             'birthdate': getattr(context, 'birthdate', colander.null),
             'location': getattr(context, 'location', colander.null),
             'age':getattr(context, 'age', 0),
@@ -143,6 +145,7 @@ class PerformerViews(object):
         rendered = None
         if 'Save' in request.POST:
             controls = request.POST.items()
+            photo = context['photo']
             try:
                 appstruct = form.validate(controls)
             except deform.ValidationFailure as e:
@@ -150,7 +153,12 @@ class PerformerViews(object):
             else:
                 context.title = appstruct['title']
                 context.email = appstruct['email']
-                context.photo_url = appstruct['photo_url']
+                phdata = appstruct['photo']
+                fp = phdata.get('fp')
+                if fp:
+                    fp.seek(0)
+                    photo.upload(fp)
+                    photo.mimetype = phdata['mimetype']
                 context.birthdate = appstruct['birthdate']
                 context.sex = appstruct['sex']
                 context.genre = appstruct['genre']
@@ -158,12 +166,13 @@ class PerformerViews(object):
                 context.location = appstruct['location']
                 request.session.flash('Profile edited', 'info')
         else:
+            photodata = get_photodata(context, request)
             appstruct = {
                 'csrf_token': request.session.get_csrf_token(),
                 'username': context.__name__,
                 'title': getattr(context, 'title', ''),
+                'photo': photodata,
                 'email': getattr(context, 'email', ''),
-                'photo_url': getattr(context, 'photo_url', ''),
                 'birthdate': getattr(context, 'birthdate', colander.null),
                 'sex': getattr(context, 'sex', None),
                 'genre': getattr(context, 'genre', None),
@@ -406,3 +415,10 @@ class PerformerProfilePrivacySchema(Schema):
         default='true',
         )
         
+@view_config(
+    context=IPerformerPhoto,
+    permission='view',
+    http_cache=0, # XXX
+    )
+def view_file(context, request):
+    return context.get_response(request=request)

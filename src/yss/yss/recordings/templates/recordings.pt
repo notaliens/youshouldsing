@@ -46,8 +46,9 @@
                   </td>
                   <td>
                     <a href="${request.resource_url(item.performer)}"
-                       ><img src="${item.performer.photo_url}" 
-                             height="20"
+                       ><img src="${layout.performer_photo_url(item.performer)}" 
+                             height="24"
+                             width="24"
                              style="padding-right: 10px;"
                              />${item.performer.__name__}</a>
                   </td>

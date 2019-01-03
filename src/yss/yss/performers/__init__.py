@@ -8,6 +8,7 @@ from substanced.event import (
     subscribe_will_be_removed,
     subscribe_removed,
     )
+from substanced.file import FileNode
 from substanced.folder import Folder
 from substanced.objectmap import (
     multireference_source_property,
@@ -88,11 +89,7 @@ class PerformerProfileSchema(Schema):
         widget=tzname_widget,
         validator=colander.OneOf(_ZONES)
         )
-    photo_url = colander.SchemaNode(
-        colander.String(),
-        title='Photo URL',
-        validator=colander.url,
-        )
+    photo = FileNode(title='Photo')
     birthdate = colander.SchemaNode(
         colander.Date(),
         title='Birth Date',
@@ -150,7 +147,6 @@ class Performer(Folder):
     divulge_performer_likes = True
     divulge_recording_likes = True
     divulge_genre = True
-    _photo_url = None
 
     @property
     def num_likes(self):
@@ -173,16 +169,6 @@ class Performer(Folder):
         return self.user.email
 
     email = property(_email_get, _email_set)
-
-    def _photo_url_set(self, photo_url):
-        self._photo_url = photo_url
-
-    def _photo_url_get(self):
-        if not self._photo_url:
-            return '/static/img/generic-singer-icon.png'
-        return self._photo_url
-
-    photo_url = property(_photo_url_get, _photo_url_set)
 
     @property
     def age(self):

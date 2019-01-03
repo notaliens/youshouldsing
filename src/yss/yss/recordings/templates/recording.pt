@@ -42,7 +42,7 @@
                       <tal:block repeat="item other_recordings">
                         <tr>
                           <td>
-                            <img src="${item.performer.photo_url}" height="24"/>
+                            <img src="${layout.performer_photo_url(item.performer)}" height="24" width="24"/>
                             <a style="margin-left: 20px;" href="${request.resource_url(item.performer)}">${item.performer.title}</a>
                           </td>
                           <td>
@@ -132,7 +132,7 @@
 
                     <tbody>
                       <tr tal:repeat="item liked_by">
-                        <td><img src="${item.photo_url}" height="24"/></td>
+                        <td><img src="${layout.performer_photo_url(item)}" height="24" width="24"/></td>
                         <td>
                           <a href="${request.resource_url(item)}">${item.title}</a>
                         </td>

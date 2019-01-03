@@ -2,6 +2,14 @@
 
   <div metal:fill-slot="main_content" class="container">
 
+    <div>
+      <script type="text/javascript" src="${request.static_url('deform:static/select2/select2.js')}"></script>
+      <script type="text/javascript" src="${request.static_url('deform:static/scripts/modernizr.custom.input-types-and-atts.js')}"></script>
+      <script type="text/javascript" src="${request.static_url('deform:static/scripts/deform.js')}"></script>
+      <script type="text/javascript" src="${request.static_url('deform:static/scripts/file_upload.js')}"></script>
+      <link rel="stylesheet" href="${request.static_url('deform:static/select2/select2.css')}" type="text/css" />
+    </div>
+
     <div class="row">
       <div class="col-md-12">
         <div class="panel-heading">
