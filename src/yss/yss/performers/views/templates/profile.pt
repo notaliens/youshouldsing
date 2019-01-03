@@ -14,6 +14,8 @@
 
               <span tal:condition="sex">${sex} - </span>
 
+              <span tal:condition="location">${location} - </span>
+
               <span tal:condition="genre">${genre}</span>
             </p>
             <h3>${title}</h3>

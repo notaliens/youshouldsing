@@ -1,4 +1,5 @@
 import colander
+import datetime
 import deform
 import pytz
 
@@ -67,7 +68,7 @@ class PerformerProfileSchema(Schema):
     """
     title = colander.SchemaNode(
         colander.String(),
-        title='Display Name',
+        title='Real Name',
     )
     email = colander.SchemaNode(
         colander.String(),
@@ -75,6 +76,11 @@ class PerformerProfileSchema(Schema):
             colander.Email(),
             colander.Length(max=100)
             ),
+        )
+    location = colander.SchemaNode(
+        colander.String(),
+        validator=colander.Length(max=100),
+        missing='',
         )
     tzname = colander.SchemaNode(
         colander.String(),
@@ -87,10 +93,10 @@ class PerformerProfileSchema(Schema):
         title='Photo URL',
         validator=colander.url,
         )
-    age = colander.SchemaNode(
-        colander.Int(),
-        title='Age',
-        validator=colander.Range(min=0, max=150),
+    birthdate = colander.SchemaNode(
+        colander.Date(),
+        title='Birth Date',
+        missing=colander.null,
         )
     sex = colander.SchemaNode(
         colander.String(),
@@ -128,6 +134,8 @@ class Performers(Folder):
 class Performer(Folder):
     name = renamer()
     user = reference_source_property(PerformerToUser)
+    birthdate = None # bw compat
+    location = ''
     recordings = multireference_target_property(RecordingToPerformer)
     liked_by = multireference_target_property(PerformerLikesPerformer)
     liked_by_ids = multireference_targetid_property(PerformerLikesPerformer)
@@ -156,6 +164,16 @@ class Performer(Folder):
         return self.user.email
 
     email = property(_email_get, _email_set)
+
+    @property
+    def age(self):
+        birthdate = self.birthdate
+        if birthdate is None:
+            return 0
+        today = datetime.date.today()
+        return (today.year - birthdate.year -
+                ((today.month, today.day) < (birthdate.month, birthdate.day)))
+
 
 @subscribe_will_be_removed(content_type='Performer')
 def performer_will_be_removed(event):

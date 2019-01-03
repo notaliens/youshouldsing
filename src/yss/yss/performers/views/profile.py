@@ -75,7 +75,9 @@ class PerformerViews(object):
             'title': getattr(context, 'title', ''),
             'email': getattr(context, 'email', ''),
             'photo_url': getattr(context, 'photo_url', ''),
-            'age': getattr(context, 'age', colander.null),
+            'birthdate': getattr(context, 'birthdate', colander.null),
+            'location': getattr(context, 'location', colander.null),
+            'age':getattr(context, 'age', 0),
             'sex': getattr(context, 'sex', None),
             'genre': getattr(context, 'genre', None),
             'tzname': getattr(context, 'tzname', 'UTC'),
@@ -123,10 +125,11 @@ class PerformerViews(object):
                 context.title = appstruct['title']
                 context.email = appstruct['email']
                 context.photo_url = appstruct['photo_url']
-                context.age = appstruct['age']
+                context.birthdate = appstruct['birthdate']
                 context.sex = appstruct['sex']
                 context.genre = appstruct['genre']
                 context.tzname = appstruct['tzname']
+                context.location = appstruct['location']
                 request.session.flash('Profile edited', 'info')
         else:
             appstruct = {
@@ -135,10 +138,11 @@ class PerformerViews(object):
                 'title': getattr(context, 'title', ''),
                 'email': getattr(context, 'email', ''),
                 'photo_url': getattr(context, 'photo_url', ''),
-                'age': getattr(context, 'age', colander.null),
+                'birthdate': getattr(context, 'birthdate', colander.null),
                 'sex': getattr(context, 'sex', None),
                 'genre': getattr(context, 'genre', None),
                 'tzname':getattr(context, 'tzname', None),
+                'location':getattr(context, 'location', ''),
             }
         if rendered is None:
             rendered = form.render(appstruct, readonly=False)

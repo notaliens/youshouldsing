@@ -39,7 +39,7 @@ class CreatePerformerSchema(Schema):
     """
     username = colander.SchemaNode(
         colander.String(),
-        title='Username',
+        title='Profile Name',
         validator=profilename_validator,
         )
     title = colander.SchemaNode(
@@ -54,6 +54,12 @@ class CreatePerformerSchema(Schema):
             colander.Length(max=100)
             ),
         )
+    location = colander.SchemaNode(
+        colander.String(),
+        validator=colander.Length(max=100),
+        missing='',
+        )
+
     tzname = colander.SchemaNode(
         colander.String(),
         title='Timezone',
@@ -67,10 +73,9 @@ class CreatePerformerSchema(Schema):
         missing='',
         validator=colander.url,
         )
-    age = colander.SchemaNode(
-        colander.Int(),
-        title='Age',
-        validator=colander.Range(min=0, max=150),
+    birthdate = colander.SchemaNode(
+        colander.Date(),
+        title='Birth Date',
         )
     sex = colander.SchemaNode(
         colander.String(),
@@ -111,11 +116,12 @@ def create_profile(context, request):
             performer.user = user
             performer.title = appstruct['title']
             performer.email = appstruct['email']
-            performer.age = appstruct['age']
+            performer.birthdate = appstruct['birthdate']
             performer.sex = appstruct['sex']
             performer.genre = appstruct['genre']
             performer.tzname = appstruct['tzname']
             performer.photo_url = appstruct['photo_url']
+            performer.location = appstruct['location']
             set_acl(performer, [(Allow, user.__oid__, ['yss.edit'])])
             headers = remember(request, get_oid(user))
             return HTTPFound(request.resource_url(performer), headers=headers)
@@ -126,10 +132,11 @@ def create_profile(context, request):
             'title': request.session.get('realname', ''),
             'email': '',
             'photo_url': request.session.get('photo_url', ''),
-            'age': colander.null,
+            'birthdate': colander.null,
             'sex': colander.null,
             'genre': colander.null,
             'tzname': colander.null,
+            'location':colander.null,
         }
     if rendered is None:
         rendered = form.render(appstruct, readonly=False)
