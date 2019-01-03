@@ -85,7 +85,7 @@
 
                     <tbody>
                       <tr tal:repeat="item liked_by">
-                        <td><img src="${item.photo_url}"/></td>
+                        <td><img src="${item.photo_url}" height="24"/></td>
                         <td>
                           <a href="${request.resource_url(item)}">${item.title}</a>
                         </td>
