@@ -11,6 +11,7 @@ from ZODB.blob import Blob
 from pyramid.httpexceptions import HTTPBadRequest
 from pyramid.settings import asbool
 from pyramid.httpexceptions import HTTPFound
+from pyramid.security import Allow
 from pyramid.traversal import (
     find_root,
     resource_path,
@@ -30,6 +31,7 @@ from substanced.sdi import mgmt_view
 from substanced.util import (
     Batch,
     find_index,
+    set_acl,
     )
 
 from yss.interfaces import (
@@ -330,7 +332,8 @@ class SongView(object):
         tmpdir = get_recording_tempdir(request, recording_id)
         recording = request.registry.content.create('Recording', tmpdir)
         recordings[recording_id] = recording
-        recording.performer = request.user.performer
+        performer = request.user.performer
+        recording.performer = performer
         recording.song = song
         recording.dry_blob = Blob()
         recording.effects = tuple([ # not currently propsheet-exposed
@@ -346,6 +349,7 @@ class SongView(object):
             pass
         with recording.dry_blob.open("w") as saveto:
             shutil.copyfileobj(f, saveto)
+        set_acl(recording, [(Allow, request.user.__oid__, ['yss.edit'])])
         redis = get_redis(request)
         redis.rpush("yss.new-recordings", resource_path(recording))
         print ("finished", tmpdir, resource_path(recording))

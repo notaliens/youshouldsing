@@ -19,7 +19,7 @@
               <div id="recording-video">
 
                 <video id="thevideo" width="640" height="400" controls style="display: ${processed and 'block' or 'none'};">
-                  <source src="${video_url}" type="video/mp4"/>
+                  <source id="thevideosource" src="${video_url}" type="video/webm"/>
                 </video>
                 <div class="well" id="processing"
                      tal:condition="not processed">
@@ -132,7 +132,7 @@
 
                     <tbody>
                       <tr tal:repeat="item liked_by">
-                        <td><img src="${item.photo_url}"/></td>
+                        <td><img src="${item.photo_url}" height="24"/></td>
                         <td>
                           <a href="${request.resource_url(item)}">${item.title}</a>
                         </td>
@@ -157,8 +157,13 @@
                "url":"${request.resource_url(context, 'mixprogress')}",
                "success": function(data) {
                  if (data['done']) {
-                   $('#thevideo').load();
-                   $('#thevideo').show();
+                   rand = Math.random().toString(36).replace(/[^a-z]+/g, ''
+                                                             ).substr(0, 5);
+                   $('#thevideosource')[0].setAttribute(
+                     'src', "${video_url}?x=" + rand); // cachebust
+                   var video = $('#thevideo');
+                   video.load();
+                   video.show();
                    $('#processing').hide();
                    if (has_edit_permission) {
                      $('#button-remix').show();

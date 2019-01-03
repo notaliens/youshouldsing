@@ -109,7 +109,6 @@
 
   - no video
   - adjust latency
-  - Relative mic volume doesnt work
 
 - Record:
 
@@ -131,7 +130,6 @@
     can set e.g. 'yss.edit' permission only on the performer instead
     of on each recording she creates.
   - Description
-  - Relative music volume doesn't work.
   - Duet
 
 - Search:
