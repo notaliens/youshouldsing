@@ -47,6 +47,54 @@
         </div>
       </div>
     </div>
+    <div class="row" tal:condition="divulge_song_likes">
+      <div class="col-md-12">
+
+        <div class="panel-heading">
+          Likes Songs
+        </div>
+        <div class="panel-body">
+          <table tal:condition="likes_songs|None"
+                 class="table table-striped table-condensed">
+
+            <thead>
+              <tr>
+                <th width="25%">
+                   Original Artist
+                </th>
+                <th width="25%">
+                   Title
+                </th>
+                <th width="20%">
+                   Genre
+                </th>
+                <th width="15%">
+                   Likes
+                </th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr tal:repeat="item likes_songs">
+                <td>${item.artist}</td>
+                <td>
+                  <a href="${request.resource_url(item)}">${item.title}</a>
+                </td>
+                <td>${item.genre or 'Unknown'}</td>
+                <td>${item.num_likes}</td>
+              </tr>
+            </tbody>
+          </table>
+          <div style="padding-top: 10px;"
+               tal:condition="not likes_songs">
+             No songs liked.
+          </div>
+        </div>
+      </div>
+
+    </div>
+
   </div>
+
 
 </div>

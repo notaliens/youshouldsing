@@ -18,6 +18,8 @@
 
   - caching
 
+  - factor out likes machinery
+
 - Licensing
 
   - https://pep.rocks/programs/gem
@@ -84,8 +86,7 @@
   - Delete/edit recordings
   - Change password
   - Singlist
-  - Likes songs / likes performers / likes recordings / recent recordings should
-    be tabs and batched
+  - Batch recordings and likes
   - Description
   - Delete account
   - Deleting a profile should delete its associated user (otherwise, problems
@@ -94,6 +95,7 @@
   - Disallow non-square images as photos
   - Rescale or reject large photo images
   - Accept gravatar image as initial photo from oauth
+  - Unlike
 
 - View recording:
 

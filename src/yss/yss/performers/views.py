@@ -46,11 +46,16 @@ class PerformerViews(object):
         performer = self.context
         return self.request.has_permission('yss.edit', performer)
 
+    @reify
+    def has_view_permission(self):
+        performer = self.context
+        return self.request.has_permission('view', performer)
+
     def tabs(self):
         state = self.request.view_name
         performer = self.context
         tabs = []
-        if self.has_edit_permission:
+        if self.has_view_permission:
             tabs.append(
                 {'title':'View',
                  'id':'button-view',
@@ -58,6 +63,41 @@ class PerformerViews(object):
                  'class':state == '' and 'active' or '',
                  'enabled':True,
                  })
+            tabs.append(
+                {'title':'Recordings',
+                 'id':'button-recordings',
+                 'url':self.request.resource_url(performer, 'recordings'),
+                 'class':state == 'recordings' and 'active' or '',
+                 'enabled':True,
+                 })
+            if performer.divulge_recording_likes:
+                tabs.append(
+                    {'title':'Recordings Liked',
+                     'id':'button-recordingsliked',
+                     'url':self.request.resource_url(
+                         performer, 'recordingsliked'),
+                     'class':state == 'recordingsliked' and 'active' or '',
+                     'enabled':True,
+                    })
+            if performer.divulge_song_likes:
+                tabs.append(
+                    {'title':'Songs Liked',
+                     'id':'button-songsliked',
+                     'url':self.request.resource_url(performer, 'songsliked'),
+                     'class':state == 'songsliked' and 'active' or '',
+                     'enabled':True,
+                    })
+            if performer.divulge_performer_likes:
+                tabs.append(
+                    {'title':'Performers Liked',
+                     'id':'button-performersliked',
+                     'url':self.request.resource_url(
+                         performer, 'performersliked'),
+                     'class':state == 'performersliked' and 'active' or '',
+                     'enabled':True,
+                    })
+
+        if self.has_edit_permission:
             tabs.append(
                 {'title':'Edit',
                  'id':'button-edit',
@@ -92,22 +132,59 @@ class PerformerViews(object):
             'sex': getattr(context, 'sex', None),
             'genre': getattr(context, 'genre', None),
             'tzname': getattr(context, 'tzname', 'UTC'),
-            'form': None,
-            'recent_recordings': recent_recordings(context, request),
             'num_likes': context.num_likes,
-            'likes_songs': self.sfilter(context.likes_songs),
-            'likes_performers': self.sfilter(context.likes_performers),
-            'likes_recordings': self.sfilter(context.likes_recordings),
             'can_edit': getattr(request.user, 'performer', None) is context,
-            'divulge_song_likes': context.divulge_song_likes,
-            'divulge_performer_likes': context.divulge_performer_likes,
             'divulge_recording_likes': context.divulge_recording_likes,
+            'divulge_performer_likes': context.divulge_performer_likes,
+            'divulge_song_likes': context.divulge_song_likes,
             'divulge_age': context.divulge_age,
             'divulge_realname':context.divulge_realname,
             'divulge_location':context.divulge_location,
             'divulge_genre':context.divulge_genre,
             'divulge_sex':context.divulge_sex,
         }
+
+    @view_config(
+        renderer='templates/profile_recordings.pt',
+        name='recordings',
+        permission='view',
+    )
+    def recordings(self):
+        vals = self.view()
+        vals['recent_recordings'] =  recent_recordings(
+            self.context, self.request
+        )
+        return vals
+
+    @view_config(
+        renderer='templates/profile_songsliked.pt',
+        name='songsliked',
+        permission='view',
+    )
+    def songsliked(self):
+        vals = self.view()
+        vals['likes_songs'] = self.sfilter(self.context.likes_songs)
+        return vals
+
+    @view_config(
+        renderer='templates/profile_performersliked.pt',
+        name='performersliked',
+        permission='view',
+    )
+    def performersliked(self):
+        vals = self.view()
+        vals['likes_performers'] = self.sfilter(self.context.likes_performers)
+        return vals
+
+    @view_config(
+        renderer='templates/profile_recordingsliked.pt',
+        name='recordingsliked',
+        permission='view',
+    )
+    def recordingsliked(self):
+        vals = self.view()
+        vals['likes_recordings'] = self.sfilter(self.context.likes_recordings)
+        return vals
 
     def sfilter(self, resources):
         allowed = []
