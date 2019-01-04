@@ -163,6 +163,13 @@ class RecordingView(object):
             needs_remix = True
             recording.musicvolume = musicvolume
 
+        show_camera = request.params.get('show-camera', 'true')
+        show_camera = show_camera == 'true' and True or False
+
+        if bool(show_camera) != bool(recording.show_camera):
+            needs_remix = True
+            recording.show_camera = show_camera
+
         if needs_remix:
             recording.remixing = True
             redis = get_redis(request)

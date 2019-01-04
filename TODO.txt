@@ -99,7 +99,6 @@
 
 - Remix recording
 
-  - no video
   - adjust latency
 
 - Record:

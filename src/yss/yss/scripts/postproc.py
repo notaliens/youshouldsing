@@ -156,18 +156,24 @@ def postprocess(recording, redis):
         redis.hmset(
             progress_key, {'pct':60, 'status':'Creating final mix'}
         )
-        ffmpeg(
+        ffmpeg_args = [
             "-y", # clobber
             "-i", dry_webm,
             "-i", "mixed.mp3",
             # vp8/opus combination supported by both FF and chrome
-            "-c:v", "vp8",
             "-c:a", "libopus",
-            "-map", "0:v:0?", # ? at end makes it optional (recs with no video)
             "-map", "1:a:0",
             "-shortest",
-            "mixed.webm"
-        )
+            ]
+        if recording.show_camera:
+            ffmpeg_args.extend([
+                "-c:v", "vp8",
+                "-map", "0:v:0?", # ? at end makes it opt (recs with no cam)
+                ])
+        else:
+            ffmpeg_args.append('-vn') # no video
+        ffmpeg_args.append('mixed.webm')
+        ffmpeg(*ffmpeg_args)
         recording.mixed_blob = Blob()
         redis.hmset(
             progress_key, {'pct':90, 'status':'Saving final mix'}

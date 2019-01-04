@@ -44,7 +44,8 @@ class Recording(persistent.Persistent):
     liked_by = multireference_target_property(PerformerLikesRecording)
     liked_by_ids = multireference_targetid_property(PerformerLikesRecording)
     effects = ()
-    musicvolume = 0
+    musicvolume = .5
+    show_camera = True
     remixing = False
 
     def __init__(self, tmpfolder):
