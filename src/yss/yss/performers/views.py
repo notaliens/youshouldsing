@@ -26,15 +26,6 @@ from yss.performers import PerformerProfileSchema
 
 from yss.utils import get_photodata
 
-def recent_recordings(context, request, limit=10):
-    q = find_index(context, 'system', 'content_type').eq('Recording')
-    q = q & find_index(context, 'system', 'allowed').allows(
-        request, 'view')
-    q = q & find_index(context, 'yss', 'performer_id').eq(context.__oid__)
-    created = find_index(context, 'yss', 'created')
-    resultset = q.execute()
-    return resultset.sort(created, reverse=True, limit=limit)
-
 @view_defaults(context=IPerformer)
 class PerformerViews(object):
     def __init__(self, context, request):
@@ -50,6 +41,18 @@ class PerformerViews(object):
     def has_view_permission(self):
         performer = self.context
         return self.request.has_permission('view', performer)
+
+    def recent_recordings(self, limit=10):
+        # XXX unused, kept around for instruction
+        context = self.context
+        request = self.request
+        q = find_index(context, 'system', 'content_type').eq('Recording')
+        q = q & find_index(context, 'system', 'allowed').allows(
+            request, 'view')
+        q = q & find_index(context, 'yss', 'performer_id').eq(context.__oid__)
+        created = find_index(context, 'yss', 'created')
+        resultset = q.execute()
+        return resultset.sort(created, reverse=True, limit=limit)
 
     def tabs(self):
         state = self.request.view_name
@@ -151,9 +154,7 @@ class PerformerViews(object):
     )
     def recordings(self):
         vals = self.view()
-        vals['recent_recordings'] =  recent_recordings(
-            self.context, self.request
-        )
+        vals['recent_recordings'] =  self.sfilter(self.context.recordings)
         return vals
 
     @view_config(
@@ -233,9 +234,9 @@ class PerformerViews(object):
                 phdata = appstruct['photo']
                 fp = phdata.get('fp')
                 if fp:
-                    fp.seek(0)
+                    fp.seek(0) # already resized by validator
                     photo.upload(fp)
-                    photo.mimetype = phdata['mimetype']
+                    photo.mimetype = 'image/png'
                 context.birthdate = appstruct['birthdate']
                 context.sex = appstruct['sex']
                 context.genre = appstruct['genre']

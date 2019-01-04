@@ -71,17 +71,21 @@
                 <th width="15%">
                    Likes
                 </th>
+                <th width="20%">
+                   Recorded
+                </th>
               </tr>
             </thead>
 
             <tbody>
               <tr tal:repeat="item likes_recordings">
-                <td>${item.artist}</td>
+                <td>${item.song.artist}</td>
                 <td>
-                  <a href="${request.resource_url(item)}">${item.title}</a>
+                  <a href="${request.resource_url(item.song)}">${item.song.title}</a>
                 </td>
-                <td>${item.genre or 'Unknown'}</td>
+                <td>${item.song.genre or 'Unknown'}</td>
                 <td>${item.num_likes}</td>
+                <td><a href="${request.resource_url(item)}">${layout.short_created_local(item)}</a></td>
               </tr>
             </tbody>
           </table>

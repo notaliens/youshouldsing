@@ -1,6 +1,8 @@
 import colander
 import datetime
 import deform
+import io
+import PIL.Image
 import pytz
 
 from substanced.content import content
@@ -64,6 +66,22 @@ class User(BaseUser):
 def tzname_widget(node, kw): #pragma NO COVER
     return deform.widget.Select2Widget(values=zip(_ZONES, _ZONES))
 
+@colander.deferred
+def photo_validator(node, kw):
+    def _photo_validator(node, value):
+        if not value['mimetype'].startswith('image/'):
+            raise colander.Invalid(node, 'Photo must be an image')
+        value['fp'].seek(0)
+        try:
+            pil_image = PIL.Image.open(value['fp'])
+            pil_image.thumbnail((128, 128), PIL.Image.ANTIALIAS)
+            buffer = io.BytesIO()
+            pil_image.save(buffer, 'png')
+            value['fp'] = buffer
+        except OSError:
+            raise colander.Invalid(node, 'Photo must be an image')
+    return _photo_validator
+
 class PerformerProfileSchema(Schema):
     """ Property schema for Performer.
     """
@@ -89,7 +107,10 @@ class PerformerProfileSchema(Schema):
         widget=tzname_widget,
         validator=colander.OneOf(_ZONES)
         )
-    photo = FileNode(title='Photo')
+    photo = FileNode(
+        title='Photo',
+        validator=photo_validator,
+    )
     birthdate = colander.SchemaNode(
         colander.Date(),
         title='Birth Date',

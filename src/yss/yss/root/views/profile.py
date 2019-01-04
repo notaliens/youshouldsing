@@ -19,8 +19,7 @@ from yss.interfaces import (
     genre_choices,
     IPerformerPhoto,
 )
-
-from yss.utils import get_photodata
+from yss.performers import photo_validator
 
 from zope.interface import alsoProvides
 
@@ -73,7 +72,10 @@ class CreatePerformerSchema(Schema):
         validator=colander.OneOf(_ZONES),
         default='UTC',
         )
-    photo = FileNode(title='Photo')
+    photo = FileNode(
+        title='Photo',
+        validator=photo_validator,
+    )
     birthdate = colander.SchemaNode(
         colander.Date(),
         title='Birth Date',
@@ -120,8 +122,8 @@ def create_profile(context, request):
             fp = phdata.get('fp')
             if fp:
                 fp.seek(0)
-                photo.upload(fp)
-                photo.mimetype = phdata['mimetype']
+                photo.upload(fp) # already resized by validator
+                photo.mimetype = 'image/png'
             # NB: performer.user required before setting tzname and email
             performer.user = user
             performer.title = appstruct['title']

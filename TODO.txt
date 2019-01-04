@@ -1,24 +1,16 @@
 - General
 
   - csrf
-
   - configure auditing
-
   - should probably use browser timezone instead of user-specified SDI timezone
-
   - Relstorage
-
   - i18n
-
   - datadog
-
   - terms of service
-
   - privacy policy
-
   - caching
-
   - factor out likes machinery
+  - tests
 
 - Licensing
 
@@ -27,24 +19,14 @@
 - Login:
 
   - Facebook login
-
-  - Photo url -> photo
-
   - How do we deal with someone forgetting which service he used to
     login with?  How do we deal with it if a user wants to log in
     to the same yss account using two different oauth providers?
-
   - Impersonation.
-
   - Disqus SSO.
-
-  - Show which authorizer (google/twitter/etc) in profile somehow.
-
   - Require user to validate email address.
-
   - Know what happens when we need to change consumer secret or details about
     app in developer settings.
-
   - Non-oauth signups.
 
 - Artist
@@ -65,26 +47,26 @@
   - Crowdsource lyric retimings... allow uploader to accept lyric timing
     suggestions.
   - Recognize dupe song metadata and group together on other recordings page.
+  - Recordings of this song as tab
+  - Performers who like this song as tab
+  - Allow uploads (yikes)
 
 - Homepage:
 
-  Featured recordings should take into account number of likes vs.  number of
-  views, whether it's "members only", and perhaps number of comments.
-
-  We need to index the number of times a song has been recorded.  This is
-  a rough measure of its popularity.
-
-  Public recordings tend to get about 20 hits per year for a not-currently-hot
-  song.  Private recordings maybe 5-10.
-
-  song_popularity = num_recordings on scale of 0 to 100 over site lifetime
-
-  use song popularity as a handicap
+  - Featured recordings should take into account number of likes vs.  number of
+    views, whether it's "members only", and perhaps number of comments.
+  - We need to index the number of times a song has been recorded.  This is
+    a rough measure of its popularity.
+  - Public recordings tend to get about 20 hits per year for a not-currently-hot
+    song.  Private recordings maybe 5-10.
+  - song_popularity = num_recordings on scale of 0 to 100 over site lifetime
+  - use song popularity as a handicap
 
 - Profile:
 
   - Delete/edit recordings
   - Change password
+  - Forgot password
   - Singlist
   - Batch recordings and likes
   - Description
@@ -92,10 +74,11 @@
   - Deleting a profile should delete its associated user (otherwise, problems
     when someone relogs in using that oauth account)
   - Disallow animated gifs as photos
-  - Disallow non-square images as photos
-  - Rescale or reject large photo images
   - Accept gravatar image as initial photo from oauth
   - Unlike
+  - Member since
+  - # of public songs recorded on header of profile views
+  - Show which authorizer (google/twitter/etc) in profile somehow.
 
 - View recording:
 
@@ -142,13 +125,8 @@
 - Search:
 
   - Index lyrics into song text index.
-
   - Provide an "X" which removes the current filter.
   
-- Allow uploads of songs (yikes)
-
-- Tests
-
 - JS:
 
   - Upgrade bootstrap and jquery (or ditch and go with the new hotness,

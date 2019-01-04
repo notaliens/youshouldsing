@@ -26,6 +26,7 @@ requires = [
     'pyramid_redis_sessions',
     'google-cloud-storage',
     'google-cloud-speech',
+    'pillow',
     ]
 
 setup(name='yss',
