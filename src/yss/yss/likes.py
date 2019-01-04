@@ -8,4 +8,3 @@ def has_liked(request, resource):
 def can_like(request, resource):
     if not has_liked(request, resource):
         return request.has_permission('yss.like', resource)
-    
