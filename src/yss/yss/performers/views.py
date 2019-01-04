@@ -218,6 +218,7 @@ class PerformerViews(object):
         permission='yss.edit',
     )
     def profile_edit_form(self):
+        vars = self.view()
         context = self.context
         request = self.request
         schema = PerformerProfileSchema().bind(request=request, context=context)
@@ -272,9 +273,8 @@ class PerformerViews(object):
             }
         if rendered is None:
             rendered = form.render(appstruct, readonly=False)
-        return {
-            'form': rendered,
-        }
+        vars['form'] = rendered
+        return vars
 
     @view_config(
         renderer='templates/profile_privacy.pt',
@@ -282,6 +282,7 @@ class PerformerViews(object):
         permission='yss.edit',
     )
     def profile_privacy_form(self):
+        vars = self.view()
         context = self.context
         request = self.request
         schema = PerformerProfilePrivacySchema().bind(
@@ -340,9 +341,8 @@ class PerformerViews(object):
             }
         if rendered is None:
             rendered = form.render(appstruct, readonly=False)
-        return {
-            'form': rendered,
-        }
+        vars['form'] = rendered
+        return vars
     
 
 class PerformersView(object):

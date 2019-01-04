@@ -2,6 +2,11 @@
 
   <div metal:fill-slot="main_content" class="container">
 
+    <div class="row">
+      <div class="col-md-12">
+        <div metal:use-macro="layout.profile_header_macro"></div>
+      </div>
+    </div>
     <div>
       <script type="text/javascript" src="${request.static_url('deform:static/select2/select2.js')}"></script>
       <script type="text/javascript" src="${request.static_url('deform:static/scripts/modernizr.custom.input-types-and-atts.js')}"></script>

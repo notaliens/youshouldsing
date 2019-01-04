@@ -85,6 +85,13 @@ class MainLayout(object):
             'batching'
             )
 
+    @property
+    def profile_header_macro(self):
+        return self.request.sdiapi.get_macro(
+            'yss.performers:templates/profile_header.pt',
+            'profile_header'
+            )
+
     def can_like(self, target):
         return yss.likes.can_like(self.request, target)
 

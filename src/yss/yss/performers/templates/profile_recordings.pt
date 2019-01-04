@@ -4,49 +4,10 @@
 
     <div class="row">
       <div class="col-md-12">
-        <div class="panel panel-default">
-          <div class="panel-heading">
-            <div style="float:right">
-              <img src="${layout.performer_photo_url(context)}" height="96"/>
-            </div>
-            <p style="float: right; padding-right: 2em">
-              <span tal:condition="age and divulge_age">${age} - </span>
-
-              <span tal:condition="sex and divulge_sex">${sex} - </span>
-
-              <span tal:condition="location and divulge_location">${location} - </span>
-
-              <span tal:condition="genre and divulge_genre">${genre}</span>
-            </p>
-            <h3>${name}</h3>
-            <h2 tal:condition="title and divulge_realname">${title}</h2>
-          </div>
-        </div>
-        <div class="panel-body">
-          Likes: <span id="like-count">${num_likes}</span>
-          <tal:if tal:condition="layout.can_like(context)">
-            <a id="like-button" href="@@like" style="padding-left: 10px;"
-               ><i class="glyphicon glyphicon-thumbs-up"> </i></a>
-            <script type="text/javascript">
-             $("#like-button").click(function () {
-               $.ajax('@@like')
-                    .success(function(data) {
-                 var counter = $('#like-count'),
-                 thumb = $('#like-button');
-                 counter.text(data['num_likes']);
-                 thumb.hide();
-               })
-                      .fail(function() {
-                 alert('Failed to add like');
-               });
-               return false;
-             });
-            </script>
-          </tal:if>
-
-        </div>
+        <div metal:use-macro="layout.profile_header_macro"></div>
       </div>
     </div>
+
     <div class="row">
       <div class="col-md-12">
         <div class="panel-heading">
