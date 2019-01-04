@@ -170,6 +170,19 @@ class RecordingView(object):
             needs_remix = True
             recording.show_camera = show_camera
 
+        try:
+            latency = request.params.get('latency', 0)
+            latency = float(latency)
+            if 0 > latency > 2:
+                raise ValueError
+        except (TypeError, ValueError):
+            request.session.flash('Bad latency', 'danger')
+            return request.resource_url(self.context, 'remix')
+
+        if latency != recording.latency:
+            needs_remix = True
+            recording.latency = latency
+
         if needs_remix:
             recording.remixing = True
             redis = get_redis(request)

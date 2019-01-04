@@ -74,6 +74,9 @@ var yssmixer = (function(stream_url, submit_handler) {
         if ($('#show-camera')[0]) {
             fd.append('show-camera', $('#show-camera')[0].checked);
         }
+        if ($('#latency')[0]) {
+            fd.append('latency', $('#latency')[0].value);
+        }
         url = submit_handler || window.location;
         jQuery.ajax({
             type:'POST',

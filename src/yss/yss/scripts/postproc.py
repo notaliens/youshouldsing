@@ -137,18 +137,24 @@ def postprocess(recording, redis):
                     
         song_audio_filename = recording.song.blob.committed()
         musicvolume = recording.musicvolume
+        latency = recording.latency
         soxargs = [
             "-V",
             "--clobber",
-            "-m", "micwet.mp3",
+            "-M", "micwet.mp3",
             "-t", "mp3",
             "-v", f"{float(musicvolume)}", # applies to song_audio_filename (0.5 is default on slider)
             song_audio_filename,
             "mixed.mp3",
-            "remix", "-m", "1,2", "2,1", # center vocals (see https://stackoverflow.com/questions/14950823/sox-exe-mixing-mono-vocals-with-stereo-music)
         ]
+        if latency:
+            # apply latency adj, must come before other options or voice is doubled
+            soxargs.extend(['delay', "0", str(latency)])
         if samples:
             soxargs.extend(['trim', '0s', f'{samples}s'])
+        # center vocals (see https://stackoverflow.com/questions/14950823/sox-exe-mixing-mono-vocals-with-stereo-music)
+        soxargs.extend(["remix", "-m", "1,2", "2,1"])
+
         redis.hmset(
             progress_key, {'pct':50, 'status':'Rebalancing audio'}
         )

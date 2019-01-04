@@ -99,7 +99,8 @@
 
 - Remix recording
 
-  - adjust latency
+  - Show logo or something on vids without camera or who are remixed to not
+    allow.
 
 - Record:
 
@@ -122,6 +123,7 @@
     of on each recording she creates.
   - Description
   - Duet
+  - Set guessed latency on initial record
 
 - Search:
 

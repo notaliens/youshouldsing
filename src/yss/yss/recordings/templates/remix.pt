@@ -74,6 +74,28 @@
       </div>
     </div>
 
+    <div class="row">
+      <div class="col-md-12">
+
+        <div class="panel panel-warning">
+          <div class="panel-heading">
+            <h3 class="panel-title">Mic Latency (ms)</h3>
+          </div>
+          <div class="panel-body">
+
+            <div>
+              <span class="form-check">
+                <input type="number" id="latency" min="0" max="2" step="0.1" value="${context.latency}" size="6">
+                <label class="form-check-label" for="latency">
+                  Adjust if mic vocals are out of sync with music
+                </label>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 
   <div metal:fill-slot="tail">

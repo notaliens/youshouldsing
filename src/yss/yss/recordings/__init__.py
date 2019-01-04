@@ -47,6 +47,7 @@ class Recording(persistent.Persistent):
     musicvolume = .5
     show_camera = True
     remixing = False
+    latency = 0
 
     def __init__(self, tmpfolder):
         self.dry_blob = None
