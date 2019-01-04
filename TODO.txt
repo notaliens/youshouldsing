@@ -1,20 +1,21 @@
 - General
 
   - csrf
-  - configure auditing
+  - configure auditing***
   - should probably use browser timezone instead of user-specified SDI timezone
-  - Relstorage
+  - Relstorage***
   - i18n
-  - datadog
-  - terms of service
-  - privacy policy
+  - datadog***
+  - terms of service***
+  - privacy policy***
   - caching
   - factor out likes machinery
   - tests
+  - invitations***
 
 - Licensing
 
-  - https://pep.rocks/programs/gem
+  - https://pep.rocks/programs/gem***
   
 - Login:
 
@@ -47,9 +48,9 @@
   - Crowdsource lyric retimings... allow uploader to accept lyric timing
     suggestions.
   - Recognize dupe song metadata and group together on other recordings page.
-  - Recordings of this song as tab
-  - Performers who like this song as tab
-  - Allow uploads (yikes)
+  - Recordings of this song as tab***
+  - Performers who like this song as tab***
+  - Allow uploads (yikes)***
 
 - Homepage:
 
@@ -64,53 +65,54 @@
 
 - Profile:
 
-  - Delete/edit recordings
-  - Change password
-  - Forgot password
+  - Delete/edit recordings***
+  - Change password***
+  - Forgot password***
   - Singlist
-  - Batch recordings and likes
-  - Description
+  - Batch recordings and likes***
+  - Description***
   - Delete account
   - Deleting a profile should delete its associated user (otherwise, problems
-    when someone relogs in using that oauth account)
+    when someone relogs in using that oauth account)***
   - Accept gravatar image as initial photo from oauth
-  - Unlike
-  - Member since
-  - # of public songs recorded on header of profile views
+  - Unlike***
+  - Member since***
+  - # of public songs recorded on header of profile views***
   - Show which authorizer (google/twitter/etc) in profile somehow.
   - Maybe medium sized prescaled photo for profile header.
-  - Profile header photo when clicked should show large sized photo in overlay.
-  - All uses of photos in img tags should be surrounded by fixed size div box.
+  - Profile header photo when clicked should show large sized photo in
+    overlay.***
+  - All uses of photos in img tags should be surrounded by fixed size div
+    box.***
 
 - View recording:
 
-  - Dropdown for who liked instead of inline table
-  - Dropdown for other recordings instead of inline table.
+  - Dropdown for who liked instead of inline table***
+  - Dropdown for other recordings instead of inline table.***
   - "Likes disabled" instead of "0 performers have liked this recording"
     when like permission is not available.
   - "Other recordings you might like if you like this one"
 
 - Edit recording:
 
-  - Private/public/authenticated/group viewers (workflow?)
+  - Private/public/authenticated/group viewers (workflow?)***
   - Allow/disallow likes
   - Allow/disallow comments
-  - Description
+  - Description***
 
 - Remix recording
 
   - Show logo or something on vids without camera or who are remixed to not
-    allow.
+    allow.***
 
 - Record:
 
   - Safari (mobile or desktop) doesn't support MediaRecorder.
     https://www.gmass.co/blog/record-audio-mobile-web-page-ios-android/
-  - Mic volume slider has no effect.
-  - Scrub on playonly
+  - Mic volume slider has no effect.***
+  - Scrub on playonly***
   - Unhelpful errors when camera is already used (e.g. by OBS).
   - Handle conflict errors in postprocessing.
-  - Latency handling.
   - Maybe instead of building some system to arbitrarily time-align
     source audio and mic audio after latency, just let people clap
     a pattern.  https://medium.com/@almeidneto/sound-pattern-recognition-with-python-9aff69edce5d
@@ -121,14 +123,14 @@
   - Recordings should probably be inside the performer folder so we
     can set e.g. 'yss.edit' permission only on the performer instead
     of on each recording she creates.
-  - Description
-  - Duet
+  - Description***
+  - Duet***
   - Set guessed latency on initial record
 
 - Search:
 
   - Index lyrics into song text index.
-  - Provide an "X" which removes the current filter.
+  - Provide an "X" which removes the current filter.***
   
 - JS:
 
