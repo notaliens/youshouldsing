@@ -14,7 +14,7 @@ from pyramid.paster import (
     bootstrap,
     )
 
-from yss import midi
+from yss.scripts import midi
 
 def main(argv=sys.argv):
     def usage(msg):
