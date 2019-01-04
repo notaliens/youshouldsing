@@ -28,7 +28,7 @@
                     <a href="${request.resource_url(item)}">${layout.short_created_local(item)}</a>
                   </td>
                   <td width="35%">
-                    <a href="${request.resource_url(item.performer or item)}"><img alt="" src="${layout.performer_photo_url(item.performer)}" height="24" width="24" style="padding-right: 10px;"/>${item.performer.__name__}</a>
+                    <a href="${request.resource_url(item.performer or item)}"><img alt="" src="${layout.performer_thumb_url(item.performer)}" style="padding-right: 10px;"/>${item.performer.__name__}</a>
                   </td>
                   <td width="45%">
                     <a href="${request.resource_url(item.song)}">${item.song.title}</a>
@@ -56,7 +56,7 @@
                     <a href="${request.resource_url(item)}">${layout.short_created_local(item)}</a>
                   </td>
                   <td width="35%">
-                    <a href="${request.resource_url(item.performer or item)}"><img alt="" src="${layout.performer_photo_url(item.performer)}" height="24" width="24" style="padding-right: 10px;"/>${item.performer.__name__}</a>
+                    <a href="${request.resource_url(item.performer or item)}"><img alt="" src="${layout.performer_thumb_url(item.performer)}" style="padding-right: 10px;"/>${item.performer.__name__}</a>
                   </td>
                   <td width="45%">
                     <a href="${request.resource_url(item.song)}">${item.song.title}</a>

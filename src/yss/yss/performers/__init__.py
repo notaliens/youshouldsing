@@ -74,7 +74,7 @@ def photo_validator(node, kw):
         value['fp'].seek(0)
         try:
             pil_image = PIL.Image.open(value['fp'])
-            pil_image.thumbnail((128, 128), PIL.Image.ANTIALIAS)
+            pil_image.thumbnail((640, 640), PIL.Image.ANTIALIAS)
             buffer = io.BytesIO()
             pil_image.save(buffer, 'png')
             value['fp'] = buffer

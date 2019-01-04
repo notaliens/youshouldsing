@@ -1,6 +1,8 @@
 # Retail profile views
 import colander
 import deform
+import io
+import PIL.Image
 
 from pyramid.decorator import reify
 from pyramid.httpexceptions import HTTPBadRequest
@@ -223,7 +225,6 @@ class PerformerViews(object):
         rendered = None
         if 'Save' in request.POST:
             controls = request.POST.items()
-            photo = context['photo']
             try:
                 appstruct = form.validate(controls)
             except deform.ValidationFailure as e:
@@ -231,12 +232,24 @@ class PerformerViews(object):
             else:
                 context.title = appstruct['title']
                 context.email = appstruct['email']
+                photo = context['photo']
+                photo_thumbnail = context['photo_thumbnail']
                 phdata = appstruct['photo']
                 fp = phdata.get('fp')
-                if fp:
-                    fp.seek(0) # already resized by validator
-                    photo.upload(fp)
-                    photo.mimetype = 'image/png'
+                if fp is not None:
+                    for photo_object, photosize in (
+                            (photo, (320, 320)),
+                            (photo_thumbnail, (40, 40)),
+                    ):
+                        fp.seek(0)
+                        pil_image = PIL.Image.open(fp)
+                        if pil_image.size[0] != photosize[0]: # width
+                            pil_image.thumbnail(photosize, PIL.Image.ANTIALIAS)
+                        buffer = io.BytesIO()
+                        pil_image.save(buffer, 'png')
+                        buffer.seek(0)
+                        photo_object.upload(buffer)
+                        photo_object.mimetype = 'image/png'
                 context.birthdate = appstruct['birthdate']
                 context.sex = appstruct['sex']
                 context.genre = appstruct['genre']

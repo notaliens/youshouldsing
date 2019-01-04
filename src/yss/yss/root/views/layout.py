@@ -31,11 +31,20 @@ class MainLayout(object):
     def google_login_url(self):
         return login_url(self.request, 'google')
 
+    def current_performer(self):
+        objectmap = find_objectmap(self.context)
+        user = self.request.user
+        performer = list(objectmap.sources(user, PerformerToUser))[0]
+        return performer
+
+    def performer_thumb_url(self, performer=None):
+        if performer is None:
+            performer = self.current_performer()
+        return self.request.resource_url(performer['photo_thumbnail'])
+
     def performer_photo_url(self, performer=None):
         if performer is None:
-            objectmap = find_objectmap(self.context)
-            user = self.request.user
-            performer = list(objectmap.sources(user, PerformerToUser))[0]
+            performer = self.current_performer()
         return self.request.resource_url(performer['photo'])
 
     def tabs(self):

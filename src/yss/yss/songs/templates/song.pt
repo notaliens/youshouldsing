@@ -57,7 +57,7 @@
 
                       <tbody>
                         <tr tal:repeat="item recordings">
-                          <td><img src="${layout.performer_photo_url(item.performer)}" height="24" width="24"/></td>
+                          <td><img src="${layout.performer_thumb_url(item.performer)}" width="32"/></td>
                           <td>
                             <a href="${request.resource_url(item)}">${item.title}</a>
                           </td>
@@ -85,7 +85,7 @@
 
                     <tbody>
                       <tr tal:repeat="item liked_by">
-                        <td><img src="${layout.performer_photo_url(item)}" height="24" width="24"/></td>
+                        <td><img src="${layout.performer_thumb_url(item)}"/></td>
                         <td>
                           <a href="${request.resource_url(item)}">${item.title}</a>
                         </td>

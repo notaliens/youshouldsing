@@ -73,12 +73,14 @@
   - Delete account
   - Deleting a profile should delete its associated user (otherwise, problems
     when someone relogs in using that oauth account)
-  - Disallow animated gifs as photos
   - Accept gravatar image as initial photo from oauth
   - Unlike
   - Member since
   - # of public songs recorded on header of profile views
   - Show which authorizer (google/twitter/etc) in profile somehow.
+  - Maybe medium sized prescaled photo for profile header.
+  - Profile header photo when clicked should show large sized photo in overlay.
+  - All uses of photos in img tags should be surrounded by fixed size div box.
 
 - View recording:
 

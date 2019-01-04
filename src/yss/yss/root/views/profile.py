@@ -1,5 +1,7 @@
 import colander
 import deform
+import io
+import PIL.Image
 import pytz
 
 from pyramid.security import remember
@@ -33,6 +35,9 @@ def tzname_widget(node, kw): #pragma NO COVER
 def profilename_validator(node, kw):
     context = kw['context']
     def _profilename_validator(node, value):
+        if len(value) > 15:
+            raise colander.Invalid(
+                node, 'Username must not exceed 15 characters')
         root = find_root(context)
         performers = root['performers']
         if value in performers:
@@ -50,6 +55,7 @@ class CreatePerformerSchema(Schema):
     title = colander.SchemaNode(
         colander.String(),
         title='Real Name',
+        validator=colander.Length(max=60),
         missing='',
     )
     email = colander.SchemaNode(
@@ -115,15 +121,25 @@ def create_profile(context, request):
             user = principals.add_user(userid, registry=registry)
             performer = registry.content.create('Performer')
             root['performers'][username] = performer
-            photo = registry.content.create('File')
-            alsoProvides(photo, IPerformerPhoto) # for view lookup
-            performer['photo'] = photo
             phdata = appstruct['photo']
             fp = phdata.get('fp')
-            if fp:
-                fp.seek(0)
-                photo.upload(fp) # already resized by validator
-                photo.mimetype = 'image/png'
+            if fp is not None:
+                for photoname, photosize in (
+                        ('photo', (320, 320)),
+                        ('photo_thumbnail', (40, 40)),
+                ):
+                    photo = registry.content.create('File')
+                    alsoProvides(photo, IPerformerPhoto) # for view lookup
+                    performer[photoname] = photo
+                    fp.seek(0)
+                    pil_image = PIL.Image.open(fp)
+                    if pil_image.size[0] != photosize[0]: # width
+                        pil_image.thumbnail(photosize, PIL.Image.ANTIALIAS)
+                    buffer = io.BytesIO()
+                    pil_image.save(buffer, 'png')
+                    buffer.seek(0)
+                    photo.upload(buffer)
+                    photo.mimetype = 'image/png'
             # NB: performer.user required before setting tzname and email
             performer.user = user
             performer.title = appstruct['title']
