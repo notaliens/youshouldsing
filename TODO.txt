@@ -13,6 +13,7 @@
   - invitations***
   - page titles***
   - get substanced.secret out of shared.ini
+  - contests
 
 - Licensing
 
@@ -127,7 +128,6 @@
   - Recordings should probably be inside the performer folder so we
     can set e.g. 'yss.edit' permission only on the performer instead
     of on each recording she creates.
-  - Initial visibility***
   - Duet***
   - Set guessed latency on initial record
   - Karaoke display seems random which line is chosen next to display

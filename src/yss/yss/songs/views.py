@@ -373,6 +373,8 @@ class SongView(object):
             shutil.copyfileobj(f, saveto)
         workflow = get_workflow(request, 'Visibility', 'Recording')
         workflow.reset(recording, request) # private by default
+        visibility = request.params.get('visibility', 'Private')
+        workflow.transition_to_state(recording, request, visibility)
         redis = get_redis(request)
         redis.rpush("yss.new-recordings", resource_path(recording))
         print ("finished", tmpdir, resource_path(recording))

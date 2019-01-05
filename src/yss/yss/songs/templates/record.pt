@@ -124,13 +124,33 @@
       <div id="metadata-overlay-text" class="finished-overlay-text">
         <div class="form-group">
           <label for="description" style="font-size: 14px;">Description</label>
-          <textarea class="form-control" id="description" rows="6" columns="120"></textarea>
+          <textarea class="form-control" id="description" rows="6" columns="120" placeholder="Describe your recording"></textarea>
+        </div>
+        <div class="form-group">
+          <div style="font-size: 14px;">
+            <b>Visibility</b>
+          </div>
+          <label class="form-check-label"
+                 for="visibility-public" style="font-size: 14px;"
+                 >Public</label>
+          <input id="visibility-public" type="radio" name="visibility"
+                 value="Public" checked>
+          <label class="form-check-label"
+                 for="visibility-private" style="font-size: 14px;"
+                 >Private</label>
+          <input id="visibility-private" type="radio" name="visibility"
+                   value="Private">
+          <label class="form-check-label"
+                 for="visibility-authenticated" style="font-size: 14px;"
+                 >Authenticated-only</label>
+          <input id="visibility-authenticated" type="radio" name="visibility"
+                 value="Authenticated Only">
         </div>
         <div>
-          <button id="upload-me" style="width: 8em;" class="btn btn-danger">
-             Upload</button>
-          <button id="cancel-me" style="width: 8em;" class="btn btn-primary">
+          <button id="cancel-me" style="width: 8em;" class="btn btn-danger">
              Cancel</button>
+          <button id="upload-me" style="width: 8em;" class="btn btn-success">
+             Upload</button>
         </div>
       </div>
     </div>

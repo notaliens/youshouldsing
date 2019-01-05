@@ -340,6 +340,7 @@ var rtc_recorder = (function(exports, karaoke, max_framerate, upload_handler) {
     function abandon() {
         $('#metadata-overlay')[0].style.display = "none";
         $('#uploading-overlay')[0].style.display = "none";
+        $(document).off("keyup");
         init();  // reload stream
     }
 
@@ -348,6 +349,9 @@ var rtc_recorder = (function(exports, karaoke, max_framerate, upload_handler) {
         $('#uploading-overlay')[0].style.display = "none";
         $('#upload-me')[0].onclick = uploadVideo;
         $('#cancel-me')[0].onclick = abandon;
+        $(document).keyup(function(e) {
+           if (e.keyCode === 27) abandon();   // esc
+        });
     }
 
     function uploadVideo() {
@@ -369,8 +373,11 @@ var rtc_recorder = (function(exports, karaoke, max_framerate, upload_handler) {
         }
         fd.append('data', blob);
         fd.append('finished', '1');
-        if ($('#description')[0]) {
+        if ($('#description')) {
             fd.append('description', $('#description')[0].value);
+        }
+        if ($('input[name=visibility]')) {
+            fd.append('visibility', $('input[name=visibility]:checked').val());
         }
         url = upload_handler || window.location;
         jQuery.ajax({
