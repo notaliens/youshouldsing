@@ -201,7 +201,7 @@ class PerformerViews(object):
         renderer='json',
         permission='yss.like',
     )
-    def like_profile(self):
+    def like(self):
         request = self.request
         context = self.context
         performer = request.user.performer
@@ -210,6 +210,23 @@ class PerformerViews(object):
         context.liked_by.connect([performer])
         return {'ok': True,
                 'num_likes': context.num_likes,
+                'can_like':request.layout_manager.layout.can_like(performer),
+                }
+
+    @view_config(
+        name='unlike',
+        renderer='json',
+        permission='yss.like',
+    )
+    def unlike(self):
+        request = self.request
+        context = self.context
+        performer = request.user.performer
+        if performer in context.liked_by:
+            context.liked_by.disconnect([performer])
+        return {'ok': True,
+                'num_likes': context.num_likes,
+                'can_like':request.layout_manager.layout.can_like(performer),
                 }
 
     @view_config(
@@ -343,7 +360,7 @@ class PerformerViews(object):
             rendered = form.render(appstruct, readonly=False)
         vars['form'] = rendered
         return vars
-    
+
 
 class PerformersView(object):
     default_sort = 'date'
@@ -505,7 +522,7 @@ class PerformerProfilePrivacySchema(Schema):
         title='Divulge your favorite genre',
         default='true',
         )
-        
+
 @view_config(
     context=IPerformerPhoto,
     permission='view',

@@ -23,8 +23,6 @@ from yss.interfaces import (
 
 from pyramid.decorator import reify
 
-import yss.likes
-
 @view_defaults(context=IRecording)
 class RecordingView(object):
     def __init__(self, context, request):
@@ -203,7 +201,7 @@ class RecordingView(object):
             recording.liked_by.connect([performer])
         return {'ok': True,
                 'num_likes': recording.num_likes,
-                'can_like':yss.likes.can_like(request, recording),
+                'can_like':request.layout_manager.layout.can_like(recording),
         }
 
     @view_config(
@@ -219,7 +217,7 @@ class RecordingView(object):
             recording.liked_by.disconnect([performer])
         return {'ok': True,
                 'num_likes': recording.num_likes,
-                'can_like':yss.likes.can_like(request, recording),
+                'can_like':request.layout_manager.layout.can_like(recording),
         }
 
     @view_config(

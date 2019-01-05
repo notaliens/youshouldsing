@@ -13,26 +13,7 @@
           <div class="panel-body">
             <div class="row">
               <div class="col-md-4">
-              Likes: <span id="like-count">${num_likes}</span>
-                <tal:if tal:condition="layout.can_like(context)">
-                  <a id="like-button" href="@@like" style="padding-left: 10px;"
-                     ><i class="glyphicon glyphicon-thumbs-up"> </i></a>
-                  <script type="text/javascript">
-                   $("#like-button").click(function () {
-                     $.ajax('@@like')
-                    .success(function(data) {
-                       var counter = $('#like-count'),
-                       thumb = $('#like-button');
-                       counter.text(data['num_likes']);
-                       thumb.hide();
-                     })
-                            .fail(function() {
-                       alert('Failed to add like');
-                     });
-                     return false;
-                   });
-                  </script>
-                </tal:if>
+                <div metal:use-macro="layout.likes_macro"></div>
               </div>
               <div tal:condition="can_record" class="col-md-4">
                 <button type="button"
@@ -103,5 +84,12 @@
 
       </div>
     </div>
+  </div>
+  <div metal:fill-slot="tail">
+    <script type="text/javascript"
+            src="${layout.static('js/likes.js')}"></script>
+    <script type="text/javascript">
+     liker();
+    </script>
   </div>
 </div>

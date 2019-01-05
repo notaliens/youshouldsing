@@ -60,95 +60,19 @@
 
             </div>
 
-            <div class="row" id="like-table" tal:define="can_like layout.can_like(context); has_liked layout.has_liked(context)">
-              <div class="panel panel-default">
-                <div class="panel-heading">
-                  <span id="recording-feedback">
-                    <tal:if tal:condition="can_like">
-                      <a id="like-button" href="@@like" style="padding-left: 10px;"
-                         ><i class="glyphicon glyphicon-thumbs-up"> </i></a>
-                    </tal:if>
-                    <tal:if condition="not can_like">
-                      <a id="like-button" href="@@like" style="padding-left: 10px; display: none;"
-                         ><i class="glyphicon glyphicon-thumbs-up"> </i></a>
-                    </tal:if>
-                    <tal:if tal:condition="has_liked">
-                      <a id="unlike-button" href="@@unlike" style="padding-left: 10px;"
-                         ><i class="glyphicon glyphicon-thumbs-down"> </i></a>
-                    </tal:if>
-                    <tal:if tal:condition="not has_liked">
-                      <a id="unlike-button" href="@@unlike" style="padding-left: 10px; display: none;"
-                         ><i class="glyphicon glyphicon-thumbs-down"> </i></a>
-                    </tal:if>
-                  </span>
-                  <span id="like-count">${num_likes} performer${num_likes==1 and " has liked this recording" or "s have liked this recording"}</span>
-                  <script type="text/javascript">
-
-                   $("#like-button").click(function () {
-                     $.ajax('${request.resource_url(context)}@@like')
-                      .success(function(data) {
-                       if (data['num_likes'] == 1) {
-                         message = data['num_likes'] + ' performer has liked this recording';
-                       }
-                       else {
-                         message = data['num_likes'] + ' performers have liked this recording';
-                       }
-
-                       $('#like-count').text(message);
-                       $('#like-button').hide();
-                       $('#unlike-button').show();
-                     }).fail(function() {
-                         alert('Failed to add like');
-                       });
-                       return false;
-                     });
-
-
-                       $("#unlike-button").click(function () {
-                         $.ajax('${request.resource_url(context)}@@unlike')
-                      .success(function(data) {
-                           if (data['num_likes'] == 1) {
-                             message = data['num_likes'] + ' performer has liked this recording';
-                           }
-                           else {
-                             message = data['num_likes'] + ' performers have liked this recording';
-                           }
-
-                           $('#like-count').text(message);
-                           $('#unlike-button').hide();
-                           if (data['can_like']) {
-                             $('#like-button').show();
-                           };
-                         }).fail(function() {
-                             alert('Failed to unlike');
-                           });
-                           return false;
-                         });
-                  </script>
-                </div>
-
-                <div class="panel-body">
-                  <table class="table table-striped table-condensed">
-
-                    <tbody>
-                      <tr tal:repeat="item liked_by">
-                        <td><img src="${layout.performer_thumb_url(item)}"/></td>
-                        <td>
-                          <a href="${request.resource_url(item)}">${item.title}</a>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-
-                </div>
+            <div class="row" id="like-table">
+              <div class="well">
+                <div metal:use-macro="layout.likes_macro"></div>
               </div>
 
             </div>
 
           </div>
-        </div>
 
-        <script type="text/javascript" tal:condition="not processed">
+        </div>
+      </div>
+
+      <script type="text/javascript" tal:condition="not processed">
          var progresscheck = function() {
            console.log('progress check');
            var has_edit_permission = ${has_edit_permission};
@@ -183,8 +107,7 @@
            );
            }
            setTimeout(progresscheck, 3000);
-        </script>
-      </div>
+      </script>
     </div>
 
     <div class="row" tal:condition="False">
@@ -228,6 +151,14 @@
 
     </div>
 
+  </div>
+
+  <div metal:fill-slot="tail">
+    <script type="text/javascript"
+            src="${layout.static('js/likes.js')}"></script>
+    <script type="text/javascript">
+     liker();
+    </script>
   </div>
 
 </div>

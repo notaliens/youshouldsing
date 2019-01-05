@@ -1,0 +1,24 @@
+<div metal:define-macro="likes">
+  <span id="likes"
+        tal:define="can_like layout.can_like(context);
+                    has_liked layout.has_liked(context)">
+    <tal:if tal:condition="can_like">
+      <a id="like-button" href="#" style="padding-left: 10px;"
+         ><i class="glyphicon glyphicon-thumbs-up"> </i></a>
+    </tal:if>
+    <tal:if condition="not can_like">
+      <a id="like-button" href="#" style="padding-left: 10px; display: none;"
+         ><i class="glyphicon glyphicon-thumbs-up"> </i></a>
+    </tal:if>
+    <tal:if tal:condition="has_liked">
+      <a id="unlike-button" href="#" style="padding-left: 10px;"
+         ><i class="glyphicon glyphicon-thumbs-down"> </i></a>
+    </tal:if>
+    <tal:if tal:condition="not has_liked">
+      <a id="unlike-button" href="#" style="padding-left: 10px; display: none;"
+         ><i class="glyphicon glyphicon-thumbs-down"> </i></a>
+    </tal:if>
+  </span>
+  <span id="like-count">${num_likes} performer${num_likes==1 and " has liked" or "s have liked"}</span>
+</div>
+

@@ -9,9 +9,9 @@
   - terms of service***
   - privacy policy***
   - caching
-  - factor out likes machinery
   - tests
   - invitations***
+  - page titles***
 
 - Licensing
 

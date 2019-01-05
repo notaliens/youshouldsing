@@ -38,7 +38,11 @@ from yss.interfaces import (
     ISongs,
     ISong,
     )
-from yss.utils import get_redis, decode_redis_hash, format_timings
+from yss.utils import (
+    get_redis,
+    decode_redis_hash,
+    format_timings,
+    )
 
 known_effects = (
     'effect-reverb',
@@ -232,12 +236,29 @@ class SongView(object):
         permission='yss.like',
     )
     def like(self):
-        performer = self.request.user.performer
+        request = self.request
+        performer = request.user.performer
         if performer in self.context.liked_by:
             raise HTTPBadRequest("Already")
         self.context.liked_by.connect([performer])
         return {'ok': True,
                 'num_likes': self.context.num_likes,
+                'can_like':request.layout_manager.layout.can_like(performer),
+               }
+
+    @view_config(
+        name='unlike',
+        renderer='json',
+        permission='yss.like',
+    )
+    def unlike(self):
+        request = self.request
+        performer = request.user.performer
+        if performer in self.context.liked_by:
+            self.context.liked_by.disconnect([performer])
+        return {'ok': True,
+                'num_likes': self.context.num_likes,
+                'can_like':request.layout_manager.layout.can_like(performer),
                }
 
     @view_config(
