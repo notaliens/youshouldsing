@@ -33,6 +33,7 @@ from substanced.util import (
     find_index,
     set_acl,
     )
+from substanced.workflow import get_workflow
 
 from yss.interfaces import (
     ISongs,
@@ -71,7 +72,7 @@ class SongsView(object):
         context = self.context
         q = find_index(context, 'system', 'content_type').eq('Song')
         q = q & find_index(context, 'system', 'allowed').allows(
-            request, 'view')
+            request, 'yss.indexed')
         filter_text = request.params.get('filter_text')
         if filter_text:
             terms = generate_text_filter_terms(filter_text)
@@ -370,7 +371,8 @@ class SongView(object):
             pass
         with recording.dry_blob.open("w") as saveto:
             shutil.copyfileobj(f, saveto)
-        set_acl(recording, [(Allow, request.user.__oid__, ['yss.edit'])])
+        workflow = get_workflow(request, 'Visibility', 'Recording')
+        workflow.reset(recording, request) # private by default
         redis = get_redis(request)
         redis.rpush("yss.new-recordings", resource_path(recording))
         print ("finished", tmpdir, resource_path(recording))

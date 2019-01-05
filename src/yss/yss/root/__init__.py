@@ -35,6 +35,7 @@ def root_added(event):
     acl.extend(
         [
         (Allow, Everyone, 'view'),
+        (Allow, Everyone, 'yss.indexed'),
         (Allow, Authenticated, 'yss.record'),
         (Allow, Authenticated, 'yss.like'),
         ]

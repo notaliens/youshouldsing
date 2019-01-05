@@ -1,10 +1,15 @@
+import colander
+import deform
 from pyramid.response import FileResponse
 from pyramid.view import (
     view_config,
     view_defaults,
     )
 from pyramid.settings import asbool
-from pyramid.httpexceptions import HTTPBadRequest
+from pyramid.httpexceptions import (
+    HTTPBadRequest,
+    HTTPFound,
+    )
 from pyramid.traversal import resource_path
 
 from substanced.util import (
@@ -13,6 +18,8 @@ from substanced.util import (
     )
 
 from substanced.folder.views import generate_text_filter_terms
+from substanced.schema import Schema
+from substanced.workflow import get_workflow
 
 from yss.utils import get_redis, decode_redis_hash
 
@@ -76,12 +83,13 @@ class RecordingView(object):
     )
     def view(self):
         recording = self.context
+        request = self.request
         # XXX compute other_recordings more efficiently
         other_recordings = [
             other_recording for other_recording in
             recording.song.recordings if
             other_recording is not recording and
-            self.request.has_permission('view', other_recording)
+            request.has_permission('yss.indexed', other_recording)
             ]
         return {
             'title':recording.title,
@@ -89,9 +97,55 @@ class RecordingView(object):
             'num_likes':recording.num_likes,
             'liked_by': recording.liked_by,
             'other_recordings':other_recordings,
-            'video_url': self.request.resource_url(recording, 'movie'),
+            'video_url': request.resource_url(recording, 'movie'),
             'processed': int(self.is_processed),
             'has_edit_permission':int(self.has_edit_permission),
+            }
+
+    @view_config(
+        name='edit',
+        renderer='templates/edit.pt',
+        permission='yss.edit',
+    )
+    def edit(self):
+        recording = self.context
+        request = self.request
+        visibility_wf = get_workflow(request, 'Visibility', 'Recording')
+        schema = EditRecordingSchema().bind(request=request, context=recording)
+        form = deform.Form(schema, buttons=('Save',))
+        # XXX wtf if I take this out, my visibility choices disappear
+        # on successful save until a process restart
+        form['visibility'].widget=deform.widget.RadioChoiceWidget(
+            values=zip(visibility_states, visibility_states)
+        )
+        rendered = None
+        if 'Save' in request.POST:
+            controls = request.POST.items()
+            try:
+                appstruct = form.validate(controls)
+            except deform.ValidationFailure as e:
+                rendered = e.render()
+            else:
+                recording.description = appstruct['description']
+                visibility_wf.transition_to_state(
+                    recording, request, appstruct['visibility']
+                )
+                if appstruct['allow_likes']:
+                    # XXXX
+                    pass
+                request.session.flash('Recording edited', 'info')
+                return HTTPFound(request.resource_url(recording, 'edit'))
+        else:
+            appstruct = {
+                'csrf_token': request.session.get_csrf_token(),
+                'description': recording.description,
+                'visibility':visibility_wf.state_of(recording),
+                'allow_likes':False,
+            }
+        if rendered is None:
+            rendered = form.render(appstruct, readonly=False)
+        return {
+            'form':rendered,
             }
 
     @view_config(
@@ -246,7 +300,7 @@ class RecordingsView(object):
         context = self.context
         q = find_index(context, 'system', 'content_type').eq('Recording')
         q = q & find_index(context, 'system', 'allowed').allows(
-            request, 'view')
+            request, 'yss.indexed')
         filter_text = request.params.get('filter_text')
         if filter_text:
             terms = generate_text_filter_terms(filter_text)
@@ -328,3 +382,38 @@ class RecordingsView(object):
             title,
             icon
             )
+
+visibility_states = (
+    'Public',
+    'Private',
+    'Authenticated Only',
+    ) # XXX probably should derive these from workflow
+
+@colander.deferred
+def visibility_widget(node, kw):
+    # XXX wtf if I just use RadioChoiceWidget directly without a deferral,
+    # my visibility choices disappear on successful save until a process restart
+    deform.widget.RadioChoiceWidget(
+        values=zip(visibility_states, visibility_states)
+    )
+
+class EditRecordingSchema(Schema):
+    """ Property schema to create a Performer.
+    """
+    description = colander.SchemaNode(
+        colander.String(),
+        title='Description',
+        validator=colander.Length(max=2000),
+        widget=deform.widget.TextAreaWidget(rows=6),
+        missing=colander.null,
+    )
+    visibility = colander.SchemaNode(
+        colander.String(),
+        title='Visibility',
+        widget=visibility_widget,
+    )
+
+    allow_likes = colander.SchemaNode(
+        colander.Bool(),
+        title='Allow Likes',
+    )

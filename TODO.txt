@@ -75,7 +75,6 @@
   - Deleting a profile should delete its associated user (otherwise, problems
     when someone relogs in using that oauth account)***
   - Accept gravatar image as initial photo from oauth
-  - Unlike***
   - Member since***
   - # of public songs recorded on header of profile views***
   - Show which authorizer (google/twitter/etc) in profile somehow.
@@ -84,6 +83,7 @@
     overlay.***
   - All uses of photos in img tags should be surrounded by fixed size div
     box.***
+  - Don't use "title" as realname, too easy to mistakenly expose.
 
 - View recording:
 
@@ -99,6 +99,8 @@
   - Allow/disallow likes
   - Allow/disallow comments
   - Description***
+  - Delete this recording
+  - Description should allow links and embedded videos
 
 - Remix recording
 

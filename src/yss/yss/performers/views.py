@@ -50,7 +50,7 @@ class PerformerViews(object):
         request = self.request
         q = find_index(context, 'system', 'content_type').eq('Recording')
         q = q & find_index(context, 'system', 'allowed').allows(
-            request, 'view')
+            request, 'yss.indexed')
         q = q & find_index(context, 'yss', 'performer_id').eq(context.__oid__)
         created = find_index(context, 'yss', 'created')
         resultset = q.execute()
@@ -156,7 +156,11 @@ class PerformerViews(object):
     )
     def recordings(self):
         vals = self.view()
-        vals['recent_recordings'] =  self.sfilter(self.context.recordings)
+        vals['recent_recordings'] =  self.sfilter(
+            self.context.recordings,
+            # XXX different solely to be able to get to private recordings now
+            'view',
+        )
         return vals
 
     @view_config(
@@ -189,10 +193,10 @@ class PerformerViews(object):
         vals['likes_recordings'] = self.sfilter(self.context.likes_recordings)
         return vals
 
-    def sfilter(self, resources):
+    def sfilter(self, resources, perm='yss.indexed'):
         allowed = []
         for resource in resources:
-            if self.request.has_permission('view', resource):
+            if self.request.has_permission(perm, resource):
                 allowed.append(resource)
         return allowed
 

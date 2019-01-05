@@ -12,7 +12,7 @@ class HomepageView(object):
         context = self.context
         q = find_index(context, 'system', 'content_type').eq('Recording')
         q = q & find_index(context, 'system', 'allowed').allows(
-            request, 'view')
+            request, 'yss.indexed')
         num_likes = find_index(context, 'yss', 'num_likes')
         resultset = q.execute()
         return resultset.sort(num_likes, reverse=True, limit=limit)
@@ -22,7 +22,7 @@ class HomepageView(object):
         context = self.context
         q = find_index(context, 'system', 'content_type').eq('Recording')
         q = q & find_index(context, 'system', 'allowed').allows(
-            request, 'view')
+            request, 'yss.indexed')
         created = find_index(context, 'yss', 'created')
         resultset = q.execute()
         return resultset.sort(created, reverse=True, limit=limit)
