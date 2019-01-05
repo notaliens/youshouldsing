@@ -317,8 +317,7 @@ var rtc_recorder = (function(exports, karaoke, max_framerate, upload_handler) {
         recorder.addEventListener('stop', function(e) {
             // dataavailable is guaranteed to have been called by this point
             if (!uploading) {
-                $('#uploading-overlay')[0].style.display = "block";
-                uploadVideo();
+                gatherMetadata();
             }
         });
         recorder.start();
@@ -333,10 +332,27 @@ var rtc_recorder = (function(exports, karaoke, max_framerate, upload_handler) {
         karaoke.pause();
         recording = false;
         endTime = Date.now();
-        recorder.stop();
+        if (recorder.state != 'inactive') {
+            recorder.stop();
+        }
+    }
+
+    function abandon() {
+        $('#metadata-overlay')[0].style.display = "none";
+        $('#uploading-overlay')[0].style.display = "none";
+        init();  // reload stream
+    }
+
+    function gatherMetadata() {
+        $('#metadata-overlay')[0].style.display = "block";
+        $('#uploading-overlay')[0].style.display = "none";
+        $('#upload-me')[0].onclick = uploadVideo;
+        $('#cancel-me')[0].onclick = abandon;
     }
 
     function uploadVideo() {
+        $('#metadata-overlay')[0].style.display = "none";
+        $('#uploading-overlay')[0].style.display = "block";
         uploading = true;
         var blob = new Blob(chunks);
         chunks = [];
@@ -353,6 +369,9 @@ var rtc_recorder = (function(exports, karaoke, max_framerate, upload_handler) {
         }
         fd.append('data', blob);
         fd.append('finished', '1');
+        if ($('#description')[0]) {
+            fd.append('description', $('#description')[0].value);
+        }
         url = upload_handler || window.location;
         jQuery.ajax({
             xhr: function() {
@@ -360,9 +379,6 @@ var rtc_recorder = (function(exports, karaoke, max_framerate, upload_handler) {
                 xhr.upload.addEventListener("progress", function(evt) {
                     if (evt.lengthComputable && $('#upload-progress')) {
                         var percentComplete = evt.loaded / evt.total;
-                        if (percentComplete === 1) {
-                            $('#afterupload-spinner').show();
-                        }
                         fmt = Math.round(percentComplete*100);
                         $('#upload-progress').text(fmt + '%');
                         $('#upload-progress').attr('aria-valuenow',
@@ -389,14 +405,19 @@ var rtc_recorder = (function(exports, karaoke, max_framerate, upload_handler) {
         $('#play-me')[0].onclick = karaoke.playtoggle;
     }
 
-    navigator.mediaDevices.enumerateDevices().then(gotDevices).then(getStream);
-    if (audioSelect) {
-        audioSelect.onchange = getStream;
+    function init() {
+        navigator.mediaDevices.enumerateDevices().then(gotDevices).then(
+            getStream);
+        if (audioSelect) {
+            audioSelect.onchange = getStream;
+        }
+        if (videoSelect) {
+            videoSelect.onchange = getStream;
+        }
+        initEvents();
     }
-    if (videoSelect) {
-        videoSelect.onchange = getStream;
-    }
-    initEvents();
+
+    init();
 
     return {
         stop: stop,

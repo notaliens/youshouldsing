@@ -7075,7 +7075,7 @@ select#videoSource > option {
   position: relative;
   z-index: 2;
 }
-#uploading-overlay {
+.finished-overlay {
   position: fixed;
   display: none;
   width: 100%;
@@ -7088,7 +7088,7 @@ select#videoSource > option {
   z-index: 2;
   cursor: pointer;
 }
-#uploading-overlay-text {
+.finished-overlay-text {
   position: absolute;
   top: 50%;
   left: 50%;

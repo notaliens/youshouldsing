@@ -367,6 +367,8 @@ class SongView(object):
         except (TypeError, ValueError):
             # use default musicvolume of 0 set at class level
             pass
+        description = request.params['description'][:5000]
+        recording.description = description
         with recording.dry_blob.open("w") as saveto:
             shutil.copyfileobj(f, saveto)
         workflow = get_workflow(request, 'Visibility', 'Recording')

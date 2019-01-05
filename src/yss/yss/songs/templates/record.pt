@@ -120,13 +120,25 @@
         </div>
       </div>
     </div>
-    <div id="uploading-overlay">
-      <div id="uploading-overlay-text">
+    <div id="metadata-overlay" class="finished-overlay">
+      <div id="metadata-overlay-text" class="finished-overlay-text">
+        <div class="form-group">
+          <label for="description" style="font-size: 14px;">Description</label>
+          <textarea class="form-control" id="description" rows="6" columns="120"></textarea>
+        </div>
+        <div>
+          <button id="upload-me" style="width: 8em;" class="btn btn-danger">
+             Upload</button>
+          <button id="cancel-me" style="width: 8em;" class="btn btn-primary">
+             Cancel</button>
+        </div>
+      </div>
+    </div>
+    <div id="uploading-overlay" class="finished-overlay">
+      <div id="uploading-overlay-text" class="finished-overlay-text">
         <i><b>Uploading</b></i>
         <div class="progress">
           <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%; min-width: 1em;" id="upload-progress">0%</div>
-          <i class="fas fa-spinner fa-spin" style="display:none;"
-             id="afterupload-spinner"> </i>
         </div>
 
       </div>

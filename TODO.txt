@@ -12,6 +12,7 @@
   - tests
   - invitations***
   - page titles***
+  - get substanced.secret out of shared.ini
 
 - Licensing
 
@@ -24,7 +25,6 @@
     login with?  How do we deal with it if a user wants to log in
     to the same yss account using two different oauth providers?
   - Impersonation.
-  - Disqus SSO.
   - Require user to validate email address.
   - Know what happens when we need to change consumer secret or details about
     app in developer settings.
@@ -84,6 +84,8 @@
   - All uses of photos in img tags should be surrounded by fixed size div
     box.***
   - Don't use "title" as realname, too easy to mistakenly expose.
+  - Do better when people log in from Google getting profile create
+    fields right
 
 - View recording:
 
@@ -92,15 +94,15 @@
   - "Likes disabled" instead of "0 performers have liked this recording"
     when like permission is not available.
   - "Other recordings you might like if you like this one"
+  - Disqus SSO.***
 
 - Edit recording:
 
-  - Private/public/authenticated/group viewers (workflow?)***
-  - Allow/disallow likes
-  - Allow/disallow comments
-  - Description***
+  - Allow/disallow likes***
+  - Allow/disallow comments***
   - Delete this recording
   - Description should allow links and embedded videos
+  - When acl is empty, dont set it, when setting visibility, delete it instead.
 
 - Remix recording
 
@@ -119,15 +121,18 @@
     source audio and mic audio after latency, just let people clap
     a pattern.  https://medium.com/@almeidneto/sound-pattern-recognition-with-python-9aff69edce5d
   - Do less work in postprocessing to produce a mix; currently we
-    transcode all over the place. Probably really should mix on browser,
-    not on server.
+    transcode all over the place.
+  - Mix in browser, not on server.
   - Remove recorded song from singlist.
   - Recordings should probably be inside the performer folder so we
     can set e.g. 'yss.edit' permission only on the performer instead
     of on each recording she creates.
-  - Description***
+  - Initial visibility***
   - Duet***
   - Set guessed latency on initial record
+  - Karaoke display seems random which line is chosen next to display
+    upcoming lyrics.
+  - Negative mic latency.***
 
 - Search:
 
