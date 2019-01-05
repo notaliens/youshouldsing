@@ -17,6 +17,7 @@ from substanced.util import (
     find_index,
     )
 from substanced.schema import Schema
+from substanced.workflow import get_workflow
 
 from yss.interfaces import (
     IPerformer,
@@ -29,7 +30,8 @@ from yss.performers import PerformerProfileSchema
 from yss.utils import get_photodata
 
 @view_defaults(context=IPerformer)
-class PerformerViews(object):
+class PerformerView(object):
+    batch_size = 20
     def __init__(self, context, request):
         self.context = context
         self.request = request
@@ -43,18 +45,6 @@ class PerformerViews(object):
     def has_view_permission(self):
         performer = self.context
         return self.request.has_permission('view', performer)
-
-    def recent_recordings(self, limit=10):
-        # XXX unused, kept around for instruction
-        context = self.context
-        request = self.request
-        q = find_index(context, 'system', 'content_type').eq('Recording')
-        q = q & find_index(context, 'system', 'allowed').allows(
-            request, 'yss.indexed')
-        q = q & find_index(context, 'yss', 'performer_id').eq(context.__oid__)
-        created = find_index(context, 'yss', 'created')
-        resultset = q.execute()
-        return resultset.sort(created, reverse=True, limit=limit)
 
     def tabs(self):
         state = self.request.view_name
@@ -71,7 +61,7 @@ class PerformerViews(object):
             tabs.append(
                 {'title':'Recordings',
                  'id':'button-recordings',
-                 'url':self.request.resource_url(performer, 'recordings'),
+                 'url':self.request.resource_url(performer, '@@recordings'),
                  'class':state == 'recordings' and 'active' or '',
                  'enabled':True,
                  })
@@ -80,7 +70,7 @@ class PerformerViews(object):
                     {'title':'Recordings Liked',
                      'id':'button-recordingsliked',
                      'url':self.request.resource_url(
-                         performer, 'recordingsliked'),
+                         performer, '@@recordingsliked'),
                      'class':state == 'recordingsliked' and 'active' or '',
                      'enabled':True,
                     })
@@ -88,7 +78,7 @@ class PerformerViews(object):
                 tabs.append(
                     {'title':'Songs Liked',
                      'id':'button-songsliked',
-                     'url':self.request.resource_url(performer, 'songsliked'),
+                     'url':self.request.resource_url(performer, '@@songsliked'),
                      'class':state == 'songsliked' and 'active' or '',
                      'enabled':True,
                     })
@@ -97,7 +87,7 @@ class PerformerViews(object):
                     {'title':'Performers Liked',
                      'id':'button-performersliked',
                      'url':self.request.resource_url(
-                         performer, 'performersliked'),
+                         performer, '@@performersliked'),
                      'class':state == 'performersliked' and 'active' or '',
                      'enabled':True,
                     })
@@ -106,14 +96,14 @@ class PerformerViews(object):
             tabs.append(
                 {'title':'Edit',
                  'id':'button-edit',
-                 'url':self.request.resource_url(performer, 'edit'),
+                 'url':self.request.resource_url(performer, '@@edit'),
                  'class':state=='edit' and 'active' or '',
                  'enabled':True,
                  })
             tabs.append(
                 {'title':'Privacy',
                  'id':'button-privacy',
-                 'url':self.request.resource_url(performer, 'privacy'),
+                 'url':self.request.resource_url(performer, '@@privacy'),
                  'class':state=='privacy' and 'active' or '',
                  'enabled':True,
                  })
@@ -148,50 +138,6 @@ class PerformerViews(object):
             'divulge_genre':context.divulge_genre,
             'divulge_sex':context.divulge_sex,
         }
-
-    @view_config(
-        renderer='templates/profile_recordings.pt',
-        name='recordings',
-        permission='view',
-    )
-    def recordings(self):
-        vals = self.view()
-        vals['recent_recordings'] =  self.sfilter(
-            self.context.recordings,
-            # XXX different solely to be able to get to private recordings now
-            'view',
-        )
-        return vals
-
-    @view_config(
-        renderer='templates/profile_songsliked.pt',
-        name='songsliked',
-        permission='view',
-    )
-    def songsliked(self):
-        vals = self.view()
-        vals['likes_songs'] = self.sfilter(self.context.likes_songs)
-        return vals
-
-    @view_config(
-        renderer='templates/profile_performersliked.pt',
-        name='performersliked',
-        permission='view',
-    )
-    def performersliked(self):
-        vals = self.view()
-        vals['likes_performers'] = self.sfilter(self.context.likes_performers)
-        return vals
-
-    @view_config(
-        renderer='templates/profile_recordingsliked.pt',
-        name='recordingsliked',
-        permission='view',
-    )
-    def recordingsliked(self):
-        vals = self.view()
-        vals['likes_recordings'] = self.sfilter(self.context.likes_recordings)
-        return vals
 
     def sfilter(self, resources, perm='yss.indexed'):
         allowed = []
@@ -233,12 +179,163 @@ class PerformerViews(object):
                 'can_like':request.layout_manager.layout.can_like(performer),
                 }
 
+
+@view_defaults(context=IPerformer)
+class PerformerRecordingsView(PerformerView):
+    default_sort = 'created'
+    def sort_by(self, rs, token, reverse):
+        context = self.context
+        title = find_index(context, 'yss', 'title')
+        performer = find_index(context, 'yss', 'performer')
+        num_likes = find_index(context, 'yss', 'num_likes')
+        genre = find_index(context, 'yss', 'genre')
+        created = find_index(context, 'yss', 'created')
+        visib = find_index(context, 'yss', 'visibility_state')
+        sorting = {
+            'created':(created, num_likes, title, performer, genre, visib),
+            'title':(title, performer, num_likes, genre, created, visib),
+            'performer':(performer, title, num_likes, genre, created, visib),
+            'genre':(genre, performer, title, num_likes, created, visib),
+            'likes':(num_likes, performer, title, genre, created, visib),
+            'visibility':(visib, created, num_likes, title, performer, genre)
+            }
+        indexes = sorting.get(token, sorting[self.default_sort])
+        for idx in indexes[1:]:
+            rs = rs.sort(idx)
+        first = indexes[0]
+        rs = rs.sort(first, reverse=reverse)
+        return rs
+
+    def sort_tag(self, token, title):
+        request = self.request
+        context = self.context
+        reverse = request.params.get('reverse', 'false')
+        reverse = asbool(reverse)
+        sorting = request.params.get('sorting')
+        if sorting == token or (not sorting and token == self.default_sort):
+            if reverse:
+                icon = 'glyphicon glyphicon-chevron-up'
+            else:
+                icon = 'glyphicon glyphicon-chevron-down'
+            reverse = reverse and 'false' or 'true'
+        else:
+            icon = ''
+            reverse = 'false'
+
+        url = request.resource_url(
+            context, '@@recordings', query=(
+                ('sorting', token), ('reverse', reverse)
+            )
+        )
+
+        return '<a href="%s">%s <i class="%s"> </i></a>' % (
+            url,
+            title,
+            icon
+            )
+
+    def query(self):
+        request = self.request
+        context = self.context
+        q = find_index(context, 'system', 'content_type').eq('Recording')
+        q = q & find_index(context, 'system', 'path').eq(
+            request.resource_path(context, 'recordings')
+        )
+        permission = (
+            (context == request.user.performer) and 'view' or 'yss.indexed'
+            )
+        q = q & find_index(context, 'system', 'allowed').allows(
+            request, permission)
+        filter_text = request.params.get('filter_text')
+        if filter_text:
+            terms = generate_text_filter_terms(filter_text)
+            text = find_index(context, 'yss', 'text')
+            for term in terms:
+                if text.check_query(term):
+                    q = q & text.eq(term)
+        resultset = q.execute()
+        sorting = request.params.get('sorting')
+        reverse = request.params.get('reverse')
+        if reverse == 'false':
+            reverse = False
+        reverse = bool(reverse)
+        if sorting:
+            resultset = self.sort_by(resultset, sorting, reverse)
+        else:
+            resultset = self.sort_by(resultset, self.default_sort, False)
+        return resultset
+
+    @view_config(
+        renderer='templates/profile_recordings.pt',
+        name='recordings',
+        permission='view',
+    )
+    def __call__(self):
+        vals = self.view()
+        request = self.request
+        resultset = self.query()
+        batch = Batch(resultset, self.request, seqlen=len(resultset),
+                      default_size=self.batch_size)
+        vals.update({
+            'batch':batch,
+            'filter_text':request.params.get('filter_text'),
+            'reverse':request.params.get('reverse', 'false')
+            })
+        return vals
+
+    def visibility_state(self, recording):
+        wf = get_workflow(self.request, 'Visibility', 'Recording')
+        return wf.state_of(recording)
+
+
+@view_defaults(context=IPerformer)
+class PerformerSongsLikedView(PerformerView):
+
+    @view_config(
+        renderer='templates/profile_songsliked.pt',
+        name='songsliked',
+        permission='view',
+    )
+    def __call__(self):
+        vals = self.view()
+        vals['likes_songs'] = self.sfilter(self.context.likes_songs)
+        return vals
+
+@view_defaults(context=IPerformer)
+class PerformerPerformersLikedView(PerformerView):
+
+    @view_config(
+        renderer='templates/profile_performersliked.pt',
+        name='performersliked',
+        permission='view',
+    )
+    def __call__(self):
+        vals = self.view()
+        vals['likes_performers'] = self.sfilter(self.context.likes_performers)
+        return vals
+
+@view_defaults(context=IPerformer)
+class PerformerRecordingsLikedView(PerformerView):
+
+    @view_config(
+        renderer='templates/profile_recordingsliked.pt',
+        name='recordingsliked',
+        permission='view',
+    )
+    def __call__(self):
+        vals = self.view()
+        vals['likes_recordings'] = self.sfilter(self.context.likes_recordings)
+        return vals
+
+@view_defaults(context=IPerformer)
+class PerformerEditView(PerformerView):
+
     @view_config(
         renderer='templates/profile_edit.pt',
         name='edit',
         permission='yss.edit',
     )
-    def profile_edit_form(self):
+    def __call__(self):
         vars = self.view()
         context = self.context
         request = self.request
@@ -297,12 +394,15 @@ class PerformerViews(object):
         vars['form'] = rendered
         return vars
 
+@view_defaults(context=IPerformer)
+class PerformerPrivacyView(PerformerView):
+
     @view_config(
         renderer='templates/profile_privacy.pt',
         name='privacy',
         permission='yss.edit',
     )
-    def profile_privacy_form(self):
+    def __call__(self):
         vars = self.view()
         context = self.context
         request = self.request

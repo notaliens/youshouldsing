@@ -30,6 +30,7 @@ from substanced.sdi import mgmt_view
 from substanced.util import (
     Batch,
     find_index,
+    find_catalog,
     )
 from substanced.workflow import get_workflow
 
@@ -346,10 +347,14 @@ class SongView(object):
     def finish_recording(self):
         song = self.context
         request = self.request
-        recordings = find_root(song)['recordings']
-        recording_id = generate_recording_id(recordings)
+        performer = self.request.user.performer
+        recordings = performer['recordings']
+        recording_id = self.generate_recording_id(recordings)
         f = request.params['data'].file
-        tmpdir = get_recording_tempdir(request, recording_id)
+        # disallow /, .., etc
+        sane_name = ''.join(c for c in performer.__name__ if c.isalnum())
+        tmpdir_name = f'{sane_name}-{recording_id}'
+        tmpdir = get_recording_tempdir(request, tmpdir_name)
         recording = request.registry.content.create('Recording', tmpdir)
         recordings[recording_id] = recording
         performer = request.user.performer
@@ -375,11 +380,22 @@ class SongView(object):
         workflow.reset(recording, request) # private by default
         visibility = request.params.get('visibility', 'Private')
         workflow.transition_to_state(recording, request, visibility)
+        # reindex visibility state
+        catalog = find_catalog(recording, 'yss')
+        catalog.reindex_resource(recording)
         redis = get_redis(request)
         redis.rpush("yss.new-recordings", resource_path(recording))
         print ("finished", tmpdir, resource_path(recording))
         return request.resource_url(recording)
 
+    def generate_recording_id(self, recordings):
+        i = 0
+        while True:
+            id = ''.join([random.choice(idchars) for _ in range(8)])
+            if id not in recordings:
+                break
+            i+=1
+        return id
 
 class AddSongSchema(Schema):
     title = colander.SchemaNode(colander.String())
@@ -425,18 +441,8 @@ class AddSongView(FormView):
         self.context[name] = song
         return HTTPFound(self.request.sdiapi.mgmt_path(self.context))
 
-def generate_recording_id(recordings):
-    while True:
-        id = ''.join([random.choice(idchars) for _ in range(8)])
-        if id not in recordings:
-            break
-    return id
-
 def get_recording_tempdir(request, recording_id):
     postproc_dir = request.registry.settings['yss.postproc_dir']
-    if set(recording_id).difference(set(idchars)):
-        # don't allow filesystem shenanigans if we accept this from a client
-        raise RuntimeError('bad recording id')
     return os.path.abspath(os.path.join(postproc_dir, recording_id))
 
 def get_retime_tempdir(request, song_id):

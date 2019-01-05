@@ -46,10 +46,10 @@
                   </td>
                   <td>
                     <a href="${request.resource_url(item.performer)}"
-                       ><img src="${layout.performer_thumb_url(item.performer)}" style="padding-right: 10px;"/>${item.performer.__name__}</a>
+                       ><img src="${layout.performer_thumb_url(item.performer)}" alt="" style="padding-right: 10px;"/>${item.performer.__name__}</a>
                   </td>
                   <td>
-                    <a href="${request.resource_url(item.song)}">${item.song.title}</a>
+                    <a href="${request.resource_url(item.song)}">${item.song.title} (${item.song.artist})</a>
                   </td>
                   <td>${item.genre or 'Unknown'}</td>
                   <td>${item.num_likes}</td>

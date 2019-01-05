@@ -11,7 +11,7 @@ from substanced.objectmap import multireference_target_property
 from substanced.objectmap import multireference_targetid_property
 from substanced.objectmap import reference_source_property
 from substanced.workflow import Workflow
-from substanced.util import get_acl, set_acl, find_service
+from substanced.util import get_acl, set_acl, find_service, find_catalog
 
 from pyramid.security import (
     Allow,

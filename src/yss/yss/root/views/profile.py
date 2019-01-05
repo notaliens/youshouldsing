@@ -121,6 +121,7 @@ def create_profile(context, request):
             user = principals.add_user(userid, registry=registry)
             performer = registry.content.create('Performer')
             root['performers'][username] = performer
+            performer['recordings'] = registry.content.create('Recordings')
             phdata = appstruct['photo']
             fp = phdata.get('fp')
             if fp is not None:

@@ -44,28 +44,49 @@ class MainLayout(object):
         context = self.context
         root = request.virtual_root
         user = request.user
-        performer = None
-        if user:
-            performer = getattr(user, 'performer', None)
+        performer = getattr(user, 'performer', None)
         tab_data = []
         songs = root.get('songs')
         performers = root.get('performers')
-        recordings = root.get('recordings')
         for (title, section, exact, q) in (
-            ('Songs', songs, None, None),
-            ('Performers', performers, lambda s: context is not performer,
-             None),
-            ('Recordings', recordings,
-             None, {'sorting':'created', 'reverse':'true'}),
-            ('My Profile', performer, None, None),
+                (
+                    'Songs',
+                    songs,
+                    None,
+                    None
+                ),
+                (
+                    'Performers',
+                    performers,
+                    lambda c: performer is None or not inside(c, performer),
+                    None
+                ),
+                (
+                    'Recordings',
+                    '@@recordings',
+                    lambda c: c is root and request.view_name == 'recordings',
+                    {'sorting':'created', 'reverse':'true'})
+                ,
+                (
+                    'My Profile',
+                    performer,
+                    None,
+                    None
+                ),
             ):
-            if section is not None:
-                d = {}
+            d = {}
+            if isinstance(section, str):
+                d['url'] = request.resource_url(root, section, query=q)
+                d['title'] = title
+                active = exact(context) and 'active' or None
+                d['class'] = active
+                tab_data.append(d)
+            elif section is not None:
                 d['url'] = request.resource_url(section, query=q)
                 d['title'] = title
                 active = inside(context, section) and 'active' or None
                 if exact and active:
-                    active = exact(section) and 'active' or None
+                    active = exact(context) and 'active' or None
                 d['class'] = active
                 tab_data.append(d)
         return tab_data

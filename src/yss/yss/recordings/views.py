@@ -12,7 +12,10 @@ from pyramid.httpexceptions import (
     )
 from pyramid.traversal import resource_path
 
+from substanced.interfaces import IRoot
+
 from substanced.util import (
+    find_catalog,
     find_index,
     Batch,
     )
@@ -23,10 +26,7 @@ from substanced.workflow import get_workflow
 
 from yss.utils import get_redis, decode_redis_hash
 
-from yss.interfaces import (
-    IRecording,
-    IRecordings,
-    )
+from yss.interfaces import IRecording
 
 from pyramid.decorator import reify
 
@@ -63,14 +63,14 @@ class RecordingView(object):
             tabs.append(
                 {'title':'Edit',
                  'id':'button-edit',
-                 'url':self.request.resource_url(recording, 'edit'),
+                 'url':self.request.resource_url(recording, '@@edit'),
                  'class':(state == 'edit') and 'active' or '',
                  'enabled':True,
                  })
             tabs.append(
                 {'title':'Remix',
                  'id':'button-remix',
-                 'url':self.request.resource_url(recording, 'remix'),
+                 'url':self.request.resource_url(recording, '@@remix'),
                  'class':(state == 'remix') and 'active' or '',
                  'enabled':processed,
                  })
@@ -130,6 +130,8 @@ class RecordingView(object):
                 visibility_wf.transition_to_state(
                     recording, request, appstruct['visibility']
                 )
+                catalog = find_catalog(recording, 'yss')
+                catalog.reindex_resource(recording)
                 if appstruct['allow_likes']:
                     # XXXX
                     pass
@@ -304,7 +306,7 @@ class RecordingsView(object):
         filter_text = request.params.get('filter_text')
         if filter_text:
             terms = generate_text_filter_terms(filter_text)
-            text = find_index(context, 'system', 'text')
+            text = find_index(context, 'yss', 'text')
             for term in terms:
                 if text.check_query(term):
                     q = q & text.eq(term)
@@ -344,7 +346,11 @@ class RecordingsView(object):
         rs = rs.sort(first, reverse=reverse)
         return rs
 
-    @view_config(context=IRecordings, renderer='templates/recordings.pt')
+    @view_config(
+        context=IRoot,
+        name='recordings',
+        renderer='templates/recordings.pt'
+    )
     def contents(self):
         request = self.request
         resultset = self.query()
@@ -375,8 +381,9 @@ class RecordingsView(object):
         url = request.resource_url(
             context, query=(
                 ('sorting', token), ('reverse', reverse)
-                )
             )
+        )
+
         return '<a href="%s">%s <i class="%s"> </i></a>' % (
             url,
             title,

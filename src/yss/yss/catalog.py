@@ -1,10 +1,14 @@
 import time
 
+from pyramid.threadlocal import get_current_request
+
 from substanced.catalog import (
     catalog_factory,
     Field,
     Text,
     )
+
+from substanced.workflow import get_workflow
 
 from yss.interfaces import (
     IRecording,
@@ -23,6 +27,8 @@ class Indexes(object):
     performer = Field()
     duration = Field() # in seconds
     lyrics = Text()
+    text = Text()
+    visibility_state = Field()
 
 class IndexViews(object):
     def __init__(self, resource):
@@ -81,6 +87,15 @@ class IndexViews(object):
     def lyrics(self, default):
         return getattr(self.resource, 'lyrics', default)
 
+    def recording_text(self, default):
+        song = self.resource.song
+        return song.title + ' ' + song.artist
+
+    def visibility_state(self, default):
+        request = get_current_request()
+        visibility_wf = get_workflow(request, 'Visibility', 'Recording')
+        return visibility_wf.state_of(self.resource)
+
 def includeme(config):  # pragma: no cover
     config.add_indexview(
         IndexViews,
@@ -124,6 +139,20 @@ def includeme(config):  # pragma: no cover
         catalog_name='yss',
         index_name='performer',
         attr='performer',
+        context = IRecording,
+        )
+    config.add_indexview(
+        IndexViews,
+        catalog_name='yss',
+        index_name='text',
+        attr='recording_text',
+        context = IRecording,
+        )
+    config.add_indexview(
+        IndexViews,
+        catalog_name='yss',
+        index_name='visibility_state',
+        attr='visibility_state',
         context = IRecording,
         )
     config.add_indexview(

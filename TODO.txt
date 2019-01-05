@@ -33,7 +33,7 @@
 
 - Artist
 
-  - Create artist page that shows all songs by an artist
+  - Create artist page that shows all songs by an artist***
 
 - Song import:
 
@@ -52,6 +52,8 @@
   - Recordings of this song as tab***
   - Performers who like this song as tab***
   - Allow uploads (yikes)***
+  - Allow cancel of retime.***
+  - Workflow for accepting retime as canonical.***
 
 - Homepage:
 
@@ -133,6 +135,7 @@
   - Karaoke display seems random which line is chosen next to display
     upcoming lyrics.
   - Negative mic latency.***
+  - It's too easy to hit cancel on a new recording and lose it.
 
 - Search:
 

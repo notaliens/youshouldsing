@@ -45,7 +45,6 @@ def root_added(event):
     root['catalogs'].add_catalog('yss')
     root['songs'] = registry.content.create('Songs')
     root['performers'] = registry.content.create('Performers')
-    root['recordings'] = registry.content.create('Recordings')
     root.max_framerate = 30
     timings_json = pkg_resources.resource_string(
         'yss', 'blackbird.json').decode('utf-8')
