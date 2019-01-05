@@ -20,7 +20,7 @@ class MainLayout(object):
 
     def static(self, path):
         if not ':' in path:
-            path = 'yss:static/' + path
+            path = 'yss.root.views:static/' + path
         return self.request.static_url(path)
 
     @reify
