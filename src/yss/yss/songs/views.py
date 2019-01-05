@@ -11,7 +11,6 @@ from ZODB.blob import Blob
 from pyramid.httpexceptions import HTTPBadRequest
 from pyramid.settings import asbool
 from pyramid.httpexceptions import HTTPFound
-from pyramid.security import Allow
 from pyramid.traversal import (
     find_root,
     resource_path,
@@ -31,7 +30,6 @@ from substanced.sdi import mgmt_view
 from substanced.util import (
     Batch,
     find_index,
-    set_acl,
     )
 from substanced.workflow import get_workflow
 
