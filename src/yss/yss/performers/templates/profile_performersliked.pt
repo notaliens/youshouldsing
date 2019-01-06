@@ -19,10 +19,10 @@
       <div class="col-md-12">
 
         <div class="well">
-          <form action="${request.resource_url(context, '@@songsliked')}" method="GET">
-            <label for="filter_text">Search</label>
-            <input class="form-control" name="filter_text" value="${filter_text|''}"/>
-          </form>
+          <div tal:define="search_url request.resource_url(context, '@@performersliked');
+                           placeholder_text 'Search performers liked...'">
+            <div metal:use-macro="layout.searching_macro"></div>
+          </div>
           <table tal:condition="batch|None"
                  class="table table-striped table-condensed">
 

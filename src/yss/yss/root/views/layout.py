@@ -98,6 +98,13 @@ class MainLayout(object):
             )
 
     @property
+    def searching_macro(self):
+        return self.request.sdiapi.get_macro(
+            'yss.root.views:templates/searching.pt',
+            'searching'
+            )
+
+    @property
     def profile_header_macro(self):
         return self.request.sdiapi.get_macro(
             'yss.performers:templates/profile_header.pt',

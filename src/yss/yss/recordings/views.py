@@ -378,11 +378,18 @@ class RecordingsView(object):
             icon = ''
             reverse = 'false'
 
-        url = request.resource_url(
-            context, '@@recordings', query=(
-                ('sorting', token), ('reverse', reverse)
-            )
-        )
+        query = [
+            ('sorting', token), ('reverse', reverse)
+            ]
+
+        filter_text = request.params.get('filter_text')
+
+        if filter_text:
+            query.append(
+                ('filter_text', filter_text)
+                )
+
+        url = request.resource_url(context, '@@recordings', query=query)
 
         return '<a href="%s">%s <i class="%s"> </i></a>' % (
             url,

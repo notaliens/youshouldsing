@@ -19,50 +19,50 @@
       <div class="col-md-12">
 
         <div class="well">
-          <form action="${request.resource_url(context, '@@songsliked')}" method="GET">
-            <label for="filter_text">Search</label>
-            <input class="form-control" name="filter_text" value="${filter_text|''}"/>
-            <table tal:condition="batch|None"
-                   class="table table-striped table-condensed">
-
-              <thead>
-                <tr>
-                  <!-- doesnt add up to 100 but works on phone -->
-                  <th width="25%">
+          <div tal:define="search_url request.resource_url(context, '@@songsliked');
+                           placeholder_text 'Search songs liked...'">
+            <div metal:use-macro="layout.searching_macro"></div>
+          </div>
+          <table tal:condition="batch|None"
+                 class="table table-striped table-condensed">
+            
+            <thead>
+              <tr>
+                <!-- doesnt add up to 100 but works on phone -->
+                <th width="25%">
                     ${structure:view.sort_tag('artist', 'Artist')}
-                  </th>
-                  <th width="30%">
+                </th>
+                <th width="30%">
                     ${structure:view.sort_tag('title', 'Title')}
-                  </th>
-                  <th width="12%">
+                </th>
+                <th width="12%">
                     ${structure:view.sort_tag('num_likes', '&#x1F44D;')}
-                  </th>
-                  <th width="13%">
+                </th>
+                <th width="13%">
                     ${structure:view.sort_tag('num_recordings', '&#x23F9;')}
-                  </th>
-                  <th width="13%">
+                </th>
+                <th width="13%">
                     ${structure:view.sort_tag('duration', '&#x23F3;')}
-                  </th>
-                </tr>
-              </thead>
-
-              <tbody>
-                <tr tal:repeat="item batch">
-                  <td>${item.artist}</td>
-                  <td>
-                    <a href="${request.resource_url(item)}">${item.title}</a>
-                  </td>
-                  <td>${item.num_likes}</td>
-                  <td>${item.num_recordings}</td>
-                  <td>${item.duration_str()}</td>
-                </tr>
-              </tbody>
-            </table>
-            <div style="padding-top: 10px;"
-                 tal:condition="not batch">
+                </th>
+              </tr>
+            </thead>
+            
+            <tbody>
+              <tr tal:repeat="item batch">
+                <td>${item.artist}</td>
+                <td>
+                  <a href="${request.resource_url(item)}">${item.title}</a>
+                </td>
+                <td>${item.num_likes}</td>
+                <td>${item.num_recordings}</td>
+                <td>${item.duration_str()}</td>
+              </tr>
+            </tbody>
+          </table>
+          <div style="padding-top: 10px;"
+               tal:condition="not batch">
              No songs liked.
-            </div>
-          </form>
+          </div>
         </div>
       </div>
 
