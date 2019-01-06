@@ -15,6 +15,7 @@
   - get substanced.secret out of shared.ini
   - contests
   - https://css-tricks.com/centering-css-complete-guide/
+  - Profile/songs export
 
 - Licensing
 
@@ -72,6 +73,11 @@ Songs
   - song_popularity = num_recordings on scale of 0 to 100 over site lifetime
   - use song popularity as a handicap
   - if the song is part of a contest, that needs to be factored in too
+
+Profile Recordings
+
+  - Tint background color of table row of private and authenticated-only
+    recordings different colors.
 
 - Profile:
 

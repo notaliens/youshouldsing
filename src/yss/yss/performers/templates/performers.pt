@@ -28,10 +28,10 @@
                     ${structure:view.sort_tag('name', 'Name')}
                     </th>
                     <th width="20%">
-                    ${structure:view.sort_tag('likes', 'Likes')}
+                    ${structure:view.sort_tag('likes', '&#x1F44D;')}
                     </th>
                     <th width="20%">
-                    ${structure:view.sort_tag('recordings', 'Recordings')}
+                    ${structure:view.sort_tag('recordings', '&#x23F9;')}
                     </th>
                   </tr>
                 </thead>

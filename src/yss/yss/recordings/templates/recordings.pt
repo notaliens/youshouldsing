@@ -37,7 +37,7 @@
                     ${structure:view.sort_tag('genre', 'Genre')}
                     </th>
                     <th width="10%">
-                    ${structure:view.sort_tag('num_likes', 'Likes')}
+                    ${structure:view.sort_tag('num_likes', '&#x1F44D;')}
                     </th>
                   </tr>
                 </thead>

@@ -379,7 +379,7 @@ class RecordingsView(object):
             reverse = 'false'
 
         url = request.resource_url(
-            context, query=(
+            context, '@@recordings', query=(
                 ('sorting', token), ('reverse', reverse)
             )
         )
