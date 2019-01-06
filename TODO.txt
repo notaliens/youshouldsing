@@ -41,6 +41,7 @@
 
 - Song
 
+  - Listen to song.***
   - Add to singlist
   - Song timings editor (post-speech)
   - Postprocess retimings (cope with API call error unexpected state when
