@@ -15,11 +15,12 @@
           <div class="panel-body">
 
             <div class="row">
-              <div class="col-md-12">
+              <div class="col-md-8 col-md-offset-2">
 
                 <div class="embed-responsive embed-responsive-4by3">
 
-                  <video id="thevideo" controls width=640" height="480">
+                  <video id="thevideo" controls width="640" height="480"
+                         style="display: ${processed and 'inline-block' or 'none'};">
                     <source id="thevideosource" src="${video_url}" type="video/webm"/>
                   </video>
 
@@ -64,7 +65,7 @@
               </div>
             </div>
 
-            <div class="row" id="like-table">
+            <div class="row" id="like-table" style="padding-top: 10px;">
               <div class="col-md-12">
                 <div class="well">
                   <div metal:use-macro="layout.likes_macro"></div>

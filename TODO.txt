@@ -67,6 +67,7 @@
     song.  Private recordings maybe 5-10.
   - song_popularity = num_recordings on scale of 0 to 100 over site lifetime
   - use song popularity as a handicap
+  - if the song is part of a contest, that needs to be factored in too
 
 - Profile:
 
@@ -139,6 +140,7 @@
     upcoming lyrics.
   - Negative mic latency.***
   - It's too easy to hit cancel on a new recording and lose it.
+  - Allow 16x9
 
 - Search:
 
