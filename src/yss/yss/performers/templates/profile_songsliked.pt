@@ -27,23 +27,21 @@
 
               <thead>
                 <tr>
-                  <th width="30%">
+                  <!-- doesnt add up to 100 but works on phone -->
+                  <th width="25%">
                     ${structure:view.sort_tag('artist', 'Artist')}
                   </th>
                   <th width="30%">
                     ${structure:view.sort_tag('title', 'Title')}
                   </th>
-                  <th width="15%">
-                    ${structure:view.sort_tag('genre', 'Genre')}
+                  <th width="12%">
+                    ${structure:view.sort_tag('num_likes', '&#x1F44D;')}
                   </th>
-                  <th width="8%">
-                    ${structure:view.sort_tag('num_likes', 'Likes')}
+                  <th width="13%">
+                    ${structure:view.sort_tag('num_recordings', '&#x23F9;')}
                   </th>
-                  <th width="8%">
-                    ${structure:view.sort_tag('num_recordings', 'Records')}
-                  </th>
-                  <th width="19%">
-                    ${structure:view.sort_tag('duration', 'Duration')}
+                  <th width="13%">
+                    ${structure:view.sort_tag('duration', '&#x23F3;')}
                   </th>
                 </tr>
               </thead>
@@ -54,7 +52,6 @@
                   <td>
                     <a href="${request.resource_url(item)}">${item.title}</a>
                   </td>
-                  <td>${item.genre or 'Unknown'}</td>
                   <td>${item.num_likes}</td>
                   <td>${item.num_recordings}</td>
                   <td>${item.duration_str()}</td>

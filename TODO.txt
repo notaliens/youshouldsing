@@ -57,6 +57,10 @@
   - Allow cancel of retime.***
   - Workflow for accepting retime as canonical.***
 
+Songs
+
+  - Filter by genre
+
 - Homepage:
 
   - Featured recordings should take into account number of likes vs.  number of
