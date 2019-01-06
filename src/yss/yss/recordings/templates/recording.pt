@@ -9,7 +9,15 @@
         <div class="panel panel-primary">
 
           <div class="panel-heading">
-          ${title} by ${performer.__name__|None}
+            <div class="row">
+              <div class="col-md-9">
+                <a href="${request.resource_url(context.song)}">${title}</a> by                 <a href="${request.resource_url(performer)"><img src="${layout.performer_thumb_url(performer)}" alt=""/> ${performer.__name__}</a>
+
+              </div>
+              <div class="col-md-3">
+                <span metal:use-macro="layout.likes_macro"></span>
+              </div>
+            </div>
           </div>
 
           <div class="panel-body">
@@ -63,15 +71,6 @@
 
 
               </div>
-            </div>
-
-            <div class="row" id="like-table" style="padding-top: 10px;">
-              <div class="col-md-12">
-                <div class="well">
-                  <div metal:use-macro="layout.likes_macro"></div>
-                </div>
-              </div>
-
             </div>
 
           </div>

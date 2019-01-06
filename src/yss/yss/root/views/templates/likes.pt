@@ -1,4 +1,4 @@
-<div metal:define-macro="likes">
+<span metal:define-macro="likes">
   <span id="likes"
         tal:define="can_like layout.can_like(context);
                     has_liked layout.has_liked(context)">
@@ -20,5 +20,5 @@
     </tal:if>
   </span>
   <span id="like-count">${num_likes} performer${num_likes==1 and " has liked" or "s have liked"}</span>
-</div>
+</span>
 
