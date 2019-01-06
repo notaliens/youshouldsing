@@ -186,5 +186,4 @@ workflow.add_transition(
 
 def includeme(config):
     config.add_static_view('recordingstatic', 'yss.recordings:static')
-    config.add_permission('yss.indexed')
     config.add_workflow(workflow, ('Recording',))

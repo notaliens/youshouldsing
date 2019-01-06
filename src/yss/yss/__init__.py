@@ -42,6 +42,7 @@ def main(global_config, **settings):
         consumer_secret=os.environ['YSS_GOOGLE_LOGIN_CONSUMER_SECRET'],
         )
     config.add_static_view('static', 'yss.root.views:static')
+    config.add_permission('yss.indexed')
 
     config.add_request_method(
         authentication_type,
