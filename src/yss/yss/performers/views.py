@@ -128,7 +128,7 @@ class PerformerView(object):
             'genre': getattr(context, 'genre', None),
             'tzname': getattr(context, 'tzname', 'UTC'),
             'num_likes': context.num_likes,
-            'can_edit': getattr(request.user, 'performer', None) is context,
+            'can_edit': request.performer is context,
             'divulge_recording_likes': context.divulge_recording_likes,
             'divulge_performer_likes': context.divulge_performer_likes,
             'divulge_song_likes': context.divulge_song_likes,
@@ -154,7 +154,7 @@ class PerformerView(object):
     def like(self):
         request = self.request
         context = self.context
-        performer = request.user.performer
+        performer = request.performer
         if performer in context.liked_by:
             raise HTTPBadRequest("Already")
         context.liked_by.connect([performer])
@@ -173,7 +173,7 @@ class PerformerView(object):
     def unlike(self):
         request = self.request
         context = self.context
-        performer = request.user.performer
+        performer = request.performer
         if performer in context.liked_by:
             context.liked_by.disconnect([performer])
         find_index(self.context, 'yss', 'num_likes').reindex_doc(
@@ -247,8 +247,7 @@ class PerformerRecordingsView(PerformerView):
             request.resource_path(context, 'recordings')
         )
         permission = (
-            (context == getattr(request.user, 'performer')
-             and 'view' or 'yss.indexed')
+            (context == request.performer and 'view' or 'yss.indexed')
             )
         q = q & find_index(context, 'system', 'allowed').allows(
             request, permission)

@@ -58,6 +58,12 @@ def root_added(event):
     )
     root['songs']['blackbird'] = song
 
+def performer(request):
+    user = request.user
+    if user is not None:
+        return user.performer
+
 def includeme(config):
     config.add_propertysheet('YSS', RootPropertySheet, IRoot)
+    config.add_request_method(performer, reify=True)
     

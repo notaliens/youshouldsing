@@ -27,7 +27,7 @@ class MainLayout(object):
         return login_url(self.request, 'google')
 
     def current_performer(self):
-        return self.request.user.performer
+        return self.request.performer
 
     def performer_thumb_url(self, performer=None):
         if performer is None:
@@ -43,8 +43,7 @@ class MainLayout(object):
         request = self.request
         context = self.context
         root = request.virtual_root
-        user = request.user
-        performer = getattr(user, 'performer', None)
+        performer = request.performer
         tab_data = []
         songs = root.get('songs')
         performers = root.get('performers')
@@ -119,11 +118,9 @@ class MainLayout(object):
 
     def has_liked(self, resource):
         request = self.request
-        user = request.user
-        if user is not None:
-            performer = user.performer
-            if performer is not None:
-                return performer in resource.liked_by
+        performer = request.performer
+        if performer is not None:
+            return performer in resource.liked_by
 
     def localize_created(self, resource):
         tzname = getattr(self.request.user, 'tzname', 'UTC')

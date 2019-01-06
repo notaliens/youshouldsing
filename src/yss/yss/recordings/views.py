@@ -252,7 +252,7 @@ class RecordingView(object):
     def like(self):
         request = self.request
         recording = self.context
-        performer = request.user.performer
+        performer = request.performer
         if not performer in recording.liked_by:
             recording.liked_by.connect([performer])
         return {'ok': True,
@@ -268,7 +268,7 @@ class RecordingView(object):
     def unlike(self):
         request = self.request
         recording = self.context
-        performer = request.user.performer
+        performer = request.performer
         if performer in recording.liked_by:
             recording.liked_by.disconnect([performer])
         return {'ok': True,

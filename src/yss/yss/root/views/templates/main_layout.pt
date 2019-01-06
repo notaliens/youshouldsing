@@ -80,7 +80,7 @@
                   </ul>
                 </form>
               </li>
-              <li tal:condition="request.user">
+              <li tal:condition="request.performer">
                 <img src="${layout.performer_thumb_url()}" style="padding-top:10px;"/>
               </li>
               <li tal:condition="request.user">
