@@ -9,8 +9,10 @@
     </div>
 
     <div class="row" style="margin-bottom: 10px;">
-      <div tal:condition="batch"
-           metal:use-macro="layout.batching_macro"></div>
+      <div class="col-md-12">
+        <div tal:condition="batch"
+             metal:use-macro="layout.batching_macro"></div>
+      </div>
     </div>
 
     <div class="row">

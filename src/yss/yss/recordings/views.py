@@ -15,7 +15,6 @@ from pyramid.traversal import resource_path
 from substanced.interfaces import IRoot
 
 from substanced.util import (
-    find_catalog,
     find_index,
     Batch,
     )
@@ -130,8 +129,9 @@ class RecordingView(object):
                 visibility_wf.transition_to_state(
                     recording, request, appstruct['visibility']
                 )
-                catalog = find_catalog(recording, 'yss')
-                catalog.reindex_resource(recording)
+                # reindex visibility state
+                index = find_index(recording, 'yss', 'visibility_state')
+                index.reindex_doc(recording.__oid__, appstruct['visibility'])
                 if appstruct['allow_likes']:
                     # XXXX
                     pass

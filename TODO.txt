@@ -72,7 +72,6 @@
   - Change password***
   - Forgot password***
   - Singlist
-  - Batch recordings and likes***
   - Description***
   - Delete account
   - Deleting a profile should delete its associated user (otherwise, problems
@@ -89,6 +88,8 @@
   - Don't use "title" as realname, too easy to mistakenly expose.
   - Do better when people log in from Google getting profile create
     fields right
+  - Show new icon without a shift reload when editing profile and icon
+    changes.
 
 - View recording:
 

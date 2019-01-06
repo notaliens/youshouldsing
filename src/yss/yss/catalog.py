@@ -13,6 +13,7 @@ from substanced.workflow import get_workflow
 from yss.interfaces import (
     IRecording,
     ISong,
+    IPerformer,
     )
 
 @catalog_factory('yss')
@@ -29,6 +30,7 @@ class Indexes(object):
     lyrics = Text()
     text = Text()
     visibility_state = Field()
+    oid = Field()
 
 class IndexViews(object):
     def __init__(self, resource):
@@ -91,10 +93,17 @@ class IndexViews(object):
         song = self.resource.song
         return song.title + ' ' + song.artist
 
+    def performer_text(self, default):
+        performer = self.resource
+        return performer.__name__
+
     def visibility_state(self, default):
         request = get_current_request()
         visibility_wf = get_workflow(request, 'Visibility', 'Recording')
         return visibility_wf.state_of(self.resource)
+
+    def oid(self, default):
+        return getattr(self.resource, '__oid__', default)
 
 def includeme(config):  # pragma: no cover
     config.add_indexview(
@@ -120,6 +129,12 @@ def includeme(config):  # pragma: no cover
         catalog_name='yss',
         index_name='num_likes',
         attr='num_likes',
+        )
+    config.add_indexview(
+        IndexViews,
+        catalog_name='yss',
+        index_name='oid',
+        attr='oid',
         )
     config.add_indexview(
         IndexViews,
@@ -151,6 +166,13 @@ def includeme(config):  # pragma: no cover
     config.add_indexview(
         IndexViews,
         catalog_name='yss',
+        index_name='text',
+        attr='performer_text',
+        context = IPerformer,
+        )
+    config.add_indexview(
+        IndexViews,
+        catalog_name='yss',
         index_name='visibility_state',
         attr='visibility_state',
         context = IRecording,
@@ -168,6 +190,13 @@ def includeme(config):  # pragma: no cover
         index_name='num_recordings',
         attr='num_recordings',
         context = ISong,
+        )
+    config.add_indexview(
+        IndexViews,
+        catalog_name='yss',
+        index_name='num_recordings',
+        attr='num_recordings',
+        context = IPerformer,
         )
     config.add_indexview(
         IndexViews,

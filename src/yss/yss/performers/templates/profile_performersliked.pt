@@ -8,38 +8,51 @@
       </div>
     </div>
 
+    <div class="row" style="margin-bottom: 10px;">
+      <div class="col-md-12">
+        <div tal:condition="batch"
+             metal:use-macro="layout.batching_macro"></div>
+      </div>
+    </div>
+
     <div class="row" tal:condition="divulge_performer_likes">
       <div class="col-md-12">
 
-        <div class="panel-heading">
-          Likes Performers
-        </div>
-        <div class="panel-body">
-          <table tal:condition="likes_performers"
+        <div class="well">
+          <form action="${request.resource_url(context, '@@songsliked')}" method="GET">
+            <label for="filter_text">Search</label>
+            <input class="form-control" name="filter_text" value="${filter_text|''}"/>
+          </form>
+          <table tal:condition="batch|None"
                  class="table table-striped table-condensed">
 
             <thead>
               <tr>
-                <th width="80%">
-                   Name
+                <th width="60%">
+                    ${structure:view.sort_tag('name', 'Name')}
                 </th>
                 <th width="20%">
-                   Likes
+                    ${structure:view.sort_tag('likes', 'Likes')}
+                </th>
+                <th width="20%">
+                    ${structure:view.sort_tag('recordings', 'Recordings')}
                 </th>
               </tr>
             </thead>
-
             <tbody>
-              <tr tal:repeat="item likes_performers">
+              <tr tal:repeat="item batch">
                 <td>
-                  <a href="${request.resource_url(item)}">${item.__name__}</a>
+                  <a href="${request.resource_url(item)}"
+                     ><img src="${layout.performer_thumb_url(item)}"
+                           style="padding-right: 10px;"/>${item.__name__}</a>
                 </td>
                 <td>${item.num_likes}</td>
+                <td>${item.num_recordings}</td>
               </tr>
             </tbody>
           </table>
           <div style="padding-top: 10px;"
-               tal:condition="not likes_performers">
+               tal:condition="not batch">
              No performers liked.
           </div>
         </div>
@@ -47,6 +60,4 @@
 
     </div>
   </div>
-
-
 </div>

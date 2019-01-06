@@ -31,7 +31,7 @@
                     <a href="${request.resource_url(item.performer or item)}"><img alt="" src="${layout.performer_thumb_url(item.performer)}" style="padding-right: 10px;"/>${item.performer.__name__}</a>
                   </td>
                   <td width="45%">
-                    <a href="${request.resource_url(item.song)}">${item.song.title}</a>
+                    <a href="${request.resource_url(item.song)}">${item.song.title} (${item.song.artist})</a>
                   </td>
                 </tr>
               </tbody>
@@ -59,7 +59,7 @@
                     <a href="${request.resource_url(item.performer or item)}"><img alt="" src="${layout.performer_thumb_url(item.performer)}" style="padding-right: 10px;"/>${item.performer.__name__}</a>
                   </td>
                   <td width="45%">
-                    <a href="${request.resource_url(item.song)}">${item.song.title}</a>
+                    <a href="${request.resource_url(item.song)}">${item.song.title} (${item.song.artist})</a>
                   </td>
                 </tr>
               </tbody>

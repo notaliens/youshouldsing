@@ -5,6 +5,8 @@ import io
 import PIL.Image
 import pytz
 
+from pyramid.threadlocal import get_current_request
+
 from substanced.content import content
 from substanced.event import (
     subscribe_will_be_removed,
@@ -16,6 +18,7 @@ from substanced.objectmap import (
     multireference_source_property,
     multireference_target_property,
     multireference_targetid_property,
+    multireference_sourceid_property,
     reference_source_property,
     reference_target_property,
     )
@@ -31,6 +34,7 @@ from substanced.util import (
     renamer,
     find_service,
     )
+from substanced.workflow import get_workflow
 
 from zope.interface import implementer
 
@@ -155,11 +159,17 @@ class Performer(Folder):
     birthdate = None # bw compat
     location = ''
     recordings = multireference_target_property(RecordingToPerformer)
+    recording_ids = multireference_targetid_property(RecordingToPerformer)
     liked_by = multireference_target_property(PerformerLikesPerformer)
     liked_by_ids = multireference_targetid_property(PerformerLikesPerformer)
     likes_performers = multireference_source_property(PerformerLikesPerformer)
+    likes_performerids = multireference_sourceid_property(
+        PerformerLikesPerformer)
     likes_songs = multireference_source_property(PerformerLikesSong)
+    likes_songids = multireference_sourceid_property(PerformerLikesSong)
     likes_recordings = multireference_source_property(PerformerLikesRecording)
+    likes_recordingids = multireference_sourceid_property(
+        PerformerLikesRecording)
     divulge_age = True
     divulge_realname = False
     divulge_sex = True
@@ -168,6 +178,17 @@ class Performer(Folder):
     divulge_performer_likes = True
     divulge_recording_likes = True
     divulge_genre = True
+
+    @property
+    def num_recordings(self):
+        request = get_current_request()
+        count = 0
+        visibility_wf = get_workflow(request, 'Visibility', 'Recording')
+        for recording in self.recordings:
+            if visibility_wf.state_of(recording) in (
+                    'Public', 'Authenticated Only'):
+                count += 1
+        return count
 
     @property
     def num_likes(self):

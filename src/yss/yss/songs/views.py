@@ -30,7 +30,6 @@ from substanced.sdi import mgmt_view
 from substanced.util import (
     Batch,
     find_index,
-    find_catalog,
     )
 from substanced.workflow import get_workflow
 
@@ -381,8 +380,8 @@ class SongView(object):
         visibility = request.params.get('visibility', 'Private')
         workflow.transition_to_state(recording, request, visibility)
         # reindex visibility state
-        catalog = find_catalog(recording, 'yss')
-        catalog.reindex_resource(recording)
+        index = find_index(recording, 'yss', 'visibility_state')
+        index.reindex_doc(recording.__oid__, visibility)
         redis = get_redis(request)
         redis.rpush("yss.new-recordings", resource_path(recording))
         print ("finished", tmpdir, resource_path(recording))

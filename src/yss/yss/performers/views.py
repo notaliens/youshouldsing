@@ -158,6 +158,8 @@ class PerformerView(object):
         if performer in context.liked_by:
             raise HTTPBadRequest("Already")
         context.liked_by.connect([performer])
+        find_index(self.context, 'yss', 'num_likes').reindex_doc(
+            context.__oid__, len(context.liked_by))
         return {'ok': True,
                 'num_likes': context.num_likes,
                 'can_like':request.layout_manager.layout.can_like(performer),
@@ -174,10 +176,41 @@ class PerformerView(object):
         performer = request.user.performer
         if performer in context.liked_by:
             context.liked_by.disconnect([performer])
+        find_index(self.context, 'yss', 'num_likes').reindex_doc(
+            context.__oid__, len(context.liked_by))
         return {'ok': True,
                 'num_likes': context.num_likes,
                 'can_like':request.layout_manager.layout.can_like(performer),
                 }
+
+    def sort_tag(self, token, title):
+        request = self.request
+        context = self.context
+        reverse = request.params.get('reverse', 'false')
+        reverse = asbool(reverse)
+        sorting = request.params.get('sorting')
+        view_name = request.view_name
+        if sorting == token or (not sorting and token == self.default_sort):
+            if reverse:
+                icon = 'glyphicon glyphicon-chevron-up'
+            else:
+                icon = 'glyphicon glyphicon-chevron-down'
+            reverse = reverse and 'false' or 'true'
+        else:
+            icon = ''
+            reverse = 'false'
+
+        url = request.resource_url(
+            context, f'@@{view_name}', query=(
+                ('sorting', token), ('reverse', reverse)
+            )
+        )
+
+        return '<a href="%s">%s <i class="%s"> </i></a>' % (
+            url,
+            title,
+            icon
+            )
 
 
 @view_defaults(context=IPerformer)
@@ -206,34 +239,6 @@ class PerformerRecordingsView(PerformerView):
         rs = rs.sort(first, reverse=reverse)
         return rs
 
-    def sort_tag(self, token, title):
-        request = self.request
-        context = self.context
-        reverse = request.params.get('reverse', 'false')
-        reverse = asbool(reverse)
-        sorting = request.params.get('sorting')
-        if sorting == token or (not sorting and token == self.default_sort):
-            if reverse:
-                icon = 'glyphicon glyphicon-chevron-up'
-            else:
-                icon = 'glyphicon glyphicon-chevron-down'
-            reverse = reverse and 'false' or 'true'
-        else:
-            icon = ''
-            reverse = 'false'
-
-        url = request.resource_url(
-            context, '@@recordings', query=(
-                ('sorting', token), ('reverse', reverse)
-            )
-        )
-
-        return '<a href="%s">%s <i class="%s"> </i></a>' % (
-            url,
-            title,
-            icon
-            )
-
     def query(self):
         request = self.request
         context = self.context
@@ -242,7 +247,8 @@ class PerformerRecordingsView(PerformerView):
             request.resource_path(context, 'recordings')
         )
         permission = (
-            (context == request.user.performer) and 'view' or 'yss.indexed'
+            (context == getattr(request.user, 'performer')
+             and 'view' or 'yss.indexed')
             )
         q = q & find_index(context, 'system', 'allowed').allows(
             request, permission)
@@ -290,6 +296,64 @@ class PerformerRecordingsView(PerformerView):
 
 @view_defaults(context=IPerformer)
 class PerformerSongsLikedView(PerformerView):
+    default_sort='artist'
+
+    def sort_by(self, rs, token, reverse):
+        context = self.context
+        title = find_index(context, 'yss', 'title')
+        num_likes = find_index(context, 'yss', 'num_likes')
+        artist = find_index(context, 'yss', 'artist')
+        num_recordings = find_index(context, 'yss', 'num_recordings')
+        duration = find_index(context, 'yss', 'duration')
+        num_likes = find_index(context, 'yss', 'num_likes')
+        genre = find_index(context, 'yss', 'genre')
+        sorting = {
+            'title':
+            (title, artist, num_recordings, num_likes, genre),
+            'artist':
+            (artist, title, num_recordings, num_likes, genre),
+            'genre':
+            (genre, artist, title, num_recordings, num_likes),
+            'num_likes':
+            (num_likes, artist, title, num_recordings, genre),
+            'recordings':
+            (num_recordings, artist, title, num_likes, genre),
+            'duration':
+            (duration, artist, title, genre, num_likes, num_recordings),
+            }
+        indexes = sorting.get(token, sorting[self.default_sort])
+        for idx in indexes[1:]:
+            rs = rs.sort(idx)
+        first = indexes[0]
+        rs = rs.sort(first, reverse=reverse)
+        return rs
+
+    def query(self):
+        request = self.request
+        context = self.context
+        q = find_index(context, 'yss', 'oid').any(context.likes_songids)
+        q = q & find_index(context, 'system', 'content_type').eq('Song')
+        q = q & find_index(context, 'system', 'allowed').allows(
+            request, 'yss.indexed')
+        filter_text = request.params.get('filter_text')
+        if filter_text:
+            terms = generate_text_filter_terms(filter_text)
+            text = find_index(context, 'yss', 'text')
+            for term in terms:
+                if text.check_query(term):
+                    q = q & text.eq(term)
+        resultset = q.execute()
+        sorting = request.params.get('sorting')
+        reverse = request.params.get('reverse')
+        if reverse == 'false':
+            reverse = False
+        reverse = bool(reverse)
+        if sorting:
+            resultset = self.sort_by(resultset, sorting, reverse)
+        else:
+            resultset = self.sort_by(resultset, self.default_sort, False)
+        return resultset
+
 
     @view_config(
         renderer='templates/profile_songsliked.pt',
@@ -298,11 +362,71 @@ class PerformerSongsLikedView(PerformerView):
     )
     def __call__(self):
         vals = self.view()
-        vals['likes_songs'] = self.sfilter(self.context.likes_songs)
+        if vals['divulge_song_likes']:
+            resultset = self.query()
+        else:
+            resultset = []
+        request = self.request
+        batch = Batch(resultset, request, seqlen=len(resultset),
+                      default_size=self.batch_size)
+        vals.update({
+            'batch':batch,
+            'filter_text':request.params.get('filter_text'),
+            'reverse':request.params.get('reverse', 'false')
+            })
         return vals
 
 @view_defaults(context=IPerformer)
 class PerformerPerformersLikedView(PerformerView):
+    default_sort = 'name'
+
+    def sort_by(self, rs, token, reverse):
+        context = self.context
+        name = find_index(context, 'system', 'name')
+        num_likes = find_index(context, 'yss', 'num_likes')
+        num_recordings = find_index(context, 'yss', 'num_likes')
+        created = find_index(context, 'yss', 'created')
+        sorting = {
+            'created':(created, num_likes, num_recordings, name),
+            'name':(name, num_likes, created, num_recordings),
+            'likes':(num_likes, name, num_recordings, created),
+            'recordings':(num_recordings, num_likes, name, created),
+            }
+        indexes = sorting.get(token, sorting[self.default_sort])
+        for idx in indexes[1:]:
+            rs = rs.sort(idx)
+        first = indexes[0]
+        rs = rs.sort(first, reverse=reverse)
+        return rs
+
+    def query(self):
+        request = self.request
+        context = self.context
+        q = find_index(context, 'yss', 'oid').any(context.likes_performerids)
+        q = q & find_index(context, 'system', 'content_type').eq('Performer')
+        q = q & find_index(context, 'system', 'allowed').allows(
+            request, 'view')
+        filter_text = request.params.get('filter_text')
+        if filter_text:
+            terms = generate_text_filter_terms(filter_text)
+            text = find_index(context, 'yss', 'text')
+            for term in terms:
+                if text.check_query(term):
+                    q = q & text.eq(term)
+        filter_genre = request.params.get('filter_genre')
+        if filter_genre:
+            q = q & find_index(context, 'yss', 'genre').eq(filter_genre)
+        resultset = q.execute()
+        sorting = request.params.get('sorting')
+        reverse = request.params.get('reverse')
+        if reverse == 'false':
+            reverse = False
+        reverse = bool(reverse)
+        if sorting:
+            resultset = self.sort_by(resultset, sorting, reverse)
+        else:
+            resultset = self.sort_by(resultset, self.default_sort, False)
+        return resultset
 
     @view_config(
         renderer='templates/profile_performersliked.pt',
@@ -311,11 +435,73 @@ class PerformerPerformersLikedView(PerformerView):
     )
     def __call__(self):
         vals = self.view()
-        vals['likes_performers'] = self.sfilter(self.context.likes_performers)
+        if vals['divulge_performer_likes']:
+            resultset = self.query()
+        else:
+            resultset = []
+        request = self.request
+        batch = Batch(resultset, request, seqlen=len(resultset),
+                      default_size=self.batch_size)
+        vals.update({
+            'batch':batch,
+            'filter_text':request.params.get('filter_text'),
+            'reverse':request.params.get('reverse', 'false')
+            })
         return vals
 
 @view_defaults(context=IPerformer)
 class PerformerRecordingsLikedView(PerformerView):
+    default_sort='created'
+
+    def sort_by(self, rs, token, reverse):
+        context = self.context
+        title = find_index(context, 'yss', 'title')
+        performer = find_index(context, 'yss', 'performer')
+        num_likes = find_index(context, 'yss', 'num_likes')
+        genre = find_index(context, 'yss', 'genre')
+        created = find_index(context, 'yss', 'created')
+        sorting = {
+            'created':(created, num_likes, title, performer, genre),
+            'title':(title, performer, num_likes, genre, created),
+            'performer':(performer, title, num_likes, genre, created),
+            'genre':(genre, performer, title, num_likes, created),
+            'likes':(num_likes, performer, title, genre, created),
+            }
+        indexes = sorting.get(token, sorting[self.default_sort])
+        for idx in indexes[1:]:
+            rs = rs.sort(idx)
+        first = indexes[0]
+        rs = rs.sort(first, reverse=reverse)
+        return rs
+
+    def query(self):
+        request = self.request
+        context = self.context
+        q = find_index(context, 'yss', 'oid').any(context.likes_recordingids)
+        q = q & find_index(context, 'system', 'content_type').eq('Recording')
+        q = q & find_index(context, 'system', 'allowed').allows(
+            request, 'yss.indexed')
+        filter_text = request.params.get('filter_text')
+        if filter_text:
+            terms = generate_text_filter_terms(filter_text)
+            text = find_index(context, 'yss', 'text')
+            for term in terms:
+                if text.check_query(term):
+                    q = q & text.eq(term)
+        filter_genre = request.params.get('filter_genre')
+        if filter_genre:
+            q = q & find_index(context, 'yss', 'genre').eq(filter_genre)
+        resultset = q.execute()
+        sorting = request.params.get('sorting')
+        reverse = request.params.get('reverse')
+        if reverse == 'false':
+            reverse = False
+        reverse = bool(reverse)
+        if sorting:
+            resultset = self.sort_by(resultset, sorting, reverse)
+        else:
+            resultset = self.sort_by(resultset, self.default_sort, False)
+        return resultset
 
     @view_config(
         renderer='templates/profile_recordingsliked.pt',
@@ -324,7 +510,18 @@ class PerformerRecordingsLikedView(PerformerView):
     )
     def __call__(self):
         vals = self.view()
-        vals['likes_recordings'] = self.sfilter(self.context.likes_recordings)
+        if vals['divulge_recording_likes']:
+            resultset = self.query()
+        else:
+            resultset = []
+        request = self.request
+        batch = Batch(resultset, request, seqlen=len(resultset),
+                      default_size=self.batch_size)
+        vals.update({
+            'batch':batch,
+            'filter_text':request.params.get('filter_text'),
+            'reverse':request.params.get('reverse', 'false')
+            })
         return vals
 
 @view_defaults(context=IPerformer)
@@ -467,7 +664,7 @@ class PerformerPrivacyView(PerformerView):
 
 
 class PerformersView(object):
-    default_sort = 'date'
+    default_sort = 'name'
     batch_size = 20
     def __init__(self, context, request):
         self.context = context
@@ -482,7 +679,7 @@ class PerformersView(object):
         filter_text = request.params.get('filter_text')
         if filter_text:
             terms = generate_text_filter_terms(filter_text)
-            text = find_index(context, 'system', 'text')
+            text = find_index(context, 'yss', 'text')
             for term in terms:
                 if text.check_query(term):
                     q = q & text.eq(term)
@@ -505,14 +702,13 @@ class PerformersView(object):
         context = self.context
         name = find_index(context, 'system', 'name')
         num_likes = find_index(context, 'yss', 'num_likes')
-        genre = find_index(context, 'yss', 'genre')
+        num_recordings = find_index(context, 'yss', 'num_likes')
         created = find_index(context, 'yss', 'created')
         sorting = {
-            #'date':(created, likes, title, genre),
-            'date':(created,),
-            'name':(name, num_likes, genre, created),
-            'genre':(genre, name, num_likes, created),
-            'likes':(num_likes, name, genre, created),
+            'created':(created, num_likes, num_recordings, name),
+            'name':(name, num_likes, created, num_recordings),
+            'likes':(num_likes, name, num_recordings, created),
+            'recordings':(num_recordings, num_likes, name, created),
             }
         indexes = sorting.get(token, sorting[self.default_sort])
         for idx in indexes[1:]:
@@ -543,7 +739,7 @@ class PerformersView(object):
         reverse = request.params.get('reverse', 'false')
         reverse = asbool(reverse)
         sorting = request.params.get('sorting')
-        if sorting == token or (not sorting and token == 'artist'):
+        if sorting == token or (not sorting and token == 'name'):
             if reverse:
                 icon = 'glyphicon glyphicon-chevron-up'
             else:
@@ -630,7 +826,7 @@ class PerformerProfilePrivacySchema(Schema):
 @view_config(
     context=IPerformerPhoto,
     permission='view',
-    http_cache=0, # XXX
+#    http_cache=0, # XXX
     )
 def view_file(context, request):
     return context.get_response(request=request)
