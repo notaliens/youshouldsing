@@ -32,6 +32,9 @@
   - Know what happens when we need to change consumer secret or details about
     app in developer settings.
   - Non-oauth signups.
+  - Keep around original google/twitter login name so we can manually
+    find their account and associate with another oauth identity if user loses
+    access to twitter/google.
 
 - Artist
 
