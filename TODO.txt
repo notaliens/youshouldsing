@@ -14,6 +14,7 @@
   - page titles***
   - get substanced.secret out of shared.ini
   - contests
+  - https://css-tricks.com/centering-css-complete-guide/
 
 - Licensing
 
