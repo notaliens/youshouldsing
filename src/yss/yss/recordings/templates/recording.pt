@@ -17,11 +17,12 @@
             <div class="row">
               <div class="col-md-12">
 
-                <div id="recording-video" style="padding-bottom: 10px;">
+                <div class="embed-responsive embed-responsive-4by3">
 
-                  <video id="thevideo" width="640" height="400" controls style="display: ${processed and 'block' or 'none'}; margin: auto">
+                  <video id="thevideo" controls width=640" height="480">
                     <source id="thevideosource" src="${video_url}" type="video/webm"/>
                   </video>
+
                   <div class="well" id="processing"
                        tal:condition="not processed">
                     <div class="progress">
