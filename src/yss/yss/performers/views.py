@@ -769,56 +769,56 @@ class PerformerProfilePrivacySchema(Schema):
         colander.String(),
         validator=colander.OneOf([x[0] for x in binary_choices]),
         widget=deform.widget.RadioChoiceWidget(values=binary_choices),
-        title='Divulge your age',
+        title='Divulge your age on your profile page',
         default='true',
         )
     divulge_realname = colander.SchemaNode(
         colander.String(),
         validator=colander.OneOf([x[0] for x in binary_choices]),
         widget=deform.widget.RadioChoiceWidget(values=binary_choices),
-        title='Divulge your real name',
+        title='Divulge your real name on your profile page',
         default='false',
         )
     divulge_sex = colander.SchemaNode(
         colander.String(),
         validator=colander.OneOf([x[0] for x in binary_choices]),
         widget=deform.widget.RadioChoiceWidget(values=binary_choices),
-        title='Divulge your gender',
+        title='Divulge your gender on your profile page',
         default='true',
         )
     divulge_location = colander.SchemaNode(
         colander.String(),
         validator=colander.OneOf([x[0] for x in binary_choices]),
         widget=deform.widget.RadioChoiceWidget(values=binary_choices),
-        title='Divulge your location',
+        title='Divulge your location on your profile page',
         default='true',
         )
     divulge_song_likes = colander.SchemaNode(
         colander.String(),
         validator=colander.OneOf([x[0] for x in binary_choices]),
         widget=deform.widget.RadioChoiceWidget(values=binary_choices),
-        title='Divulge the songs you like',
+        title='Divulge the songs you like on your profile page',
         default='true',
         )
     divulge_performer_likes = colander.SchemaNode(
         colander.String(),
         validator=colander.OneOf([x[0] for x in binary_choices]),
         widget=deform.widget.RadioChoiceWidget(values=binary_choices),
-        title='Divulge the performers you like',
+        title='Divulge the performers you like on your profile page',
         default='false',
         )
     divulge_recording_likes = colander.SchemaNode(
         colander.String(),
         validator=colander.OneOf([x[0] for x in binary_choices]),
         widget=deform.widget.RadioChoiceWidget(values=binary_choices),
-        title='Divulge the recordings you like',
+        title='Divulge the recordings you like on your profile page',
         default='false',
         )
     divulge_genre = colander.SchemaNode(
         colander.String(),
         validator=colander.OneOf([x[0] for x in binary_choices]),
         widget=deform.widget.RadioChoiceWidget(values=binary_choices),
-        title='Divulge your favorite genre',
+        title='Divulge your favorite genre on your profile page',
         default='true',
         )
 
