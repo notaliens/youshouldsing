@@ -155,7 +155,6 @@ Profile Recordings
 - Search:
 
   - Index lyrics into song text index.
-  - Provide an "X" which removes the current filter.***
   
 - JS:
 
