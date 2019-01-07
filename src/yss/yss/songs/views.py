@@ -243,8 +243,10 @@ class SongsView(object):
                 finally:
                     shutil.rmtree(jobdir, ignore_errors=True)
                 request.session.flash(
-                    'Song uploaded, talk like William Shatner to retime '
-                    'karaoke lyrics',
+                    'Song uploaded. Now voice lyrics like William Shatner in '
+                    'time with the song in order to retime karaoke lyrics '
+                    'display text. Remember: it doesnt need to be perfect',
+                    'it\'s just karaoke!',
                     'info')
                 songname = slug.slug(appstruct['title'])
                 hashval = md5.hexdigest()
@@ -359,7 +361,7 @@ class SongView(object):
             'liked_by': song.liked_by,
             'recordings':song.recordings,
             'can_record':self.has_record_permission,
-            'can_retime':self.has_retime_permission,
+            'can_retime':self.has_edit_permission,
             "mp3_url": self.request.resource_url(song, 'mp3'),
             "timings": song.timings,
             "max_framerate": root.max_framerate,
