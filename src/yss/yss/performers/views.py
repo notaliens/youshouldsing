@@ -322,7 +322,7 @@ class PerformerSongsLikedView(PerformerView):
             (genre, artist, title, num_recordings, num_likes),
             'num_likes':
             (num_likes, artist, title, num_recordings, genre),
-            'recordings':
+            'num_recordings':
             (num_recordings, artist, title, num_likes, genre),
             'duration':
             (duration, artist, title, genre, num_likes, num_recordings),

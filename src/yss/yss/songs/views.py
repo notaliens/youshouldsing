@@ -130,7 +130,7 @@ class SongsView(object):
             (genre, artist, title, num_recordings, num_likes, created),
             'num_likes':
             (num_likes, artist, title, num_recordings, genre, created),
-            'recordings':
+            'num_recordings':
             (num_recordings, artist, title, num_likes, genre, created),
             'duration':
             (duration, artist, title, genre, created, num_likes,num_recordings),

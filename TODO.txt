@@ -36,10 +36,6 @@
     find their account and associate with another oauth identity if user loses
     access to twitter/google.
 
-- Artist
-
-  - Create artist page that shows all songs by an artist***
-
 - Song import:
 
   - Handle conflict errors.
@@ -55,6 +51,7 @@
   - Recordings of this song as tab***
   - Performers who like this song as tab***
   - Allow cancel of retime.***
+  - Metadata edit.
 
 Songs
 
@@ -101,6 +98,11 @@ Profile Recordings
     fields right
   - Show new icon without a shift reload when editing profile and icon
     changes.
+
+- Recordings:
+
+  - By your favorite performers
+  - By performers whom have favorited you
 
 - View recording:
 
