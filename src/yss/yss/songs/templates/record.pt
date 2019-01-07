@@ -13,13 +13,17 @@
             <div class="row" style="padding-bottom: 10px;">
               <div class="col-md-12">
 
-                <button id="play-me" style="width: 8em;" class="btn btn-primary"><i
+                <button id="play-me" style="width: 8em;"
+                        class="btn btn-primary"><i
               class="fas fa-bullhorn"> </i> Listen</button>
-                <button id="record-me" style="width: 8em;" class="btn btn-danger"><i
+                <button id="record-me" style="width: 8em;"
+                        class="btn btn-danger"><i
               class="fas fa-microphone"> </i> Record</button>
-                <button id="reverse" style="width: 8em; display: none" class="btn btn-warning audiocontrol"><i
+                <button id="reverse" style="width: 8em; display: none"
+                        class="btn btn-warning audiocontrol"><i
               class="fas fa-backward"> </i></button>
-                <button id="forward" style="width: 8em; display: none" class="btn btn-warning audiocontrol"><i
+                <button id="forward" style="width: 8em; display: none"
+                        class="btn btn-warning audiocontrol"><i
               class="fas fa-forward"> </i></button>
               </div>
             </div>

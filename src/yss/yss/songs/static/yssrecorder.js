@@ -66,25 +66,27 @@ var karaoke = (function(mp3_url, timings) {
         if (new_timings) {
             timings = new_timings;
         }
-        if (timings) {
-            var rice = new RiceKaraoke(
-                RiceKaraoke.simpleTimingToTiming(timings));
-            var renderer = new SimpleKaraokeDisplayEngine(
-                'karaoke-display', numDisplayLines);
-            show = rice.createShow(renderer, numDisplayLines);
-            player.addEventListener('timeupdate', function () {
-                var ct = player.currentTime;
-                if (ct < lastPosition) {
-                    show.reset();
-                }
-                if (ct >= player.duration) {
-                    reset();
-                }
-                show.render(ct, false);
-                updateStatus();
-                lastPosition = ct;
-            }, false);
+        if (timings == undefined || timings == null) {
+            console.log('timings were undefined');
+            timings = [];
         }
+        var rice = new RiceKaraoke(
+            RiceKaraoke.simpleTimingToTiming(timings));
+        var renderer = new SimpleKaraokeDisplayEngine(
+            'karaoke-display', numDisplayLines);
+        show = rice.createShow(renderer, numDisplayLines);
+        player.addEventListener('timeupdate', function () {
+            var ct = player.currentTime;
+            if (ct < lastPosition) {
+                show.reset();
+            }
+            if (ct >= player.duration) {
+                reset();
+            }
+            show.render(ct, false);
+            updateStatus();
+            lastPosition = ct;
+        }, false);
 
         $('#forward')[0].onclick = function() {
             player.currentTime = player.currentTime + 5;
@@ -345,6 +347,10 @@ var rtc_recorder = (function(exports, karaoke, max_framerate, upload_handler) {
     }
 
     function gatherMetadata() {
+        if (!$('#metadata-overlay').length) {
+            /// empty
+            return uploadVideo();
+        }
         $('#metadata-overlay')[0].style.display = "block";
         $('#uploading-overlay')[0].style.display = "none";
         $('#upload-me')[0].onclick = uploadVideo;
@@ -355,7 +361,9 @@ var rtc_recorder = (function(exports, karaoke, max_framerate, upload_handler) {
     }
 
     function uploadVideo() {
-        $('#metadata-overlay')[0].style.display = "none";
+        if ($('#metadata-overlay').length) {
+            $('#metadata-overlay')[0].style.display = "none";
+        }
         $('#uploading-overlay')[0].style.display = "block";
         uploading = true;
         var blob = new Blob(chunks);
@@ -368,15 +376,15 @@ var rtc_recorder = (function(exports, karaoke, max_framerate, upload_handler) {
                 fd.append('effects', effect.id);
             }
         }
-        if ($('#musicvolume')[0]) {
+        if ($('#musicvolume').length) {
             fd.append('musicvolume', $('#musicvolume')[0].value);
         }
         fd.append('data', blob);
         fd.append('finished', '1');
-        if ($('#description')) {
+        if ($('#description').length) {
             fd.append('description', $('#description')[0].value);
         }
-        if ($('input[name=visibility]')) {
+        if ($('input[name=visibility]').length) {
             fd.append('visibility', $('input[name=visibility]:checked').val());
         }
         url = upload_handler || window.location;

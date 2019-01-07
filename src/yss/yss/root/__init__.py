@@ -36,7 +36,6 @@ def root_added(event):
         [
         (Allow, Everyone, 'view'),
         (Allow, Everyone, 'yss.indexed'),
-        (Allow, Authenticated, 'yss.record'),
         (Allow, Authenticated, 'yss.like'),
         ]
     )
@@ -44,6 +43,10 @@ def root_added(event):
     root.title = root.sdi_title = 'You Should Sing'
     root['catalogs'].add_catalog('yss')
     root['songs'] = registry.content.create('Songs')
+    set_acl(root['songs'], [
+        (Allow, Authenticated, 'yss.upload'),
+        (Allow, Authenticated, 'yss.record'),
+    ])
     root['performers'] = registry.content.create('Performers')
     root.max_framerate = 30
     timings_json = pkg_resources.resource_string(

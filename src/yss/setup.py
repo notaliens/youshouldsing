@@ -27,6 +27,7 @@ requires = [
     'google-cloud-storage',
     'google-cloud-speech',
     'pillow',
+    'ffmpeg-python',
     ]
 
 setup(name='yss',

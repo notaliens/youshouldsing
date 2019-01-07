@@ -1,21 +1,29 @@
 import colander
 import deform.widget
+import ffmpeg
+import hashlib
 import logging
 import os
 import random
 import slug
 import shutil
+import uuid
 
 from ZODB.blob import Blob
 
 from pyramid.httpexceptions import HTTPBadRequest
 from pyramid.settings import asbool
 from pyramid.httpexceptions import HTTPFound
+from pyramid.decorator import reify
 from pyramid.traversal import (
     find_root,
     resource_path,
     )
-from pyramid.decorator import reify
+from pyramid.security import (
+    Allow,
+    Deny,
+    Everyone,
+    )
 from pyramid.view import (
     view_config,
     view_defaults,
@@ -30,12 +38,16 @@ from substanced.sdi import mgmt_view
 from substanced.util import (
     Batch,
     find_index,
+    set_acl,
+    get_acl,
     )
 from substanced.workflow import get_workflow
 
 from yss.interfaces import (
     ISongs,
     ISong,
+    genre_choices,
+    language_choices,
     )
 from yss.utils import (
     get_redis,
@@ -176,6 +188,109 @@ class SongsView(object):
             icon,
             )
 
+    @view_config(
+        name='upload',
+        renderer='templates/upload.pt',
+        permission='yss.upload',
+    )
+    def upload(self):
+        context = self.context
+        request = self.request
+        schema = SongUploadSchema().bind(request=request, context=context)
+        form = deform.Form(schema, buttons=('Save',))
+        if 'Save' in request.POST:
+            controls = request.POST.items()
+            try:
+                appstruct = form.validate(controls)
+            except deform.ValidationFailure as e:
+                rendered = e.render()
+            else:
+                audio_file = appstruct['audio_file']
+                tmpdir = request.registry.settings['substanced.uploads_tempdir']
+                job = uuid.uuid4().hex
+                jobdir = os.path.join(tmpdir, job)
+                try:
+                    try:
+                        os.makedirs(jobdir)
+                    except FileExistsError:
+                        pass
+                    inputfn = os.path.join(jobdir, 'inputfile')
+                    inputfile = open(inputfn, 'wb')
+                    fp = audio_file['fp']
+                    fp.seek(0)
+                    shutil.copyfileobj(fp, inputfile)
+                    M = 1024 * 1024 * 1024
+                    md5 = hashlib.md5()
+                    f = open(inputfn, 'rb')
+                    while True:
+                        data = f.read(M)
+                        if not data:
+                            break
+                        md5.update(data)
+                    mp3_filename = os.path.join(jobdir, 'output.mp3')
+                    ffmpeg.input(inputfn).output(mp3_filename).run()
+                    song = request.registry.content.create(
+                        'Song',
+                        appstruct['title'],
+                        appstruct['artist'],
+                        appstruct['lyrics'],
+                        timings='',
+                        audio_stream=open(mp3_filename, 'rb'),
+                        audio_mimetype='audio/mpeg',
+                        language=appstruct['language'],
+                    )
+                finally:
+                    shutil.rmtree(jobdir, ignore_errors=True)
+                request.session.flash(
+                    'Song uploaded, talk like William Shatner to retime '
+                    'karaoke lyrics',
+                    'info')
+                songname = slug.slug(appstruct['title'])
+                hashval = md5.hexdigest()
+                songname = f'{songname}-{hashval}'
+                self.context[songname] = song
+                song.uploader = request.performer
+                set_acl(song,
+                        [
+                            (Allow, request.user.__oid__, ['yss.edit']),
+                            (Deny, Everyone, ['yss.indexed']),
+                        ]
+                )
+                return HTTPFound(request.resource_url(song, '@@retime'))
+        else:
+            appstruct = {
+                'title':colander.null,
+                'artist':colander.null,
+                'audio_file':colander.null,
+                'genre':colander.null,
+                'language':colander.null,
+                'lyrics':colander.null,
+                }
+        rendered = form.render(appstruct, readonly=False)
+        return {'form':rendered}
+
+    def tabs(self):
+        songs = self.context
+        request = self.request
+        state = request.view_name
+        tabs = []
+        if request.has_permission('yss.upload', songs):
+            tabs.append(
+                {'title':'View',
+                 'id':'button-view',
+                 'url':request.resource_url(songs),
+                 'class':state == '' and 'active' or '',
+                 'enabled':True,
+                 })
+            tabs.append(
+                {'title':'Upload',
+                 'id':'button-upload',
+                 'url':request.resource_url(songs, '@@upload'),
+                 'class':state == 'upload' and 'active' or '',
+                 'enabled':True,
+                 })
+        return tabs
+
     @mgmt_view(name='preview')
     def preview(self):
         return HTTPFound(location=self.request.resource_url(self.context))
@@ -188,33 +303,40 @@ class SongView(object):
         self.request = request
 
     @reify
-    def has_retime_permission(self):
+    def has_edit_permission(self):
         song = self.context
-        return self.request.has_permission('yss.retime', song)
+        return self.request.has_permission('yss.edit', song)
+
+    @reify
+    def has_record_permission(self):
+        song = self.context
+        return self.request.has_permission('yss.record', song)
 
     def tabs(self):
         state = self.request.view_name
         song = self.context
         tabs = []
-        if self.has_retime_permission:
+        if (self.has_record_permission or self.has_edit_permission):
             tabs.append(
-                {'title':'View',
+                {'title':'Listen',
                  'id':'button-view',
                  'url':self.request.resource_url(song),
                  'class':state == '' and 'active' or '',
                  'enabled':True,
-                 })
+                })
+        if self.has_record_permission:
             tabs.append(
                 {'title':'Record',
                  'id':'button-recordview',
-                 'url':self.request.resource_url(song, 'record'),
+                 'url':self.request.resource_url(song, '@@record'),
                  'class':state=='record' and 'active' or '',
                  'enabled':True,
                  })
+        if self.has_edit_permission:
             tabs.append(
                 {'title':'Retime',
                  'id':'button-retime',
-                 'url':self.request.resource_url(song, 'retime'),
+                 'url':self.request.resource_url(song, '@@retime'),
                  'class':state == 'retime' and 'active' or '',
                  'enabled':True,
                  })
@@ -226,15 +348,20 @@ class SongView(object):
     )
     def view(self):
         song = self.context
+        song = self.context
+        root = find_root(song)
         return {
             'title':song.title,
             'artist':song.artist,
             'num_likes':song.num_likes,
             'liked_by': song.liked_by,
             'recordings':song.recordings,
-            'can_record':self.request.has_permission('yss.record', song),
+            'can_record':self.has_record_permission,
             'can_retime':self.has_retime_permission,
-            }
+            "mp3_url": self.request.resource_url(song, 'mp3'),
+            "timings": song.timings,
+            "max_framerate": root.max_framerate,
+        }
 
     @view_config(
         name='like',
@@ -269,13 +396,16 @@ class SongView(object):
 
     @view_config(
         name='retime',
-        permission='yss.retime',
+        permission='yss.edit',
         renderer='templates/retime.pt',
     )
     def retime(self):
-        timings = getattr(self.context, 'alt_timings', '').strip()
+        alt_timings = getattr(self.context, 'alt_timings', '')
+        timings = alt_timings.strip()
         if not timings:
             timings = self.context.timings.strip()
+        if not timings:
+            timings = '[]'
         formatted_timings = format_timings(timings)
         if self.context.retiming:
             processed = 0
@@ -286,11 +416,15 @@ class SongView(object):
             "timings": timings,
             "formatted_timings":formatted_timings,
             'processed':processed,
+            'accept_url':self.request.resource_url(
+                self.context, '@@accept_retime'
+            ),
+            'needs_accept':alt_timings,
         }
 
     @view_config(
         name='finish_retime',
-        permission='yss.retime',
+        permission='yss.edit',
         xhr=True,
         renderer='string',
     )
@@ -306,7 +440,25 @@ class SongView(object):
 
         redis = get_redis(self.request)
         redis.rpush("yss.new-retimings", resource_path(self.context))
-        return self.request.resource_url(self.context, 'retime')
+        return self.request.resource_url(self.context, '@@retime')
+
+    @view_config(
+        name='accept_retime',
+        permission='yss.edit',
+        xhr=True,
+        renderer='string',
+    )
+    def accept_retime(self):
+        song = self.context
+        song.timings = song.alt_timings
+        song.alt_timings = ''
+        acl = get_acl(song)
+        if (Deny, Everyone, ['yss.indexed']) in acl:
+            acl.remove((Deny, Everyone, ['yss.indexed']))
+        set_acl(song, acl)
+        self.request.session.flash(
+            'Retime accepted, song may now be recorded by everyone', 'info')
+        return self.request.resource_url(self.context, '@@retime')
 
     @view_config(
         name='retimeprogress',
@@ -332,9 +484,9 @@ class SongView(object):
     @view_config(
         name="record",
         renderer="templates/record.pt",
-        permission='view', # XXX
+        permission='yss.record',
     )
-    def recording_app(self):
+    def record(self):
         song = self.context
         root = find_root(song)
         return {
@@ -454,3 +606,48 @@ def get_recording_tempdir(request, recording_id):
 def get_retime_tempdir(request, song_id):
     retime_dir = request.registry.settings['yss.retime_dir']
     return os.path.abspath(os.path.join(retime_dir, song_id))
+
+@colander.deferred
+def audio_validator(node, kw):
+    def _audio_validator(node, value):
+        mimetype = value['mimetype']
+        if not mimetype.startswith('audio/'):
+            raise colander.Invalid(
+                node,
+                f'Audio file must be an audio file (not {mimetype})'
+            )
+    return _audio_validator
+
+class SongUploadSchema(Schema):
+    """ Property schema for song upload.
+    """
+    title = colander.SchemaNode(
+        colander.String(),
+        title='Song Title',
+        validator=colander.Length(max=100),
+    )
+
+    artist = colander.SchemaNode(
+        colander.String(),
+        title='Artist Name',
+        validator=colander.Length(max=100),
+    )
+
+    audio_file = FileNode(
+        title='Backing Track (audio file like mp3/aac/wav)',
+        validator=audio_validator,
+    )
+    genre = colander.SchemaNode(
+        colander.String(),
+        title='Song Genre',
+        widget=deform.widget.SelectWidget(values=genre_choices),
+    )
+    language = colander.SchemaNode(
+        colander.String(),
+        widget=deform.widget.Select2Widget(values=language_choices),
+    )
+    lyrics = colander.SchemaNode(
+        colander.String(),
+        validator=colander.Length(max=20000),
+        widget=deform.widget.TextAreaWidget(style="height: 200px;"),
+    )

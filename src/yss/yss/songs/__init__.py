@@ -9,6 +9,7 @@ from substanced.file import FileUploadPropertySheet
 from substanced.folder import Folder
 from substanced.objectmap import multireference_target_property
 from substanced.objectmap import multireference_targetid_property
+from substanced.objectmap import reference_target_property
 from substanced.property import PropertySheet
 from substanced.schema import NameSchemaNode
 from substanced.util import renamer
@@ -18,6 +19,7 @@ from yss.interfaces import (
     ISong,
     ISongs,
     PerformerLikesSong,
+    PerformerUploadedSong,
     RecordingToSong,
     RelatedPropertySheet,
     genre_choices,
@@ -95,6 +97,7 @@ class Song(File):
     recordings = multireference_target_property(RecordingToSong)
     liked_by = multireference_target_property(PerformerLikesSong)
     liked_by_ids = multireference_targetid_property(PerformerLikesSong)
+    uploader = reference_target_property(PerformerUploadedSong)
     duration = 0
     language = 'en-US'
     alt_timings = ''

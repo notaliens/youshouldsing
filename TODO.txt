@@ -46,20 +46,15 @@
 
 - Song
 
-  - Listen to song.***
   - Add to singlist
   - Song timings editor (post-speech)
-  - Postprocess retimings (cope with API call error unexpected state when
-    file is deleted too)
   - Song timing word endings don't seem to be right... see whiter shade.
   - Crowdsource lyric retimings... allow uploader to accept lyric timing
     suggestions.
   - Recognize dupe song metadata and group together on other recordings page.
   - Recordings of this song as tab***
   - Performers who like this song as tab***
-  - Allow uploads (yikes)***
   - Allow cancel of retime.***
-  - Workflow for accepting retime as canonical.***
 
 Songs
 

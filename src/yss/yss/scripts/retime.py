@@ -20,6 +20,7 @@ from google.cloud import storage
 from google.cloud import speech
 from google.cloud.speech import enums as speech_enums
 from google.cloud.speech import types as speech_types
+from google.api_core.exceptions import GoogleAPICallError
 
 logger = logging.getLogger('retime')
 
@@ -52,7 +53,7 @@ def main(argv=sys.argv):
             song = find_resource(root, path)
         except KeyError:
             logger.warning('Could not find %s' % path)
-            
+
         else:
             progress_key = f'retimeprogress-{song.__name__}'
             try:
@@ -77,7 +78,7 @@ def main(argv=sys.argv):
 def get_retime_tempdir(registry, song_id):
     retime_dir = registry.settings['yss.retime_dir']
     return os.path.abspath(os.path.join(retime_dir, song_id))
-            
+
 def retime(song, redis, env):
     tmpdir = get_retime_tempdir(
         env['registry'],
@@ -140,9 +141,6 @@ def retime(song, redis, env):
 
         logger.info('Waiting for speech recognition to complete')
         operation = client.long_running_recognize(config, audio)
-        # google.api_core.exceptions.GoogleAPICallError: None
-        # Unexpected state: Long-running operation had neither response
-        # nor error set.
         # doing add_done_callback and checking for status is pointless,
         # it returns 0 then 100 for percent complete
         redis.hmset(
@@ -152,7 +150,23 @@ def retime(song, redis, env):
              'done':1,
             }
         )
-        response = operation.result(timeout=7200)
+        try:
+            response = operation.result(timeout=7200)
+        except GoogleAPICallError:
+            # google.api_core.exceptions.GoogleAPICallError: None
+            # Unexpected state: Long-running operation had neither response
+            # nor error set.
+            logger.error('Retiming failed', exc_info=True)
+            redis.hmset(
+                progress_key,
+                {'pct':-1, 'status':'Retiming failed; speech recognition error'}
+            )
+            song.retiming_failure = True
+            song.retiming = False
+            song.retiming_blob = None
+            transaction.commit()
+            return
+
         logger.info('Speech recognition operation completed')
         timings = speech_results_to_timings(response.results, 7)
         alt_timings = json.dumps(timings, indent=2)
@@ -170,16 +184,20 @@ def retime(song, redis, env):
         song.retiming = False
         song.retiming_blob = None
         transaction.commit()
-        shutil.rmtree(tmpdir, ignore_errors=True)
     except FileNotFoundError:
         # no such file or dir when chdir
         redis.hmset(
             progress_key,
             {'pct':-1, 'status':'Retime failed; temporary files missing'}
         )
-        redis.persist(progress_key)
+        redis.persist(progress_key) # XXX when does it die
         song.retime_failure = True # currently not exposed
     finally:
+        try:
+            blob.delete()
+        except: # XXX
+            pass
+        shutil.rmtree(tmpdir, ignore_errors=True)
         os.chdir(curdir)
 
 def speech_results_to_timings(speech_results, max_words_per_line):

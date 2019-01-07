@@ -11,19 +11,27 @@
           <div class="panel-body">
             <div class="row" style="padding-bottom: 10px;">
 
-              <div id="display" style="display: ${processed and 'block' or 'none'}">
-                <button id="play-me" style="width: 8em;" class="btn btn-primary"><i
-              class="fas fa-bullhorn"> </i> Listen</button>
-                <button id="record-me" style="width: 8em;" class="btn btn-danger"><i
-              class="fas fa-microphone"> </i> Record</button>
-                <button id="reverse" style="width: 8em; display: none" class="btn btn-warning audiocontrol"><i
-              class="fas fa-backward"> </i></button>
-                <button id="forward" style="width: 8em; display: none" class="btn btn-warning audiocontrol"><i
-              class="fas fa-forward"> </i></button>
+              <div id="display"
+                   style="display: ${processed and 'block' or 'none'};">
+                <button id="play-me" style="width: 8em;"
+                        class="btn btn-primary"><i
+                        class="fas fa-bullhorn"> </i> Listen</button>
+                <button tal:condition="needs_accept"
+                        id="accept-me" style="width: 8em;"
+                        class="btn btn-success"><i
+                        class="fas fa-bullhorn"> </i> Accept</button>
+                <button id="record-me" style="width: 8em;"
+                        class="btn btn-danger"><i
+                        class="fas fa-microphone"> </i> Record</button>
+                <button id="reverse" style="width: 8em; display: none"
+                        class="btn btn-warning audiocontrol"><i
+                        class="fas fa-backward"> </i></button>
+                <button id="forward" style="width: 8em; display: none"
+                        class="btn btn-warning audiocontrol"><i
+                               class="fas fa-forward"> </i></button>
               </div>
             </div>
-
-            <div class="row" tal:condition="timings">
+            <div class="row">
               <div class="col-md-12">
                 <div id="player" style="display: none">
                   <div id="karaoke-wrapper">
@@ -33,6 +41,7 @@
                 <div id="status" style="padding-bottom: 5px;">0:00</div>
               </div>
             </div>
+
           </div>
         </div>
 
@@ -100,13 +109,11 @@
       </div>
     </div>
 
-    <div id="uploading-overlay">
-      <div id="uploading-overlay-text">
+    <div id="uploading-overlay" class="finished-overlay">
+      <div id="uploading-overlay-text" class="finished-overlay-text">
         <i><b>Uploading</b></i>
         <div class="progress">
           <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%; min-width: 1em;" id="upload-progress">0%</div>
-          <i class="fas fa-spinner fa-spin" id="afterupload-spinner"
-             style="display:none;"> </i>
         </div>
       </div>
     </div>
@@ -120,6 +127,18 @@
      // karaoke and rtc_recorder are exported by yssrecorder
      kar = karaoke("${mp3_url}", ${timings});
      rtc_recorder(window, kar, null, "${request.resource_url(context, 'finish_retime')}");
+     var accept_url = "${accept_url}";
+     var accept = function() {
+       $.ajax({
+            type:'POST',
+            url: accept_url,
+            processData: false,
+            contentType: false
+       }).done(function(data) { window.location = data; });
+     };
+     if ($('#accept-me').length) {
+       $('#accept-me')[0].onclick = accept;
+     }
     </script>
     <script type="text/javascript" tal:condition="not processed">
      var progresscheck = function() {
@@ -133,6 +152,8 @@
                $('#formatted-timings')[0].innerHTML = data['formatted_timings'];
                kar.init(JSON.parse(data['timings']));
                $('#display').show();
+               $('#accept-me').show();
+               $('#accept-me')[0].onclick = accept;
                $('#processing').hide();
              }
              else {

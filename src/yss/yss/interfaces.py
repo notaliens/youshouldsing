@@ -43,6 +43,10 @@ class PerformerLikesSong(ReferenceType):
     """
     target_ordered = True
 
+class PerformerUploadedSong(ReferenceType):
+    """ Map a performer to the corresponding user object.
+    """
+
 class PerformerToUser(ReferenceType):
     """ Map a performer to the corresponding user object.
     """
