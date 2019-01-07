@@ -198,6 +198,7 @@ class SongsView(object):
         request = self.request
         schema = SongUploadSchema().bind(request=request, context=context)
         form = deform.Form(schema, buttons=('Save',))
+        rendered = None
         if 'Save' in request.POST:
             controls = request.POST.items()
             try:
@@ -266,7 +267,8 @@ class SongsView(object):
                 'language':colander.null,
                 'lyrics':colander.null,
                 }
-        rendered = form.render(appstruct, readonly=False)
+        if rendered is None:
+            rendered = form.render(appstruct, readonly=False)
         return {'form':rendered}
 
     def tabs(self):
