@@ -16,7 +16,7 @@
   - contests
   - https://css-tricks.com/centering-css-complete-guide/
   - Profile/songs export
-  - DMCA claim handler.
+  - DMCA claim handler.***
   - Show account activity.
 
 - Licensing
