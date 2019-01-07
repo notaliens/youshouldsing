@@ -28,14 +28,19 @@
               class="fas fa-forward"> </i></button>
               </div>
             </div>
-            <div class="row">
+            <div class="row" style="padding-bottom: 10px;">
               <div class="col-md-12">
                 <div id="player" style="display: none">
                   <div id="karaoke-wrapper">
                     <div id="karaoke-display"></div>
                   </div>
                 </div>
-                <div id="status" style="padding-bottom: 5px;">0:00</div>
+                <div id="status">0:00</div>
+                <div class="audiocontrol"
+                     style="width: 100%; display:none">
+                  <input type="range" min="1" max="100" value="0"
+                         class="slider" id="scrubber">
+                </div>
               </div>
             </div>
             <div class="row">

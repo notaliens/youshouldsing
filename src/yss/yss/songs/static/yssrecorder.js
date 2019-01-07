@@ -83,6 +83,7 @@ var karaoke = (function(mp3_url, timings) {
             if (ct >= player.duration) {
                 reset();
             }
+            $('#scrubber')[0].value = ct / player.duration * 100;
             show.render(ct, false);
             updateStatus();
             lastPosition = ct;
@@ -110,6 +111,10 @@ var karaoke = (function(mp3_url, timings) {
             $('.audiocontrol').hide();
             reset();
         }, false);
+        $('#scrubber')[0].onchange = function() {
+            player.currentTime = player.duration * (parseFloat(this.value)/100);
+        };
+
     }
 
     init();
