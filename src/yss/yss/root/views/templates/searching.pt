@@ -1,0 +1,11 @@
+<div metal:define-macro="searching">
+  <form action="${search_url}" method="GET">
+    <div class="input-group">
+      <input type="text" class="form-control" name="filter_text" value="${filter_text|''}" placeholder="${placeholder_text}">
+      <span class="input-group-btn" tal:define="filter filter_text|None">
+        <button type="submit" tal:condition="not filter" class="btn btn-default">&#x1F50e;</button>
+        <button tal:condition="filter" class="btn btn-default" type="button" onclick="document.location='${search_url}';">x</button>
+      </span>
+    </div>
+  </form>
+</div>
