@@ -2,24 +2,25 @@
 <html metal:use-macro="main_template">
 
   <div metal:fill-slot="main_content" class="container">
-    <div class="row">
-      <div class="col-md-12">
-        <div class="panel panel-default">
-          <div class="panel-heading">
-            <i>${context.title}</i> in the style of ${context.artist}
-          </div>
-          <div class="panel-body">
-            <div class="row" style="padding-bottom: 10px;">
+    <div id="display"
+         style="display: ${processed and 'block' or 'none'};">
+      <div class="row">
+        <div class="col-md-12">
+          <div class="panel panel-default">
+            <div class="panel-heading">
+              <i>${context.title}</i> in the style of ${context.artist}
+            </div>
+            <div class="panel-body">
+              <div class="row" style="padding-bottom: 10px;">
 
-              <div id="display"
-                   style="display: ${processed and 'block' or 'none'};">
                 <button id="play-me" style="width: 8em;"
                         class="btn btn-primary"><i
                         class="fas fa-bullhorn"> </i> Listen</button>
-                <button tal:condition="needs_accept"
-                        id="accept-me" style="width: 8em;"
+                <button style="display: ${needs_accept and 'inline' or 'none'};
+                               width: 8em;"
+                        id="accept-me"
                         class="btn btn-success"><i
-                        class="fas fa-bullhorn"> </i> Accept</button>
+                             class="fas fa-bullhorn"> </i> Accept</button>
                 <button id="record-me" style="width: 8em;"
                         class="btn btn-danger"><i
                         class="fas fa-microphone"> </i> Record</button>
@@ -86,6 +87,21 @@
         <div class="col-md-12">
           <div class="panel panel-warning">
             <div class="panel-heading">
+              <h3 class="panel-title">Lyrics</h3>
+            </div>
+            <div class="panel-body">
+              <div class="well">
+                <pre id="lyrics">${lyrics}</pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-12">
+          <div class="panel panel-warning">
+            <div class="panel-heading">
               <h3 class="panel-title">Timing Data</h3>
             </div>
             <div class="panel-body">
@@ -109,6 +125,17 @@
       </div>
     </div>
 
+    <div id="metadata-overlay" class="finished-overlay">
+      <div id="metadata-overlay-text" class="finished-overlay-text">
+        <div>
+          <button id="cancel-me" style="width: 8em;" class="btn btn-danger">
+             Cancel</button>
+          <button id="upload-me" style="width: 8em;" class="btn btn-success">
+             Upload</button>
+        </div>
+      </div>
+    </div>
+
     <div id="uploading-overlay" class="finished-overlay">
       <div id="uploading-overlay-text" class="finished-overlay-text">
         <i><b>Uploading</b></i>
@@ -118,7 +145,6 @@
       </div>
     </div>
   </div>
-
   <div metal:fill-slot="tail">
     <script type="text/javascript" src="${layout.static('yss.songs:static/ricekaraoke.js')}"></script>
     <script type="text/javascript" src="${layout.static('yss.songs:static/simplekaraokedisplay.js')}"></script>
@@ -136,9 +162,7 @@
             contentType: false
        }).done(function(data) { window.location = data; });
      };
-     if ($('#accept-me').length) {
-       $('#accept-me')[0].onclick = accept;
-     }
+     $('#accept-me')[0].onclick = accept;
     </script>
     <script type="text/javascript" tal:condition="not processed">
      var progresscheck = function() {
@@ -152,8 +176,10 @@
                $('#formatted-timings')[0].innerHTML = data['formatted_timings'];
                kar.init(JSON.parse(data['timings']));
                $('#display').show();
-               $('#accept-me').show();
-               $('#accept-me')[0].onclick = accept;
+               if ($('#accept-me').length) {
+                 $('#accept-me').show();
+                 $('#accept-me')[0].onclick = accept;
+                 }
                $('#processing').hide();
              }
              else {

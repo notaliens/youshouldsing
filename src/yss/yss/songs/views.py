@@ -400,7 +400,7 @@ class SongView(object):
         renderer='templates/retime.pt',
     )
     def retime(self):
-        alt_timings = getattr(self.context, 'alt_timings', '')
+        alt_timings = getattr(self.context, 'alt_timings', '').strip()
         timings = alt_timings.strip()
         if not timings:
             timings = self.context.timings.strip()
@@ -419,7 +419,8 @@ class SongView(object):
             'accept_url':self.request.resource_url(
                 self.context, '@@accept_retime'
             ),
-            'needs_accept':alt_timings,
+            'needs_accept':int(bool(alt_timings)),
+            'lyrics':self.context.lyrics,
         }
 
     @view_config(
@@ -440,6 +441,8 @@ class SongView(object):
 
         redis = get_redis(self.request)
         redis.rpush("yss.new-retimings", resource_path(self.context))
+        self.request.session.flash(
+            'Hit accept if you are happy with the retiming', 'info')
         return self.request.resource_url(self.context, '@@retime')
 
     @view_config(
@@ -453,8 +456,9 @@ class SongView(object):
         song.timings = song.alt_timings
         song.alt_timings = ''
         acl = get_acl(song)
-        if (Deny, Everyone, ['yss.indexed']) in acl:
-            acl.remove((Deny, Everyone, ['yss.indexed']))
+        deny_ace = (Deny, Everyone, ['yss.indexed'])
+        if deny_ace in acl:
+            acl.remove(deny_ace)
         set_acl(song, acl)
         self.request.session.flash(
             'Retime accepted, song may now be recorded by everyone', 'info')

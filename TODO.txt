@@ -16,6 +16,7 @@
   - contests
   - https://css-tricks.com/centering-css-complete-guide/
   - Profile/songs export
+  - DMCA claim handler.
 
 - Licensing
 
@@ -50,7 +51,6 @@
   - Recognize dupe song metadata and group together on other recordings page.
   - Recordings of this song as tab***
   - Performers who like this song as tab***
-  - Allow cancel of retime.***
   - Metadata edit.
 
 Songs
