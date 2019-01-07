@@ -97,9 +97,10 @@ Profile Recordings
     box.***
   - Don't use "title" as realname, too easy to mistakenly expose.
   - Do better when people log in from Google getting profile create
-    fields right
+    fields right***
   - Show new icon without a shift reload when editing profile and icon
     changes.
+  - Not divulging a tab should still allow the performer to see the tab.***
 
 - Recordings:
 
@@ -136,7 +137,7 @@ Profile Recordings
   - Mic volume slider has no effect.***
   - Scrub on playonly***
   - Unhelpful errors when camera is already used (e.g. by OBS).
-  - Handle conflict errors in postprocessing.
+  - Handle conflict errors in postprocessing.***
   - Maybe instead of building some system to arbitrarily time-align
     source audio and mic audio after latency, just let people clap
     a pattern.  https://medium.com/@almeidneto/sound-pattern-recognition-with-python-9aff69edce5d
@@ -144,9 +145,6 @@ Profile Recordings
     transcode all over the place.
   - Mix in browser, not on server.
   - Remove recorded song from singlist.
-  - Recordings should probably be inside the performer folder so we
-    can set e.g. 'yss.edit' permission only on the performer instead
-    of on each recording she creates.
   - Duet***
   - Set guessed latency on initial record
   - Karaoke display seems random which line is chosen next to display
