@@ -17,6 +17,7 @@
   - https://css-tricks.com/centering-css-complete-guide/
   - Profile/songs export
   - DMCA claim handler.
+  - Show account activity.
 
 - Licensing
 
@@ -52,6 +53,7 @@
   - Recordings of this song as tab***
   - Performers who like this song as tab***
   - Metadata edit.
+  - Notifications when someone records a song that you uploaded.
 
 Songs
 
@@ -103,6 +105,7 @@ Profile Recordings
 
   - By your favorite performers
   - By performers whom have favorited you
+  - Of your uploaded songs
 
 - View recording:
 

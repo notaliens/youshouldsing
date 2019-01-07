@@ -45,6 +45,7 @@ from yss.interfaces import (
     PerformerLikesPerformer,
     PerformerLikesRecording,
     PerformerLikesSong,
+    PerformerUploadedSong,
     RecordingToPerformer,
     RelatedPropertySheet,
     sex_choices,
@@ -170,6 +171,8 @@ class Performer(Folder):
     likes_recordings = multireference_source_property(PerformerLikesRecording)
     likes_recordingids = multireference_sourceid_property(
         PerformerLikesRecording)
+    uploaded_songs = multireference_source_property(PerformerUploadedSong)
+    uploaded_songids = multireference_sourceid_property(PerformerUploadedSong)
     divulge_age = True
     divulge_realname = False
     divulge_sex = True
@@ -178,6 +181,7 @@ class Performer(Folder):
     divulge_performer_likes = True
     divulge_recording_likes = True
     divulge_genre = True
+    divulge_songuploads = True
 
     @property
     def num_recordings(self):

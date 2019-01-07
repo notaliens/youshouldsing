@@ -91,6 +91,15 @@ class PerformerView(object):
                      'class':state == 'performersliked' and 'active' or '',
                      'enabled':True,
                     })
+            if performer.divulge_songuploads:
+                tabs.append(
+                    {'title':'Songs Uploaded',
+                     'id':'button-songsuploaded',
+                     'url':self.request.resource_url(
+                         performer, '@@songsuploaded'),
+                     'class':state == 'songsuploaded' and 'active' or '',
+                     'enabled':True,
+                    })
 
         if self.has_edit_permission:
             tabs.append(
@@ -137,6 +146,7 @@ class PerformerView(object):
             'divulge_location':context.divulge_location,
             'divulge_genre':context.divulge_genre,
             'divulge_sex':context.divulge_sex,
+            'divulge_songuploads':context.divulge_songuploads,
         }
 
     def sfilter(self, resources, perm='yss.indexed'):
@@ -369,6 +379,88 @@ class PerformerSongsLikedView(PerformerView):
     def __call__(self):
         vals = self.view()
         if vals['divulge_song_likes']:
+            resultset = self.query()
+        else:
+            resultset = []
+        request = self.request
+        batch = Batch(resultset, request, seqlen=len(resultset),
+                      default_size=self.batch_size)
+        vals.update({
+            'batch':batch,
+            'filter_text':request.params.get('filter_text'),
+            'reverse':request.params.get('reverse', 'false')
+            })
+        return vals
+
+@view_defaults(context=IPerformer)
+class PerformerSongsUploadedView(PerformerView):
+    default_sort='artist'
+
+    def sort_by(self, rs, token, reverse):
+        context = self.context
+        title = find_index(context, 'yss', 'title')
+        num_likes = find_index(context, 'yss', 'num_likes')
+        artist = find_index(context, 'yss', 'artist')
+        num_recordings = find_index(context, 'yss', 'num_recordings')
+        duration = find_index(context, 'yss', 'duration')
+        num_likes = find_index(context, 'yss', 'num_likes')
+        genre = find_index(context, 'yss', 'genre')
+        sorting = {
+            'title':
+            (title, artist, num_recordings, num_likes, genre),
+            'artist':
+            (artist, title, num_recordings, num_likes, genre),
+            'genre':
+            (genre, artist, title, num_recordings, num_likes),
+            'num_likes':
+            (num_likes, artist, title, num_recordings, genre),
+            'num_recordings':
+            (num_recordings, artist, title, num_likes, genre),
+            'duration':
+            (duration, artist, title, genre, num_likes, num_recordings),
+            }
+        indexes = sorting.get(token, sorting[self.default_sort])
+        for idx in indexes[1:]:
+            rs = rs.sort(idx)
+        first = indexes[0]
+        rs = rs.sort(first, reverse=reverse)
+        return rs
+
+    def query(self):
+        request = self.request
+        context = self.context
+        q = find_index(context, 'yss', 'oid').any(context.uploaded_songids)
+        q = q & find_index(context, 'system', 'content_type').eq('Song')
+        q = q & find_index(context, 'system', 'allowed').allows(
+            request, 'yss.indexed')
+        filter_text = request.params.get('filter_text')
+        if filter_text:
+            terms = generate_text_filter_terms(filter_text)
+            text = find_index(context, 'yss', 'text')
+            for term in terms:
+                if text.check_query(term):
+                    q = q & text.eq(term)
+        resultset = q.execute()
+        sorting = request.params.get('sorting')
+        reverse = request.params.get('reverse')
+        if reverse == 'false':
+            reverse = False
+        reverse = bool(reverse)
+        if sorting:
+            resultset = self.sort_by(resultset, sorting, reverse)
+        else:
+            resultset = self.sort_by(resultset, self.default_sort, False)
+        return resultset
+
+
+    @view_config(
+        renderer='templates/profile_songsuploaded.pt',
+        name='songsuploaded',
+        permission='view',
+    )
+    def __call__(self):
+        vals = self.view()
+        if vals['divulge_songuploads']:
             resultset = self.query()
         else:
             resultset = []
@@ -632,6 +724,8 @@ class PerformerPrivacyView(PerformerView):
                 context.divulge_recording_likes = tf(appstruct[
                     'divulge_recording_likes'])
                 context.divulge_genre = tf(appstruct['divulge_genre'])
+                context.divulge_songuploads = tf(
+                    appstruct['divulge_songuploads'])
                 request.session.flash('Profile privacy edited', 'info')
         else:
             def tf(val):
@@ -652,6 +746,9 @@ class PerformerPrivacyView(PerformerView):
             divulge_genre = tf(
                 getattr(context,'divulge_genre', True)
                 )
+            divulge_songuploads = tf(
+                getattr(context,'divulge_songuploads', True)
+                )
             appstruct = {
                 'csrf_token': request.session.get_csrf_token(),
                 'divulge_age':divulge_age,
@@ -662,6 +759,7 @@ class PerformerPrivacyView(PerformerView):
                 'divulge_performer_likes':divulge_performer_likes,
                 'divulge_recording_likes':divulge_recording_likes,
                 'divulge_genre':divulge_genre,
+                'divulge_songuploads':divulge_songuploads,
             }
         if rendered is None:
             rendered = form.render(appstruct, readonly=False)
@@ -833,6 +931,13 @@ class PerformerProfilePrivacySchema(Schema):
         validator=colander.OneOf([x[0] for x in binary_choices]),
         widget=deform.widget.RadioChoiceWidget(values=binary_choices),
         title='Divulge your favorite genre on your profile page',
+        default='true',
+        )
+    divulge_songuploads = colander.SchemaNode(
+        colander.String(),
+        validator=colander.OneOf([x[0] for x in binary_choices]),
+        widget=deform.widget.RadioChoiceWidget(values=binary_choices),
+        title='Divulge your song uploads on your profile page',
         default='true',
         )
 

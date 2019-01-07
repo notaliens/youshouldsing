@@ -430,6 +430,7 @@ class SongView(object):
         renderer='string',
     )
     def finish_retime(self):
+        request = self.request
         file_stream = self.request.params['data'].file
 
         song = self.context
@@ -441,8 +442,15 @@ class SongView(object):
 
         redis = get_redis(self.request)
         redis.rpush("yss.new-retimings", resource_path(self.context))
+        set_acl(song,
+                [
+                    (Allow, request.user.__oid__, ['yss.edit']),
+                    (Deny, Everyone, ['yss.indexed']),
+                ]
+        )
         self.request.session.flash(
-            'Hit accept if you are happy with the retiming', 'info')
+            'After the retiming is done processing, listen, and hit accept if '
+            'you are happy with the result', 'info')
         return self.request.resource_url(self.context, '@@retime')
 
     @view_config(
@@ -455,13 +463,16 @@ class SongView(object):
         song = self.context
         song.timings = song.alt_timings
         song.alt_timings = ''
+        new_acl = []
         acl = get_acl(song)
-        deny_ace = (Deny, Everyone, ['yss.indexed'])
-        if deny_ace in acl:
-            acl.remove(deny_ace)
-        set_acl(song, acl)
+        for ace in acl:
+            if ace[0] == Deny and ace[2] == ['yss.indexed']:
+                continue
+            new_acl.append(ace)
+        set_acl(song, new_acl)
         self.request.session.flash(
-            'Retime accepted, song may now be recorded by everyone', 'info')
+            'Retime accepted, song will show up in searches, and may now be '
+            'recorded by everyone. Nice work.', 'info')
         return self.request.resource_url(self.context, '@@retime')
 
     @view_config(
