@@ -25,7 +25,8 @@
   
 - Login:
 
-  - Facebook login
+  - Non-oauth signups.***
+  - Facebook login.***
   - How do we deal with someone forgetting which service he used to
     login with?  How do we deal with it if a user wants to log in
     to the same yss account using two different oauth providers?
@@ -33,7 +34,6 @@
   - Require user to validate email address.
   - Know what happens when we need to change consumer secret or details about
     app in developer settings.
-  - Non-oauth signups.
   - Keep around original google/twitter login name so we can manually
     find their account and associate with another oauth identity if user loses
     access to twitter/google.
@@ -41,6 +41,7 @@
 - Song import:
 
   - Handle conflict errors.
+  - Set uploader.***
 
 - Song
 
@@ -51,9 +52,10 @@
     suggestions.
   - Recognize dupe song metadata and group together on other recordings page.
   - Recordings of this song as tab***
-  - Performers who like this song as tab***
+  - Performers who like this song as ***
   - Metadata edit.
   - Notifications when someone records a song that you uploaded.
+  - Retime karaoke box different size in retiming than in record/listen.***
 
 Songs
 
@@ -70,11 +72,6 @@ Songs
   - song_popularity = num_recordings on scale of 0 to 100 over site lifetime
   - use song popularity as a handicap
   - if the song is part of a contest, that needs to be factored in too
-
-Profile Recordings
-
-  - Tint background color of table row of private and authenticated-only
-    recordings different colors.
 
 - Profile:
 
@@ -102,6 +99,11 @@ Profile Recordings
     changes.
   - Not divulging a tab should still allow the performer to see the tab.***
 
+- Profile Recordings
+
+  - Tint background color of table row of private and authenticated-only
+    recordings different colors.
+
 - Recordings:
 
   - By your favorite performers
@@ -116,12 +118,13 @@ Profile Recordings
     when like permission is not available.
   - "Other recordings you might like if you like this one"
   - Disqus SSO.***
+  - Share links.
 
 - Edit recording:
 
   - Allow/disallow likes***
   - Allow/disallow comments***
-  - Delete this recording
+  - Delete this recording***
   - Description should allow links and embedded videos
   - When acl is empty, dont set it, when setting visibility, delete it instead.
 

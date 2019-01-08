@@ -26,6 +26,11 @@ class MainLayout(object):
     def google_login_url(self):
         return login_url(self.request, 'google')
 
+    @reify
+    def internal_login_url(self):
+        root = self.request.virtual_root
+        return self.request.resource_url(root, 'internal_login')
+
     def current_performer(self):
         return self.request.performer
 

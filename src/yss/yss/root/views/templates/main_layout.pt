@@ -77,11 +77,19 @@
                         Via Google
                       </a>
                     </li>
+                    <li>
+                      <a href="${layout.internal_login_url}"
+                         id="ysslogin-button">
+                        <i class="fas fa-microphone fa-sm"> </i>
+                        Via YouShouldSing
+                      </a>
+                    </li>
                   </ul>
                 </form>
               </li>
               <li tal:condition="request.performer">
-                <img src="${layout.performer_thumb_url()}" style="padding-top:10px;"/>
+                <img src="${layout.performer_thumb_url()}" alt=""
+                     style="padding-top:10px;"/>
               </li>
               <li tal:condition="request.user">
                 <form class="navbar-form">

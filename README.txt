@@ -3,8 +3,12 @@ Prep
 
 On Ubuntu 18.04:
 
-sudo apt install timidity lame sox libsox-fmt-mp3 redis-server supervisor \
-   fluid-soundfont-gm fluid-soundfont-gs npm
+sudo apt install build-essential timidity lame sox libsox-fmt-mp3 ffmpeg \
+   redis-server supervisor fluid-soundfont-gm fluid-soundfont-gs npm
+
+sudo touch /usr/include/gnu-crypt.h (see
+https://bitbucket.org/dholth/cryptacular/issues/11/not-installing-on-ubuntu-1804
+this is a ttotal hack workaround)
 
 To get all instruments mapped during song import, edit
 /etc/timidity/timidity.cfg and change:
@@ -16,13 +20,16 @@ To:
   source /etc/timidity/fluidr3_gm.cfg
   source /etc/timidity/fluidr3_gs.cfg
 
-And sudo service restart timidity.
+And sudo service timidity restart.
 
 To install less so you can recompile yss.less to yss.css, etc:
 
   sudo npm install -g less jshint recess uglify-js
 
 Then lessc yss.less to gen output.
+
+You will need Python 3.7 somehow.  It doesn't ship with 18.04.  I used
+https://github.com/pyenv/pyenv.
 
 Installation
 ------------
