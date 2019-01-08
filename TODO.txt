@@ -1,17 +1,17 @@
 - General
 
   - csrf
-  - configure auditing***
+  - configure auditing
   - should probably use browser timezone instead of user-specified SDI timezone
   - Relstorage***
   - i18n
-  - datadog***
+  - datadog
   - terms of service***
   - privacy policy***
   - caching
   - tests
   - invitations***
-  - page titles***
+  - page titles
   - get substanced.secret out of shared.ini
   - contests
   - https://css-tricks.com/centering-css-complete-guide/
