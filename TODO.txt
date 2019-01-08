@@ -109,12 +109,12 @@ Songs
 
 - View recording:
 
-  - Dropdown for who liked instead of inline table***
-  - Dropdown for other recordings instead of inline table.***
+  - Dropdown for who liked instead of inline table*** (maybe as part of like
+    macro)
   - "Likes disabled" instead of "0 performers have liked this recording"
     when like permission is not available.
   - "Other recordings you might like if you like this one"
-  - Disqus SSO.***
+  - Disqus***  (remarkbox?)
   - Share links.
 
 - Edit recording:
