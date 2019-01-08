@@ -97,6 +97,10 @@ class IndexViews(object):
         performer = self.resource
         return performer.__name__
 
+    def song_text(self, default):
+        song = self.resource
+        return song.title + ' ' + song.artist
+
     def visibility_state(self, default):
         request = get_current_request()
         visibility_wf = get_workflow(request, 'Visibility', 'Recording')
@@ -169,6 +173,13 @@ def includeme(config):  # pragma: no cover
         index_name='text',
         attr='performer_text',
         context = IPerformer,
+        )
+    config.add_indexview(
+        IndexViews,
+        catalog_name='yss',
+        index_name='text',
+        attr='song_text',
+        context = ISong,
         )
     config.add_indexview(
         IndexViews,
