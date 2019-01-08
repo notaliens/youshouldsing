@@ -86,10 +86,10 @@ class SongsView(object):
         filter_text = request.params.get('filter_text')
         if filter_text:
             terms = generate_text_filter_terms(filter_text)
-            lyrics = find_index(context, 'yss', 'text')
+            text = find_index(context, 'yss', 'text')
             for term in terms:
-                if lyrics.check_query(term):
-                    q = q & lyrics.eq(term)
+                if text.check_query(term):
+                    q = q & text.eq(term)
 
         filter_genre = request.params.get('filter_genre')
         if filter_genre:
