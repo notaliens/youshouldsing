@@ -5,7 +5,6 @@
   - should probably use browser timezone instead of user-specified SDI timezone
   - Relstorage***
   - i18n
-  - datadog
   - terms of service***
   - privacy policy***
   - caching
