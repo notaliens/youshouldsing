@@ -41,7 +41,6 @@
 - Song import:
 
   - Handle conflict errors.
-  - Set uploader.***
 
 - Song
 

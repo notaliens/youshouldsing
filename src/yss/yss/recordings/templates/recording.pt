@@ -55,7 +55,7 @@
                           <tr>
                             <td>
                               <img src="${layout.performer_thumb_url(item.performer)}"/>
-                              <a style="margin-left: 20px;" href="${request.resource_url(item.performer)}">${item.performer.title}</a>
+                              <a style="margin-left: 20px;" href="${request.resource_url(item.performer)}">${item.performer.__name__}</a>
                             </td>
                             <td>
                               <a href="${request.resource_url(item)}">${layout.short_created_local(item)}</a>
