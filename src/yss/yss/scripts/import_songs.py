@@ -114,6 +114,8 @@ def main(argv=sys.argv):
                 audio_mimetype='audio/mpeg',
                 )
             songs[name] = song
+            blameme = root['performers']['blameme']
+            song.uploader = blameme
             print ('done %s, %s, %s' % (name, title, artist))
             transaction.commit()
             songs._p_jar.sync()

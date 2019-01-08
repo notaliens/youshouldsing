@@ -8,7 +8,7 @@
 
         <div class="panel panel-default">
           <div class="panel-heading">
-            <i>${title}</i> in the style of ${artist}
+            <i>${title}</i> in the style of ${artist} uploaded by <a href="${request.resource_url(context.uploader)}">${context.uploader.__name__}</a>
             <div class="col-md-4">
               <div metal:use-macro="layout.likes_macro"></div>
             </div>

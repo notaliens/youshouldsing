@@ -942,7 +942,7 @@ class PerformerProfilePrivacySchema(Schema):
         )
 
 @view_config(
-    context=IPerformerPhoto,
+    content_type='File',
     permission='view',
 #    http_cache=0, # XXX
     )

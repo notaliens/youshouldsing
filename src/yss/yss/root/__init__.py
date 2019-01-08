@@ -41,14 +41,26 @@ def root_added(event):
     )
     set_acl(root, acl)
     root.title = root.sdi_title = 'You Should Sing'
+    root.max_framerate = 30
+
     root['catalogs'].add_catalog('yss')
+
     root['songs'] = registry.content.create('Songs')
     set_acl(root['songs'], [
         (Allow, Authenticated, 'yss.upload'),
         (Allow, Authenticated, 'yss.record'),
     ])
-    root['performers'] = registry.content.create('Performers')
-    root.max_framerate = 30
+
+    performers = root['performers'] = registry.content.create('Performers')
+
+    blameme = registry.content.create('Performer')
+    performers['blameme'] = blameme
+    blameme['recordings'] = registry.content.create('Recordings')
+    blameme['photo'] = registry.content.create('File')
+    blameme['photo_thumbnail'] = registry.content.create('File')
+
+    blameme.user = root['principals']['users']['admin']
+
     timings_json = pkg_resources.resource_string(
         'yss', 'blackbird.json').decode('utf-8')
     song = registry.content.create(
@@ -60,6 +72,7 @@ def root_added(event):
         audio_stream=pkg_resources.resource_stream('yss', 'blackbird.mp3')
     )
     root['songs']['blackbird'] = song
+    song.uploader = blameme
 
 def performer(request):
     user = request.user
