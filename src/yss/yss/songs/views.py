@@ -244,9 +244,8 @@ class SongsView(object):
                     shutil.rmtree(jobdir, ignore_errors=True)
                 request.session.flash(
                     'Song uploaded. Now voice lyrics like William Shatner in '
-                    'time with the song in order to retime karaoke lyrics '
-                    'display text. Remember: it doesnt need to be perfect',
-                    'it\'s just karaoke!',
+                    'rhythm with the song in order to time the karaoke '
+                    'display text.',
                     'info')
                 songname = slug.slug(appstruct['title'])
                 hashval = md5.hexdigest()
