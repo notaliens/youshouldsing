@@ -116,7 +116,7 @@
       </script>
     </div>
 
-    <div class="row">
+    <div class="row" tal:condition="False">
 
       <div class="col-md-12">
 
@@ -167,6 +167,6 @@
     <script type="text/javascript">
      liker();
     </script>
-    <script id="dsq-count-scr" src="//youshouldsing-1.disqus.com/count.js" async></script>
+    <script id="dsq-count-scr" src="//youshouldsing-1.disqus.com/count.js" async tal:condition="False"></script>
   </div>
 </div>
