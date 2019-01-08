@@ -50,8 +50,7 @@
   - Crowdsource lyric retimings... allow uploader to accept lyric timing
     suggestions.
   - Recognize dupe song metadata and group together on other recordings page.
-  - Recordings of this song as tab***
-  - Performers who like this song as ***
+  - Performers who like this song inline ***
   - Notifications when someone records a song that you uploaded.
 
 Songs
@@ -155,6 +154,7 @@ Songs
 - Search:
 
   - Search by lyrics.
+  - Filter genre.
   
 - JS:
 

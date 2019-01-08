@@ -95,6 +95,7 @@ class Song(File):
     name = renamer()
     genre = 'Unknown'
     recordings = multireference_target_property(RecordingToSong)
+    recording_ids = multireference_targetid_property(RecordingToSong)
     liked_by = multireference_target_property(PerformerLikesSong)
     liked_by_ids = multireference_targetid_property(PerformerLikesSong)
     uploader = reference_target_property(PerformerUploadedSong)

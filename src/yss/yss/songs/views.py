@@ -300,6 +300,8 @@ class SongsView(object):
 
 @view_defaults(context=ISong)
 class SongView(object):
+    default_sort = 'created'
+    batch_size = 20
     def __init__(self, context, request):
         self.context = context
         self.request = request
@@ -318,14 +320,13 @@ class SongView(object):
         state = self.request.view_name
         song = self.context
         tabs = []
-        if (self.has_record_permission or self.has_edit_permission):
-            tabs.append(
-                {'title':'Listen',
-                 'id':'button-view',
-                 'url':self.request.resource_url(song),
-                 'class':state == '' and 'active' or '',
-                 'enabled':True,
-                })
+        tabs.append(
+            {'title':'Listen',
+             'id':'button-view',
+             'url':self.request.resource_url(song),
+             'class':state == '' and 'active' or '',
+             'enabled':True,
+            })
         if self.has_record_permission:
             tabs.append(
                 {'title':'Record',
@@ -334,6 +335,15 @@ class SongView(object):
                  'class':state=='record' and 'active' or '',
                  'enabled':True,
                  })
+        if len(song.recording_ids):
+            tabs.append(
+                {'title':'Recordings',
+                 'id':'button-recordings',
+                 'url':self.request.resource_url(song, '@@recordings'),
+                 'class':state == 'recordings' and 'active' or '',
+                 'enabled':True,
+                })
+
         if self.has_edit_permission:
             tabs.append(
                 {'title':'Retime',
@@ -620,6 +630,103 @@ class SongView(object):
         if rendered is None:
             rendered = form.render(appstruct, readonly=False)
         return {'form':rendered}
+
+    @view_config(
+        name="recordings",
+        renderer="templates/recordings.pt",
+        permission='view',
+    )
+    def recordings(self):
+        request = self.request
+        resultset = self.query()
+        batch = Batch(resultset, self.request, seqlen=len(resultset),
+                      default_size=self.batch_size)
+        return {
+            'batch':batch,
+            'filter_text':request.params.get('filter_text'),
+            'reverse':request.params.get('reverse', 'false')
+            }
+
+    def query(self):
+        request = self.request
+        context = self.context
+        q = find_index(context, 'yss', 'oid').any(context.recording_ids)
+        q = q & find_index(context, 'system', 'content_type').eq('Recording')
+        q = q & find_index(context, 'system', 'allowed').allows(
+            request, 'yss.indexed')
+        filter_text = request.params.get('filter_text')
+        if filter_text:
+            terms = generate_text_filter_terms(filter_text)
+            text = find_index(context, 'yss', 'text')
+            for term in terms:
+                if text.check_query(term):
+                    q = q & text.eq(term)
+        resultset = q.execute()
+        sorting = request.params.get('sorting')
+        reverse = request.params.get('reverse')
+        if reverse == 'false':
+            reverse = False
+        reverse = bool(reverse)
+        if sorting:
+            resultset = self.sort_by(resultset, sorting, reverse)
+        else:
+            resultset = self.sort_by(resultset, self.default_sort, False)
+        return resultset
+
+    def sort_by(self, rs, token, reverse):
+        context = self.context
+        title = find_index(context, 'yss', 'title')
+        performer = find_index(context, 'yss', 'performer')
+        num_likes = find_index(context, 'yss', 'num_likes')
+        genre = find_index(context, 'yss', 'genre')
+        created = find_index(context, 'yss', 'created')
+        sorting = {
+            'created':(created, num_likes, title, performer, genre),
+            'title':(title, performer, num_likes, genre, created),
+            'performer':(performer, title, num_likes, genre, created),
+            'genre':(genre, performer, title, num_likes, created),
+            'likes':(num_likes, performer, title, genre, created),
+            }
+        indexes = sorting.get(token, sorting[self.default_sort])
+        for idx in indexes[1:]:
+            rs = rs.sort(idx)
+        first = indexes[0]
+        rs = rs.sort(first, reverse=reverse)
+        return rs
+
+    def sort_tag(self, token, title):
+        request = self.request
+        context = self.context
+        reverse = request.params.get('reverse', 'false')
+        reverse = asbool(reverse)
+        sorting = request.params.get('sorting')
+        if sorting == token or (not sorting and token == self.default_sort):
+            if reverse:
+                icon = 'glyphicon glyphicon-chevron-up'
+            else:
+                icon = 'glyphicon glyphicon-chevron-down'
+            reverse = reverse and 'false' or 'true'
+        else:
+            icon = ''
+            reverse = 'false'
+
+        query = [
+            ('sorting', token), ('reverse', reverse)
+        ]
+        filter_text = request.params.get('filter_text')
+
+        if filter_text:
+            query.append(
+                ('filter_text', filter_text)
+                )
+
+        url = request.resource_url(context, query=query)
+
+        return '<a href="%s">%s <i class="%s"> </i></a>' % (
+            url,
+            title,
+            icon,
+            )
 
 class AddSongSchema(Schema):
     title = colander.SchemaNode(colander.String())
