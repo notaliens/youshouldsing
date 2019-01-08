@@ -427,12 +427,16 @@ class PerformerSongsUploadedView(PerformerView):
         return rs
 
     def query(self):
+        if self.request.performer is self.context:
+            permission = 'view'
+        else:
+            permission = 'yss.indexed'
         request = self.request
         context = self.context
         q = find_index(context, 'yss', 'oid').any(context.uploaded_songids)
         q = q & find_index(context, 'system', 'content_type').eq('Song')
         q = q & find_index(context, 'system', 'allowed').allows(
-            request, 'yss.indexed')
+            request, permission)
         filter_text = request.params.get('filter_text')
         if filter_text:
             terms = generate_text_filter_terms(filter_text)

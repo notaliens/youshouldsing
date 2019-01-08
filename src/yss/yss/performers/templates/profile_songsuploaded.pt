@@ -19,7 +19,7 @@
       <div class="col-md-12">
 
         <div class="well">
-          <div tal:define="search_url request.resource_url(context, '@@songsliked');
+          <div tal:define="search_url request.resource_url(context, '@@songsuploaded');
                            placeholder_text 'Search songs uploaded...'">
             <div metal:use-macro="layout.searching_macro"></div>
           </div>
