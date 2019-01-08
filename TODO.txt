@@ -18,6 +18,7 @@
   - DMCA claim handler.***
   - Show account activity.
   - Allow screen name change.
+  - Marketing/about page.***
 
 - Licensing
 
@@ -135,7 +136,7 @@ Songs
     https://www.gmass.co/blog/record-audio-mobile-web-page-ios-android/
   - Mic volume slider has no effect.***
   - Unhelpful errors when camera is already used (e.g. by OBS).
-  - Handle conflict errors in postprocessing.***
+  - Handle conflict errors in postprocessing.
   - Maybe instead of building some system to arbitrarily time-align
     source audio and mic audio after latency, just let people clap
     a pattern.  https://medium.com/@almeidneto/sound-pattern-recognition-with-python-9aff69edce5d
@@ -143,7 +144,7 @@ Songs
     transcode all over the place.
   - Mix in browser, not on server.
   - Remove recorded song from singlist.
-  - Duet***
+  - Duet
   - Set guessed latency on initial record
   - Karaoke display seems random which line is chosen next to display
     upcoming lyrics.

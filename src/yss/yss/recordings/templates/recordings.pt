@@ -14,7 +14,7 @@
 
         <div class="panel panel-default">
           <div class="panel-heading"
-               tal:define="search_url request.resource_url(context, '@@recordings'); 
+               tal:define="search_url request.resource_url(context, '@@recordings')
                            placeholder_text 'Search recordings...'">
             <div metal:use-macro="layout.searching_macro"></div>
           </div>
