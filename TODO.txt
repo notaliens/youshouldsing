@@ -54,7 +54,6 @@
   - Performers who like this song as ***
   - Metadata edit.
   - Notifications when someone records a song that you uploaded.
-  - Retime karaoke box different size in retiming than in record/listen.***
 
 Songs
 

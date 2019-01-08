@@ -12,45 +12,45 @@
             </div>
             <div class="panel-body">
               <div class="row" style="padding-bottom: 10px;">
-
-                <button id="play-me" style="width: 8em;"
-                        class="btn btn-primary"><i
+                <div class="col-md-12">
+                  <button id="play-me" style="width: 8em;"
+                          class="btn btn-primary"><i
                         class="fas fa-bullhorn"> </i> Listen</button>
-                <button style="display: ${needs_accept and 'inline' or 'none'};
-                               width: 8em;"
-                        id="accept-me"
-                        class="btn btn-success"><i
+                  <button style="display: ${needs_accept and 'inline' or 'none'};
+                          width: 8em;"
+                          id="accept-me"
+                          class="btn btn-success"><i
                              class="fas fa-bullhorn"> </i> Accept</button>
-                <button id="record-me" style="width: 8em;"
-                        class="btn btn-danger"><i
+                  <button id="record-me" style="width: 8em;"
+                          class="btn btn-danger"><i
                         class="fas fa-microphone"> </i> Record</button>
-                <button id="reverse" style="width: 8em; display: none"
-                        class="btn btn-warning audiocontrol"><i
+                  <button id="reverse" style="width: 8em; display: none"
+                          class="btn btn-warning audiocontrol"><i
                         class="fas fa-backward"> </i></button>
-                <button id="forward" style="width: 8em; display: none"
-                        class="btn btn-warning audiocontrol"><i
+                  <button id="forward" style="width: 8em; display: none"
+                          class="btn btn-warning audiocontrol"><i
                                class="fas fa-forward"> </i></button>
+                </div>
               </div>
-            </div>
-            <div class="row" style="padding-bottom: 10px;">
-              <div class="col-md-12">
-                <div id="player" style="display: none">
-                  <div id="karaoke-wrapper">
-                    <div id="karaoke-display"></div>
+              <div class="row" style="padding-bottom: 10px;">
+                <div class="col-md-12">
+                  <div id="player" style="display: none">
+                    <div id="karaoke-wrapper">
+                      <div id="karaoke-display"></div>
+                    </div>
+                  </div>
+                  <div id="status">0:00</div>
+                  <div class="audiocontrol"
+                       style="width: 100%; display:none">
+                    <input type="range" min="1" max="100" value="0"
+                           class="slider" id="scrubber">
                   </div>
                 </div>
-                <div id="status">0:00</div>
-                <div class="audiocontrol"
-                     style="width: 100%; display:none">
-                  <input type="range" min="1" max="100" value="0"
-                         class="slider" id="scrubber">
-                </div>
               </div>
-            </div>
 
+            </div>
           </div>
         </div>
-
       </div>
 
       <div class="row">
