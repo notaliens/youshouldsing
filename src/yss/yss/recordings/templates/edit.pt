@@ -22,7 +22,7 @@
               action="${request.resource_url(context, '@@delete')}"
               onsubmit="return confirm('Are you sure you want to delete?');">
           <button id="delete-recording" class="btn btn-danger"><i
-            class="fas fas-delete"> </i> Delete Recording</button>
+            class="fas fa-trash"> </i> Delete Recording</button>
         </form>
       </div>
     </div>
