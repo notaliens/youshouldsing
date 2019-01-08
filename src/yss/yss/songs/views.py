@@ -37,6 +37,7 @@ from substanced.sdi import mgmt_view
 
 from substanced.util import (
     Batch,
+    find_catalog,
     find_index,
     set_acl,
     get_acl,
@@ -243,11 +244,13 @@ class SongsView(object):
                     'rhythm with the song in order to time the karaoke '
                     'display text.',
                     'info')
+                song.uploader = request.performer
+                song.language = appstruct['language']
+                song.genre = appstruct['genre']
                 songname = slug.slug(appstruct['title'])
                 hashval = md5.hexdigest()
                 songname = f'{songname}-{hashval}'
                 self.context[songname] = song
-                song.uploader = request.performer
                 set_acl(song,
                         [
                             (Allow, request.user.__oid__, ['yss.edit']),
@@ -337,6 +340,13 @@ class SongView(object):
                  'id':'button-retime',
                  'url':self.request.resource_url(song, '@@retime'),
                  'class':state == 'retime' and 'active' or '',
+                 'enabled':True,
+                 })
+            tabs.append(
+                {'title':'Edit',
+                 'id':'button-edit',
+                 'url':self.request.resource_url(song, '@@edit'),
+                 'class':state == 'edit' and 'active' or '',
                  'enabled':True,
                  })
         return tabs
@@ -572,6 +582,45 @@ class SongView(object):
             i+=1
         return id
 
+    @view_config(
+        name='edit',
+        renderer='templates/edit.pt',
+        permission='yss.edit',
+    )
+    def edit(self):
+        context = self.context
+        request = self.request
+        schema = SongEditSchema().bind(request=request, context=context)
+        form = deform.Form(schema, buttons=('Save',))
+        rendered = None
+        if 'Save' in request.POST:
+            controls = request.POST.items()
+            try:
+                appstruct = form.validate(controls)
+            except deform.ValidationFailure as e:
+                rendered = e.render()
+            else:
+                context.title = appstruct['title']
+                context.artist = appstruct['artist']
+                context.genre = appstruct['genre']
+                context.language = appstruct['language']
+                context.lyrics = appstruct['lyrics']
+                find_catalog(context, 'yss').reindex_resource(context)
+                find_catalog(context, 'system').reindex_resource(context)
+                request.session.flash('Song edited.', 'info')
+                return HTTPFound(request.resource_url(context, '@@edit'))
+        else:
+            appstruct = {
+                'title':context.title,
+                'artist':context.artist,
+                'genre':context.genre,
+                'language':context.language,
+                'lyrics':context.lyrics,
+                }
+        if rendered is None:
+            rendered = form.render(appstruct, readonly=False)
+        return {'form':rendered}
+
 class AddSongSchema(Schema):
     title = colander.SchemaNode(colander.String())
     artist = colander.SchemaNode(colander.String())
@@ -635,8 +684,8 @@ def audio_validator(node, kw):
             )
     return _audio_validator
 
-class SongUploadSchema(Schema):
-    """ Property schema for song upload.
+class SongEditSchema(Schema):
+    """ Property schema for song upload/edit
     """
     title = colander.SchemaNode(
         colander.String(),
@@ -650,10 +699,6 @@ class SongUploadSchema(Schema):
         validator=colander.Length(max=100),
     )
 
-    audio_file = FileNode(
-        title='Backing Track (audio file like mp3/aac/wav)',
-        validator=audio_validator,
-    )
     genre = colander.SchemaNode(
         colander.String(),
         title='Song Genre',
@@ -667,4 +712,10 @@ class SongUploadSchema(Schema):
         colander.String(),
         validator=colander.Length(max=20000),
         widget=deform.widget.TextAreaWidget(style="height: 200px;"),
+    )
+
+class SongUploadSchema(SongEditSchema):
+    audio_file = FileNode(
+        title='Backing Track (audio file like mp3/aac/wav)',
+        validator=audio_validator,
     )

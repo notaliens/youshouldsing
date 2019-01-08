@@ -31,7 +31,7 @@
     login with?  How do we deal with it if a user wants to log in
     to the same yss account using two different oauth providers?
   - Impersonation.
-  - Require user to validate email address.
+  - Require user to validate email address.*** (mailgun)
   - Know what happens when we need to change consumer secret or details about
     app in developer settings.
   - Keep around original google/twitter login name so we can manually
@@ -52,7 +52,6 @@
   - Recognize dupe song metadata and group together on other recordings page.
   - Recordings of this song as tab***
   - Performers who like this song as ***
-  - Metadata edit.
   - Notifications when someone records a song that you uploaded.
 
 Songs
@@ -122,7 +121,6 @@ Songs
 
   - Allow/disallow likes***
   - Allow/disallow comments***
-  - Delete this recording***
   - Description should allow links and embedded videos
   - When acl is empty, dont set it, when setting visibility, delete it instead.
 
@@ -130,6 +128,7 @@ Songs
 
   - Show logo or something on vids without camera or who are remixed to not
     allow.***
+  - Show video on remix page.***
 
 - Record:
 
