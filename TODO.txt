@@ -17,6 +17,7 @@
   - Profile/songs export
   - DMCA claim handler.***
   - Show account activity.
+  - Allow screen name change.
 
 - Licensing
 
@@ -73,7 +74,6 @@ Songs
 
 - Profile:
 
-  - Delete/edit recordings***
   - Change password***
   - Forgot password***
   - Singlist
@@ -101,6 +101,7 @@ Songs
 
   - Tint background color of table row of private and authenticated-only
     recordings different colors.
+  - Allow deletion from table view.
 
 - Recordings:
 

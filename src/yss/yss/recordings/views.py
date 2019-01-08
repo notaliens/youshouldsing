@@ -289,6 +289,16 @@ class RecordingView(object):
             )
         return HTTPBadRequest('Video still processing')
 
+    @view_config(
+        name='delete',
+        permission='yss.edit'
+    )
+    def delete(self):
+        parent = self.context.__parent__
+        name = self.context.__name__
+        del parent[name]
+        self.request.session.flash('Recording deleted', 'info')
+        return HTTPFound(self.request.resource_url(parent))
 
 class RecordingsView(object):
     default_sort = 'created'
