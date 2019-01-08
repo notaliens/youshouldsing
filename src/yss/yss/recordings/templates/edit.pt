@@ -4,25 +4,20 @@
 
     <div class="row">
       <div class="col-md-12">
-        <div class="panel-heading">
-           Edit recording
-        </div>
-        <div class="panel-body">
+        <div class="well">
            ${structure:form}
         </div>
       </div>
 
     </div>
     <div class="row">
-      <div class="panel-heading">
-        Delete Recording
-      </div>
-      <div class="panel-body">
+      <div class="well">
         <form method="POST"
               action="${request.resource_url(context, '@@delete')}"
               onsubmit="return confirm('Are you sure you want to delete?');">
           <button id="delete-recording" class="btn btn-danger"><i
-            class="fas fa-trash"> </i> Delete Recording</button>
+            class="fas fa-trash"> </i> Delete Recording</button> If you
+          delete this recording, you will not be able to get it back.
         </form>
       </div>
     </div>
