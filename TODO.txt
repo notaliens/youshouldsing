@@ -19,6 +19,7 @@
   - Show account activity.
   - Allow screen name change.
   - Marketing/about page.***
+  - Docs page.
   - Replace all manual form renderings with a RetailForm class.
 
 - Licensing
@@ -54,7 +55,8 @@
     suggestions.
   - Recognize dupe song metadata and group together on other recordings page.
   - Performers who like this song inline ***
-  - Notifications when someone records a song that you uploaded.
+  - Notification when someone records a song that you uploaded.
+  - Notification when someone likes a song you uploaded.
 
 Songs
 
@@ -98,12 +100,15 @@ Songs
   - Not divulging a tab should still allow the performer to see the tab.***
   - Editing requires supplying a photo even if one exists (possibly after
     tempfiles are cleaned up, not always).
+  - Notification when someone likes you.
+  - Default recording settings (visibility/allow likes/shares/comments).
 
 - Profile Recordings
 
   - Tint background color of table row of private and authenticated-only
     recordings different colors.
   - Allow deletion from table view.
+  - Notification when someone likes one of your recordings.
 
 - Recordings:
 
@@ -120,6 +125,7 @@ Songs
   - "Other recordings you might like if you like this one"
   - Disqus***  (remarkbox?)
   - Share links.
+  - Show number of views.
 
 - Edit recording:
 
@@ -151,7 +157,7 @@ Songs
   - Duet
   - Set guessed latency on initial record
   - Karaoke display seems random which line is chosen next to display
-    upcoming lyrics.
+    upcoming lyrics.***
   - Negative mic latency.***
   - It's too easy to hit cancel on a new recording and lose it.
   - Allow 16x9
