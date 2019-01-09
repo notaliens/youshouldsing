@@ -226,7 +226,8 @@ class SongsView(object):
                             break
                         md5.update(data)
                     mp3_filename = os.path.join(jobdir, 'output.mp3')
-                    ffmpeg.input(inputfn).output(mp3_filename).run()
+                    ffmpeg.input(inputfn).output(
+                        mp3_filename, ar=44100).run()
                     song = request.registry.content.create(
                         'Song',
                         appstruct['title'],
@@ -250,6 +251,9 @@ class SongsView(object):
                 songname = slug.slug(appstruct['title'])
                 hashval = md5.hexdigest()
                 songname = f'{songname}-{hashval}'
+                if songname in self.context:
+                    request.session.flash('this song has already been uploaded')
+                    raise HTTPFound(request.resource_url(self.context))
                 self.context[songname] = song
                 set_acl(song,
                         [
