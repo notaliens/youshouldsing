@@ -245,7 +245,6 @@ class SongsView(object):
                     'rhythm with the song in order to time the karaoke '
                     'display text.',
                     'info')
-                song.uploader = request.performer
                 song.language = appstruct['language']
                 song.genre = appstruct['genre']
                 songname = slug.slug(appstruct['title'])
@@ -255,6 +254,7 @@ class SongsView(object):
                     request.session.flash('this song has already been uploaded')
                     raise HTTPFound(request.resource_url(self.context))
                 self.context[songname] = song
+                song.uploader = request.performer # NB must be after seating
                 set_acl(song,
                         [
                             (Allow, request.user.__oid__, ['yss.edit']),
