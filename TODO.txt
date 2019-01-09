@@ -57,6 +57,7 @@
   - Performers who like this song inline ***
   - Notification when someone records a song that you uploaded.
   - Notification when someone likes a song you uploaded.
+  - Year in metadata***
 
 Songs
 

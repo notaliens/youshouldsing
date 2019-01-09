@@ -75,7 +75,7 @@ def postprocess(recording, redis):
         redis.hmset(
             progress_key, {'pct':1, 'status':'Preparing'}
         )
-        redis.expire(progress_key, 120) # expire in 2 minutes
+        redis.expire(progress_key, 1200) # expire in 20 minutes
         print ('Changing dir to %s' % tmpdir)
         try:
             os.chdir(tmpdir)
@@ -83,6 +83,7 @@ def postprocess(recording, redis):
             os.makedirs(tmpdir)
             os.chdir(tmpdir)
         dry_webm = recording.dry_blob.committed()
+        open('dry_blob_filename', 'w').write(dry_webm)
         # sox can't deal with opus audio, so temp transcode to mp3
         redis.hmset(
             progress_key, {'pct':10, 'status':'Extracting dry mic audio'}
@@ -136,6 +137,7 @@ def postprocess(recording, redis):
                 break
                     
         song_audio_filename = recording.song.blob.committed()
+        open('song_audio_filename', 'w').write(song_audio_filename)
         musicvolume = recording.musicvolume
         latency = recording.latency
         soxargs = [
@@ -190,6 +192,7 @@ def postprocess(recording, redis):
         print ("%s/%s" % (tmpdir, "mixed.webm"))
         recording.remixing = False
         transaction.commit()
+        open('mixed_blob_filename', 'w').write(recording.mixed_blob.committed())
         redis.hmset(
             progress_key, {'pct':100, 'status':'Finished'}
         )
