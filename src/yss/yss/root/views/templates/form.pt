@@ -1,0 +1,13 @@
+<div metal:use-macro="main_template">
+
+  <div metal:fill-slot="main_content" class="container">
+    
+    <div class="row">
+      <div class="col-md-12">
+        <div class="well">
+           ${structure:form}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

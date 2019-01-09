@@ -22,7 +22,6 @@ from substanced.workflow import get_workflow
 from yss.interfaces import (
     IPerformer,
     IPerformers,
-    IPerformerPhoto,
     )
 
 from yss.performers import PerformerProfileSchema
@@ -132,6 +131,7 @@ class PerformerView(object):
             'email': getattr(context, 'email', ''),
             'birthdate': getattr(context, 'birthdate', colander.null),
             'location': getattr(context, 'location', colander.null),
+            'description': getattr(context, 'description', colander.null),
             'age':getattr(context, 'age', 0),
             'sex': getattr(context, 'sex', None),
             'genre': getattr(context, 'genre', None),
@@ -673,6 +673,7 @@ class PerformerEditView(PerformerView):
                 context.genre = appstruct['genre']
                 context.tzname = appstruct['tzname']
                 context.location = appstruct['location']
+                context.description = appstruct['description']
                 request.session.flash('Profile edited', 'info')
         else:
             photodata = get_photodata(context, request)
@@ -687,6 +688,7 @@ class PerformerEditView(PerformerView):
                 'genre': getattr(context, 'genre', None),
                 'tzname':getattr(context, 'tzname', None),
                 'location':getattr(context, 'location', ''),
+                'description': context.description,
             }
         if rendered is None:
             rendered = form.render(appstruct, readonly=False)

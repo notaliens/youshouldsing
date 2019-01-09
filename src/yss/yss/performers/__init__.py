@@ -6,6 +6,10 @@ import PIL.Image
 import pytz
 
 from pyramid.threadlocal import get_current_request
+from pyramid.renderers import render
+
+from pyramid_mailer import get_mailer
+from pyramid_mailer.message import Message
 
 from substanced.content import content
 from substanced.event import (
@@ -66,6 +70,24 @@ _ZONES = pytz.all_timezones
     )
 class User(BaseUser):
     performer = reference_target_property(PerformerToUser)
+
+    def email_password_reset(self, request):
+        """ Sends a password reset email."""
+        root = request.virtual_root
+        sitename = root.title
+        principals = find_service(self, 'principals')
+        reset = principals.add_reset(self)
+        reseturl = request.resource_url(reset)
+        if not self.email:
+            raise ValueError('User does not possess a valid email address.')
+        message = Message(
+            subject = 'Account information for %s' % sitename,
+            recipients = [self.email],
+            body = render('templates/resetpassword_email.pt',
+                          dict(reseturl=reseturl))
+            )
+        mailer = get_mailer(request)
+        mailer.send(message)
 
 @colander.deferred
 def tzname_widget(node, kw): #pragma NO COVER
@@ -131,6 +153,12 @@ class PerformerProfileSchema(Schema):
         title='Favorite Genre',
         widget=deform.widget.SelectWidget(values=genre_choices),
     )
+    description  = colander.SchemaNode(
+        colander.String(),
+        title='Describe yourself',
+        widget = deform.widget.TextAreaWidget(style='height: 200px'),
+        missing='',
+    )
 
 class PerformerProfilePropertySheet(PropertySheet):
     schema = PerformerProfileSchema()
@@ -159,6 +187,7 @@ class Performer(Folder):
     user = reference_source_property(PerformerToUser)
     birthdate = None # bw compat
     location = ''
+    description = ''
     recordings = multireference_target_property(RecordingToPerformer)
     recording_ids = multireference_targetid_property(RecordingToPerformer)
     liked_by = multireference_target_property(PerformerLikesPerformer)

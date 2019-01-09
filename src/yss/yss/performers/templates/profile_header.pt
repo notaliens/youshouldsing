@@ -14,6 +14,7 @@
     </p>
     <h3>${name}</h3>
     <h2 tal:condition="title and divulge_realname">${title}</h2>
+    <div tal:content="description"></div>
     <div>
       <div metal:use-macro="layout.likes_macro"></div>
     </div>
