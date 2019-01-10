@@ -1,3 +1,4 @@
+import audioread
 import distutils
 import optparse
 import os
@@ -94,6 +95,8 @@ def postprocess(recording, redis):
         ffmpegexe = distutils.spawn.find_executable('ffmpeg')
 
         ffextract = [
+            "-threads", "4",
+            '-thread_queue_size', '512',
             "-y", # clobber
             "-i", dry_webm,
             "-vn", # no video
@@ -108,9 +111,12 @@ def postprocess(recording, redis):
             shell=False
         )
         pffextract.communicate()
+        duration = audioread.audio_open('micdry.opus').duration
 
         sox2wet = [
+            '--buffer', '20000',
             '-t', 'opus',
+            '-v', '0.98', # prevent clipping
             'micdry.opus',
             '-r', '48000',
             '-t', 'flac',
@@ -121,7 +127,7 @@ def postprocess(recording, redis):
             "compand 0.3,1 -90,-90,-70,-70,-60,-20,0,0 -5 0 0.2".split(' ')
             )
         if 'effect-reverb' in recording.effects:
-            sox2wet.extend(["reverb", "45"])
+            sox2wet.extend(["reverb", "40"])
         if 'effect-chorus' in recording.effects:
             s = "chorus 0.6 0.9 50.0 0.4 0.25 2.0 -t 60.0 0.32 0.4 1.3 -s"
             sox2wet.extend(s.split(' '))
@@ -130,9 +136,11 @@ def postprocess(recording, redis):
         musicvolume = recording.musicvolume
         latency = recording.latency
         sox2mixed = [
+            '--buffer', '20000',
             '-t', 'flac',
             '-',
             "-M",
+            "-v", "0.98", # prevent clipping
             "-t", "opus",
             # applies to song_audio_filename (0.5 is default on slider)
             "-v", f"{float(musicvolume)}", 
@@ -141,6 +149,7 @@ def postprocess(recording, redis):
             "-r", "48000",
             '-',
         ]
+        sox2mixed.extend(["trim", "0", str(duration)])
         if latency:
             # apply latency adj, must come before other options or voice is
             # doubled
@@ -149,12 +158,17 @@ def postprocess(recording, redis):
         sox2mixed.extend(["remix", "-m", "1,2", "2,1"])
 
         ffm2webm = [
+            "-threads", "4",
+            '-thread_queue_size', '512',
             "-y", # clobber
             "-i", dry_webm,
             "-i", "pipe:",
             # vp8/opus combination supported by both FF and chrome
             "-c:a", "libopus",
             "-map", "1:a:0",
+            "-b:a", "128000",
+            "-vbr", "on",
+            "-compression_level", "10",
             "-shortest",
             ]
         if recording.show_camera:
@@ -164,7 +178,12 @@ def postprocess(recording, redis):
                 ])
         else:
             ffm2webm.append('-vn') # no video
-        ffm2webm.append('mixed.webm')
+        ffm2webm.extend([
+            # https://stackoverflow.com/questions/20665982/convert-videos-to-webm-via-ffmpeg-faster
+            '-cpu-used', '15', # gofast (default is 1, quality suffers)
+            '-deadline', 'realtime', # gofast
+            'mixed.webm'
+        ])
 
         redis.hmset(
             progress_key, {'pct':60, 'status':'Creating mix'}
