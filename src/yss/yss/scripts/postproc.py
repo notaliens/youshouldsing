@@ -1,3 +1,4 @@
+import audioread
 import optparse
 import os
 import shutil
@@ -99,8 +100,7 @@ def postprocess(recording, redis):
             "-f", "opus",
             "micdry.opus"
             )
-        err = StringIO()
-        samples = None
+        mic_duration = audioread.audio_open('micdry.opus').duration
         soxargs = [
             "-V",
             "--clobber",
@@ -122,22 +122,7 @@ def postprocess(recording, redis):
         )
         sox(
             soxargs,
-            _err=err,
         )
-        # stderr will contain the duration that we can use to trim the file
-        # to its proper length in the next sox command, which does the
-        # mixing
-        errlines = err.getvalue().split('\n')
-        for line in errlines:
-            if line.startswith('Duration'):
-                duration = line.split(':', 1)[1]
-                duration.strip()
-                duration, samples = duration.split('=', 1)
-                duration = duration.strip()
-                samples = samples.strip()
-                samples = samples.split(' ', 1)[0].strip()
-                samples = int(samples)
-                break
                     
         song_audio_filename = recording.song.blob.committed()
         open('song_audio_filename', 'w').write(song_audio_filename)
@@ -156,8 +141,7 @@ def postprocess(recording, redis):
         if latency:
             # apply latency adj, must come before other options or voice is doubled
             soxargs.extend(['delay', "0", str(latency)])
-        if samples:
-            soxargs.extend(['trim', '0s', f'{samples}s'])
+        soxargs.extend(['trim', '0', mic_duration])
         # center vocals (see https://stackoverflow.com/questions/14950823/sox-exe-mixing-mono-vocals-with-stereo-music)
         soxargs.extend(["remix", "-m", "1,2", "2,1"])
 
