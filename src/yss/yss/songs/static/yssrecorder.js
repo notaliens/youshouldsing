@@ -223,8 +223,8 @@ var rtc_recorder = (function(exports, karaoke, max_framerate, upload_handler) {
         };
         if (videoSelect && videoSelect.value != '') {
             vidconstraint = {
-                "width": { exact: "640" },
-                "height": { exact: "480"},
+                "width": { exact: "320" },
+                "height": { exact: "240"},
                 "frameRate": { min: 5, max: max_framerate },
                 "deviceId": { exact: videoSelect.value}
             };

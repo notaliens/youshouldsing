@@ -180,7 +180,7 @@ def postprocess(recording, redis):
             ffm2webm.append('-vn') # no video
         ffm2webm.extend([
             # https://stackoverflow.com/questions/20665982/convert-videos-to-webm-via-ffmpeg-faster
-            '-cpu-used', '15', # gofast (default is 1, quality suffers)
+            '-cpu-used', '8', # gofast (default is 1, quality suffers)
             '-deadline', 'realtime', # gofast
             'mixed.webm'
         ])

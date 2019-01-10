@@ -163,7 +163,9 @@ Songs
   - Negative mic latency.***
   - It's too easy to hit cancel on a new recording and lose it.
   - Allow 16x9
-  - Remember camera and mic choices.
+  - Remember camera and mic choices.***
+  - Relative music volume is way too quiet.***
+  - Duplicate values in camera list after recording is cancelled.***
 
 - Search:
 
