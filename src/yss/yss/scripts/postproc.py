@@ -17,9 +17,8 @@ from pyramid.paster import (
 from pyramid.traversal import find_resource
 from yss.utils import get_redis
 
-from io import StringIO
-
 logger = logging.getLogger('postproc')
+logger.basicConfig()
 
 def main(argv=sys.argv):
     def usage(msg):
