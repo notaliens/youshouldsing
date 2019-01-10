@@ -201,7 +201,7 @@ def postprocess(recording, redis):
             progress_key, {'pct':100, 'status':'Finished'}
         )
         # don't remove tempdir until commit succeeds
-        #shutil.rmtree(tmpdir)
+        #shutil.rmtree(tmpdir, ignore_errors=True)
     except FileNotFoundError:
         # no such file or dir when chdir
         redis.hmset(
