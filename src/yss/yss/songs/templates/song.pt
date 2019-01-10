@@ -73,7 +73,7 @@
     <script type="text/javascript">
      liker();
      // karaoke is exported by yssrecorder
-     kar = karaoke("${mp3_url}", ${timings});
+     kar = karaoke("${stream_url}", ${timings});
      $('#play-me')[0].onclick = kar.playtoggle;
     </script>
   </div>

@@ -156,7 +156,7 @@
     <script type="text/javascript" src="${layout.static('yss.songs:static/yssrecorder.js')}"></script>
     <script type="text/javascript">
      // karaoke and rtc_recorder are exported by yssrecorder
-     kar = karaoke("${mp3_url}", ${timings});
+     kar = karaoke("${stream_url}", ${timings});
      rtc_recorder(window, kar, null, "${request.resource_url(context, 'finish_retime')}");
      var accept_url = "${accept_url}";
      var accept = function() {

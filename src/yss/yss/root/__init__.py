@@ -69,9 +69,10 @@ def root_added(event):
         'The Beatles',
         timings=timings_json,
         lyrics=timings_json,
-        audio_stream=pkg_resources.resource_stream('yss', 'blackbird.mp3')
+        audio_stream=pkg_resources.resource_stream('yss', 'blackbird.opus')
     )
     root['songs']['blackbird'] = song
+    song.mimetype = 'audio/opus'
     song.uploader = blameme
 
 def performer(request):

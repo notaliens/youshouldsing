@@ -225,17 +225,17 @@ class SongsView(object):
                         if not data:
                             break
                         md5.update(data)
-                    mp3_filename = os.path.join(jobdir, 'output.mp3')
+                    opus_filename = os.path.join(jobdir, 'output.opus')
                     ffmpeg.input(inputfn).output(
-                        mp3_filename, ar=44100).run()
+                        opus_filename, ar=48000).run()
                     song = request.registry.content.create(
                         'Song',
                         appstruct['title'],
                         appstruct['artist'],
                         appstruct['lyrics'],
                         timings='',
-                        audio_stream=open(mp3_filename, 'rb'),
-                        audio_mimetype='audio/mpeg',
+                        audio_stream=open(opus_filename, 'rb'),
+                        audio_mimetype='audio/opus',
                         language=appstruct['language'],
                     )
                 finally:
@@ -381,7 +381,7 @@ class SongView(object):
             'recordings':song.recordings,
             'can_record':self.has_record_permission,
             'can_retime':self.has_edit_permission,
-            "mp3_url": self.request.resource_url(song, 'mp3'),
+            "stream_url": self.request.resource_url(song, '@@stream'),
             "timings": song.timings,
             "max_framerate": root.max_framerate,
         }
@@ -435,7 +435,7 @@ class SongView(object):
         else:
             processed = 1
         return {
-            "mp3_url": self.request.resource_url(self.context, 'mp3'),
+            "stream_url": self.request.resource_url(self.context, '@@stream'),
             "timings": timings,
             "formatted_timings":formatted_timings,
             'processed':processed,
@@ -516,10 +516,10 @@ class SongView(object):
         return progress
 
     @view_config(
-        name='mp3',
+        name='stream',
         permission='view',
     )
-    def stream_mp3(self):
+    def stream(self):
         return self.context.get_response(request=self.request)
 
     @view_config(
@@ -531,7 +531,7 @@ class SongView(object):
         song = self.context
         root = find_root(song)
         return {
-            "mp3_url": self.request.resource_url(song, 'mp3'),
+            "stream_url": self.request.resource_url(song, '@@stream'),
             "timings": song.timings,
             "max_framerate": root.max_framerate,
         }

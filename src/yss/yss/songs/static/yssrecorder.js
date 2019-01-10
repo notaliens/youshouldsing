@@ -1,9 +1,9 @@
-var karaoke = (function(mp3_url, timings) {
+var karaoke = (function(stream_url, timings) {
     var numDisplayLines = 4; // Number of lines to do the karaoke with
     var paused = true;
     var show = null;
     var player = new Audio();
-    player.setAttribute('src', mp3_url);
+    player.setAttribute('src', stream_url);
     var lastPosition = 0;
 
     function getTimeString(t) {

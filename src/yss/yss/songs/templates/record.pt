@@ -181,7 +181,7 @@
     <script type="text/javascript" src="${layout.static('yss.songs:static/yssrecorder.js')}"></script>
     <script type="text/javascript">
      // karaoke and rtc_recorder are exported by yssrecorder
-     kar = karaoke("${mp3_url}", ${timings});
+     kar = karaoke("${stream_url}", ${timings});
      rtc_recorder(window, kar, ${max_framerate});
     </script>
   </div>

@@ -71,6 +71,8 @@ def postprocess(recording, redis):
     tmpdir = recording.tmpfolder
     curdir = os.getcwd()
     try:
+        # XXX: this probably should be recording.__oid__ to get around
+        # the eventuality of the name changing while mixing is happening.
         progress_key = f'mixprogress-{recording.__name__}'
         redis.hmset(
             progress_key, {'pct':1, 'status':'Preparing'}
@@ -84,26 +86,27 @@ def postprocess(recording, redis):
             os.chdir(tmpdir)
         dry_webm = recording.dry_blob.committed()
         open('dry_blob_filename', 'w').write(dry_webm)
-        # sox can't deal with opus audio, so temp transcode to mp3
+        # sox can't dea lwith opus audio, so temp transcode to mp3
         redis.hmset(
             progress_key, {'pct':10, 'status':'Extracting dry mic audio'}
         )
         ffmpeg(
-            "-y",
+            "-y", # clobber
             "-i", dry_webm,
             "-vn", # no video
-            "-ar", "44100",
-            "-y", # clobber
-            "micdry.mp3"
+            "-ar", "48000", # it will always be 48K from chrome
+            "-acodec", "copy",
+            "-f", "opus",
+            "micdry.opus"
             )
         err = StringIO()
         samples = None
         soxargs = [
             "-V",
             "--clobber",
-            "micdry.mp3",
-            "-r", "44100",
-            "micwet.mp3",
+            "micdry.opus",
+            "-r", "48000",
+            "micwet.wav",
         ]
         # compressor always enabled
         soxargs.extend(
@@ -143,11 +146,12 @@ def postprocess(recording, redis):
         soxargs = [
             "-V",
             "--clobber",
-            "-M", "micwet.mp3",
-            "-t", "mp3",
+            "-M", "micwet.wav",
+            "-t", "opus",
             "-v", f"{float(musicvolume)}", # applies to song_audio_filename (0.5 is default on slider)
             song_audio_filename,
-            "mixed.mp3",
+            "-r", "48000",
+            "mixed.wav",
         ]
         if latency:
             # apply latency adj, must come before other options or voice is doubled
@@ -167,7 +171,7 @@ def postprocess(recording, redis):
         ffmpeg_args = [
             "-y", # clobber
             "-i", dry_webm,
-            "-i", "mixed.mp3",
+            "-i", "mixed.wav",
             # vp8/opus combination supported by both FF and chrome
             "-c:a", "libopus",
             "-map", "1:a:0",

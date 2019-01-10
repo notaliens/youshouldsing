@@ -1,4 +1,5 @@
 import hashlib
+import logging
 import optparse
 import os
 import shutil
@@ -15,6 +16,8 @@ from pyramid.paster import (
     )
 
 from yss.scripts import midi
+
+logger = logging.getLogger('yss')
 
 def main(argv=sys.argv):
     def usage(msg):
@@ -38,8 +41,16 @@ def main(argv=sys.argv):
         help='Overwrite songs in the songs folder instead of skipping dupes',
         action='store_true',
         )
+    parser.add_option(
+        '-a',
+        '--audio-only',
+        dest='audio_only',
+        help='Overwrite audio of songs only in songs folder (not metadata)',
+        action='store_true',
+        )
     opts, args = parser.parse_args(argv[1:])
     overwrite = opts.overwrite
+    audio_only = opts.audio_only
     outdir = opts.directory or tempfile.mkdtemp()
 
     try:
@@ -55,28 +66,28 @@ def main(argv=sys.argv):
 
     try:
         for input_filename in args[1:]:
-            print(input_filename)
+            logging.info(input_filename)
             basename, ext = os.path.splitext(os.path.basename(input_filename))
             name = basename.replace('_NifterDotCom', '')
             name = name.replace('_karaoke_songs', '')
             def errback(msg):
-                print (msg)
+                logging.info(msg)
             try:
                 kardata, title, artist, lyrics, timings = get_timings(
                     input_filename
                 )
             except UnicodeError:
-                print ('Could not get timings for %s' % input_filename)
+                logging.info('Could not get timings for %s' % input_filename)
                 continue
             if timings is None:
-                print ('Could not get timings for %s' % input_filename)
+                logging.info('Could not get timings for %s' % input_filename)
                 continue
             md5 = hashlib.md5()
             md5.update(kardata)
             hexdigest = md5.hexdigest()
             name = '%s-%s' % (name, hexdigest)
-            if name in songs and not overwrite:
-                print ('Not overwriting %s' % name)
+            if name in songs and not (overwrite or audio_only):
+                logging.info('Not overwriting %s' % name)
                 continue
             wav_filename = basename + '.wav'
             output_filename = os.path.join(outdir, wav_filename)
@@ -85,35 +96,40 @@ def main(argv=sys.argv):
                 '-tutf8',
                 '-idq',
                 '-Ow',
+                '-s48000',
                 '-o%s' % output_filename,
                 input_filename,
             ]
-            result = subprocess.run(
+            subprocess.run(
                 command,
                 check=True,
-#                capture_output=True,
             )
-            #altlyrics = result.stdout.decode('utf-8', errors='replace')
-            #_, lyrics = altlyrics.split('\n', 1) # drop timidity output
-            mp3_filename = os.path.join(outdir, basename+'.mp3')
-            command2 = ['lame', output_filename, mp3_filename ]
+            opus_filename = os.path.join(outdir, basename+'.opus')
+            # NB this produces an opus file at 48Khz
+            command2 = ['opusenc', output_filename, opus_filename ]
             subprocess.check_call(command2)
             os.remove(output_filename)
-            try:
-                del songs[name]
-            except KeyError:
-                pass
-            stream = open(mp3_filename, 'rb')
-            song = registry.content.create(
-                'Song',
-                title=title,
-                artist=artist,
-                lyrics=lyrics,
-                timings=timings,
-                audio_stream=stream,
-                audio_mimetype='audio/mpeg',
-                )
-            songs[name] = song
+            stream = open(opus_filename, 'rb')
+            if name in songs and audio_only:
+                logger.info('replacing audio for %s' % title)
+                song = songs[name]
+                song.upload(stream)
+                song.mimetype = 'audio/opus'
+            else:
+                try:
+                    del songs[name]
+                except KeyError:
+                    pass
+                song = registry.content.create(
+                    'Song',
+                    title=title,
+                    artist=artist,
+                    lyrics=lyrics,
+                    timings=timings,
+                    audio_stream=stream,
+                    audio_mimetype='audio/opus',
+                    )
+                songs[name] = song
             blameme = root['performers']['blameme']
             song.uploader = blameme
             print ('done %s, %s, %s' % (name, title, artist))

@@ -153,6 +153,7 @@ Songs
     a pattern.  https://medium.com/@almeidneto/sound-pattern-recognition-with-python-9aff69edce5d
   - Do less work in postprocessing to produce a mix; currently we
     transcode all over the place.
+    ffmpeg -y -i /home/youshouldsing/buildout/var/blobs/0x00/0x00/0x00/0x00/0x00/0x00/0x15/0xfe/0x03cce02b7112cd77.blob -vn -ar 44100 -f mp3 pipe:1 | sox -t mp3 - -V --clobber -r 44100 -t mp3 - compand  0.3,1 -90,-90,-70,-70,-60,-20,0,0 -5 0 0.2 reverb 45 | sox -t mp3 - -V --clobber -r 44100 -t mp3 -M -v 0.5  /home/youshouldsing/buildout/var/blobs/0x00/0x00/0x00/0x00/0x00/0x00/0x01/0xb6/0x03ccd78f523586bb.blob -t mp3 - remix -m 1,2 2,1 > foo.mp3
   - Mix in browser, not on server.
   - Remove recorded song from singlist.
   - Duet
