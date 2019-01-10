@@ -93,6 +93,7 @@ def main(argv=sys.argv):
             output_filename = os.path.join(outdir, wav_filename)
             command = [
                 'timidity',
+                '--volume-compensation',
                 '-tutf8',
                 '-idq',
                 '-Ow',

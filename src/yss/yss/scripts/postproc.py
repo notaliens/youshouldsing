@@ -44,21 +44,25 @@ def main(argv=sys.argv):
         logger.info('Waiting for another recording')
         path = redis.blpop('yss.new-recordings', 0)[1] # blocking pop
         path = path.decode('utf-8')
+        logger.info(f'Received request for {path}')
         time.sleep(1)
         transaction.abort()
         try:
             recording = find_resource(root, path)
         except KeyError:
-            logger.warning('Could not find %s' % path)
-            
+            logger.warning(f'Could not find {path}')
         else:
             try:
                 if not bool(recording.dry_blob):
-                    # not committed yet
+                    logger.warning(f'not committed yet: {path}')
                     redis.rpush('yss.new-recordings', path)
                 else:
                     postprocess(recording, redis)
             except:
+                logger.warning(
+                    f'Unexpected error when processing {path}',
+                    exc_info=True
+                )
                 progress_key = f'mixprogress-{recording.__name__}'
                 redis.hmset(
                     progress_key,
@@ -71,15 +75,16 @@ def main(argv=sys.argv):
 def postprocess(recording, redis):
     tmpdir = recording.tmpfolder
     curdir = os.getcwd()
+    roid = recording.__oid__
+    start = time.time()
     try:
-        # XXX: this probably should be recording.__oid__ to get around
-        # the eventuality of the name changing while mixing is happening.
-        progress_key = f'mixprogress-{recording.__name__}'
+        progress_key = f'mixprogress-{roid}'
+        logger.info(f'Progress key is {progress_key}')
         redis.hmset(
             progress_key, {'pct':1, 'status':'Preparing'}
         )
         redis.expire(progress_key, 1200) # expire in 20 minutes
-        logger.info('Changing dir to %s' % tmpdir)
+        logger.info(f'Changing dir to {tmpdir}')
         try:
             os.chdir(tmpdir)
         except FileNotFoundError:
@@ -87,7 +92,6 @@ def postprocess(recording, redis):
             os.chdir(tmpdir)
         dry_webm = recording.dry_blob.committed()
         open('dry_blob_filename', 'w').write(dry_webm)
-
         redis.hmset(
             progress_key, {'pct':10, 'status':'Extracting dry mic audio'}
         )
@@ -95,6 +99,7 @@ def postprocess(recording, redis):
         ffmpegexe = distutils.spawn.find_executable('ffmpeg')
 
         ffextract = [
+            ffmpegexe,
             "-threads", "4",
             '-thread_queue_size', '512',
             "-y", # clobber
@@ -106,17 +111,21 @@ def postprocess(recording, redis):
             "micdry.opus"
             ]
 
+        logger.info(f'Extracting dry mic into {tmpdir}/micdry.opus using')
+        logger.info(' '.join(ffextract))
+
         pffextract = subprocess.Popen(
-            [ffmpegexe] + ffextract,
+            ffextract,
             shell=False
         )
         pffextract.communicate()
         duration = audioread.audio_open('micdry.opus').duration
 
         sox2wet = [
+            soxexe,
             '--buffer', '20000',
             '-t', 'opus',
-            '-v', '0.98', # prevent clipping
+            '-v', '0.1', # pertains to micdry.opus to prevent clipping
             'micdry.opus',
             '-r', '48000',
             '-t', 'flac',
@@ -136,14 +145,14 @@ def postprocess(recording, redis):
         musicvolume = recording.musicvolume
         latency = recording.latency
         sox2mixed = [
+            soxexe,
             '--buffer', '20000',
             '-t', 'flac',
             '-',
             "-M",
-            "-v", "0.98", # prevent clipping
             "-t", "opus",
             # applies to song_audio_filename (0.5 is default on slider)
-            "-v", f"{float(musicvolume)}", 
+            "-v", f"{float(musicvolume)}", # x5 is a guess
             song_audio_filename,
             '-t', 'flac',
             "-r", "48000",
@@ -158,6 +167,7 @@ def postprocess(recording, redis):
         sox2mixed.extend(["remix", "-m", "1,2", "2,1"])
 
         ffm2webm = [
+            ffmpegexe,
             "-threads", "4",
             '-thread_queue_size', '512',
             "-y", # clobber
@@ -189,22 +199,30 @@ def postprocess(recording, redis):
             progress_key, {'pct':60, 'status':'Creating mix'}
         )
 
+        logger.info(f'Creating mix in {tmpdir}/mixed.webm')
+        logger.info('pipeline:')
+        logger.info(
+            ' '.join(sox2wet) + ' | ' +
+            ' '.join(sox2mixed) + ' | ' +
+            ' '.join(ffm2webm)
+        )
+
         # look at it go
         psox2wet = subprocess.Popen(
-            [soxexe] + sox2wet,
+            sox2wet,
             stdout=subprocess.PIPE,
             shell=False
         )
 
         psox2mixed = subprocess.Popen(
-            [soxexe] + sox2mixed,
+            sox2mixed,
             stdin=psox2wet.stdout,
             stdout=subprocess.PIPE,
             shell=False
         )
 
         pff2webm = subprocess.Popen(
-            [ffmpegexe] + ffm2webm,
+            ffm2webm,
             stdin=psox2mixed.stdout,
             shell=False,
             )
@@ -212,12 +230,13 @@ def postprocess(recording, redis):
         psox2wet.stdout.close()
         psox2mixed.stdout.close()
         pff2webm.communicate()
-        logger.info('finished mixing %s' % tmpdir)
+        logger.info(f'finished mixing {tmpdir}')
 
         recording.mixed_blob = Blob()
         redis.hmset(
             progress_key, {'pct':90, 'status':'Saving final mix'}
         )
+        logger.info(f'Copying final mix to mixed blob')
         with recording.mixed_blob.open("w") as saveto:
             with open("mixed.webm", "rb") as savefrom:
                 shutil.copyfileobj(savefrom, saveto)
@@ -231,7 +250,7 @@ def postprocess(recording, redis):
         # don't remove tempdir until commit succeeds
         #shutil.rmtree(tmpdir, ignore_errors=True)
     except FileNotFoundError:
-        # no such file or dir when chdir
+        logger.warning('no such file or dir when chdir')
         redis.hmset(
             progress_key,
             {'pct':-1, 'status':'Mix failed; temporary files missing'}
@@ -239,4 +258,6 @@ def postprocess(recording, redis):
         redis.persist(progress_key)
         recording.postproc_failure = True # currently not exposed
     finally:
+        end = time.time()
+        logger.info(f'total time: {end-start}')
         os.chdir(curdir)
