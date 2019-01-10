@@ -1,13 +1,14 @@
 import audioread
+import distutils
 import optparse
 import os
 import shutil
 import sys
+import subprocess
 import time
 import transaction
 import logging
 
-from sh import ffmpeg, sox
 from ZODB.blob import Blob
 
 from pyramid.paster import (
@@ -90,7 +91,10 @@ def postprocess(recording, redis):
         redis.hmset(
             progress_key, {'pct':10, 'status':'Extracting dry mic audio'}
         )
-        ffmpeg(
+        soxexe = distutils.spawn.find_executable('sox')
+        ffmpegexe = distutils.spawn.find_executable('ffmpeg')
+
+        ffextract = [
             "-y", # clobber
             "-i", dry_webm,
             "-vn", # no video
@@ -98,77 +102,102 @@ def postprocess(recording, redis):
             "-acodec", "copy",
             "-f", "opus",
             "micdry.opus"
-            )
+            ]
+
+        pffextract = subprocess.Popen(
+            [ffmpegexe] + ffextract,
+            shell=False
+        )
+        pffextract.communicate()
+
         mic_duration = audioread.audio_open('micdry.opus').duration
-        soxargs = [
-            "-V",
-            "--clobber",
-            "micdry.opus",
-            "-r", "48000",
-            "micwet.wav",
+
+        sox2wet = [
+            '-t', 'opus',
+            'micdry.opus',
+            '-r', '48000',
+            '-t', 'flac',
+            '-',
         ]
         # compressor always enabled
-        soxargs.extend(
+        sox2wet.extend(
             "compand 0.3,1 -90,-90,-70,-70,-60,-20,0,0 -5 0 0.2".split(' ')
             )
         if 'effect-reverb' in recording.effects:
-            soxargs.extend(["reverb", "45"])
+            sox2wet.extend(["reverb", "45"])
         if 'effect-chorus' in recording.effects:
             s = "chorus 0.6 0.9 50.0 0.4 0.25 2.0 -t 60.0 0.32 0.4 1.3 -s"
-            soxargs.extend(s.split(' '))
-        redis.hmset(
-            progress_key, {'pct':30, 'status':'Applying effects'}
-        )
-        sox(
-            soxargs,
-        )
-                    
+            sox2wet.extend(s.split(' '))
         song_audio_filename = recording.song.blob.committed()
         open('song_audio_filename', 'w').write(song_audio_filename)
         musicvolume = recording.musicvolume
         latency = recording.latency
-        soxargs = [
-            "-V",
-            "--clobber",
-            "-M", "micwet.wav",
+        sox2mixed = [
+            '-t', 'flac',
+            '-',
+            "-M",
             "-t", "opus",
-            "-v", f"{float(musicvolume)}", # applies to song_audio_filename (0.5 is default on slider)
+            # applies to song_audio_filename (0.5 is default on slider)
+            "-v", f"{float(musicvolume)}", 
             song_audio_filename,
+            '-t', 'flac',
             "-r", "48000",
-            "mixed.wav",
+            '-',
         ]
         if latency:
-            # apply latency adj, must come before other options or voice is doubled
-            soxargs.extend(['delay', "0", str(latency)])
-        soxargs.extend(['trim', '0', mic_duration])
+            # apply latency adj, must come before other options or voice is
+            # doubled
+            sox2mixed.extend(['delay', "0", str(latency)])
+        sox2mixed.extend(['trim', '0', str(mic_duration)])
         # center vocals (see https://stackoverflow.com/questions/14950823/sox-exe-mixing-mono-vocals-with-stereo-music)
-        soxargs.extend(["remix", "-m", "1,2", "2,1"])
+        sox2mixed.extend(["remix", "-m", "1,2", "2,1"])
 
-        redis.hmset(
-            progress_key, {'pct':50, 'status':'Rebalancing audio'}
-        )
-        sox(soxargs)
-        redis.hmset(
-            progress_key, {'pct':60, 'status':'Creating final mix'}
-        )
-        ffmpeg_args = [
+        ffm2webm = [
             "-y", # clobber
             "-i", dry_webm,
-            "-i", "mixed.wav",
+            "-i", "pipe:",
             # vp8/opus combination supported by both FF and chrome
             "-c:a", "libopus",
             "-map", "1:a:0",
             "-shortest",
             ]
         if recording.show_camera:
-            ffmpeg_args.extend([
+            ffm2webm.extend([
                 "-c:v", "vp8",
                 "-map", "0:v:0?", # ? at end makes it opt (recs with no cam)
                 ])
         else:
-            ffmpeg_args.append('-vn') # no video
-        ffmpeg_args.append('mixed.webm')
-        ffmpeg(*ffmpeg_args)
+            ffm2webm.append('-vn') # no video
+        ffm2webm.append('mixed.webm')
+
+        redis.hmset(
+            progress_key, {'pct':60, 'status':'Creating mix'}
+        )
+
+        # look at it go
+        psox2wet = subprocess.Popen(
+            [soxexe] + sox2wet,
+            stdout=subprocess.PIPE,
+            shell=False
+        )
+
+        psox2mixed = subprocess.Popen(
+            [soxexe] + sox2mixed,
+            stdin=psox2wet.stdout,
+            stdout=subprocess.PIPE,
+            shell=False
+        )
+
+        pff2webm = subprocess.Popen(
+            [ffmpegexe] + ffm2webm,
+            stdin=psox2mixed.stdout,
+            shell=False,
+            )
+
+        psox2wet.stdout.close()
+        psox2mixed.stdout.close()
+        pff2webm.communicate()
+
         recording.mixed_blob = Blob()
         redis.hmset(
             progress_key, {'pct':90, 'status':'Saving final mix'}
