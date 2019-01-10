@@ -1,4 +1,3 @@
-import audioread
 import distutils
 import optparse
 import os
@@ -49,7 +48,7 @@ def main(argv=sys.argv):
         try:
             recording = find_resource(root, path)
         except KeyError:
-            logger.warning('Cold not find %s' % path)
+            logger.warning('Could not find %s' % path)
             
         else:
             try:
@@ -79,7 +78,7 @@ def postprocess(recording, redis):
             progress_key, {'pct':1, 'status':'Preparing'}
         )
         redis.expire(progress_key, 1200) # expire in 20 minutes
-        print ('Changing dir to %s' % tmpdir)
+        logger.info('Changing dir to %s' % tmpdir)
         try:
             os.chdir(tmpdir)
         except FileNotFoundError:
@@ -87,7 +86,7 @@ def postprocess(recording, redis):
             os.chdir(tmpdir)
         dry_webm = recording.dry_blob.committed()
         open('dry_blob_filename', 'w').write(dry_webm)
-        # sox can't dea lwith opus audio, so temp transcode to mp3
+
         redis.hmset(
             progress_key, {'pct':10, 'status':'Extracting dry mic audio'}
         )
@@ -109,8 +108,6 @@ def postprocess(recording, redis):
             shell=False
         )
         pffextract.communicate()
-
-        mic_duration = audioread.audio_open('micdry.opus').duration
 
         sox2wet = [
             '-t', 'opus',
@@ -148,7 +145,6 @@ def postprocess(recording, redis):
             # apply latency adj, must come before other options or voice is
             # doubled
             sox2mixed.extend(['delay', "0", str(latency)])
-        sox2mixed.extend(['trim', '0', str(mic_duration)])
         # center vocals (see https://stackoverflow.com/questions/14950823/sox-exe-mixing-mono-vocals-with-stereo-music)
         sox2mixed.extend(["remix", "-m", "1,2", "2,1"])
 
@@ -197,6 +193,7 @@ def postprocess(recording, redis):
         psox2wet.stdout.close()
         psox2mixed.stdout.close()
         pff2webm.communicate()
+        logger.info('finished mixing %s' % tmpdir)
 
         recording.mixed_blob = Blob()
         redis.hmset(
@@ -205,7 +202,7 @@ def postprocess(recording, redis):
         with recording.mixed_blob.open("w") as saveto:
             with open("mixed.webm", "rb") as savefrom:
                 shutil.copyfileobj(savefrom, saveto)
-        print ("%s/%s" % (tmpdir, "mixed.webm"))
+        logger.info("%s/%s" % (tmpdir, "mixed.webm"))
         recording.remixing = False
         transaction.commit()
         open('mixed_blob_filename', 'w').write(recording.mixed_blob.committed())
