@@ -187,6 +187,10 @@ var rtc_recorder = (function(exports, karaoke, max_framerate, upload_handler) {
     }
 
     function gotDevices(deviceInfos) {
+        // clear any existing values
+        $('select#audioSource option').remove();
+        $('select#videoSource option').remove();
+        // then add new ones
         for (var i = 0; i !== deviceInfos.length; ++i) {
             var deviceInfo = deviceInfos[i];
             var option = document.createElement('option');
