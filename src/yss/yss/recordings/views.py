@@ -312,7 +312,7 @@ class RecordingsView(object):
         context = self.context
         q = find_index(context, 'system', 'content_type').eq('Recording')
         q = q & find_index(context, 'system', 'allowed').allows(
-            request, 'yss.indexed')
+            ['system.Everyone'], 'yss.indexed')
         filter_text = request.params.get('filter_text')
         if filter_text:
             terms = generate_text_filter_terms(filter_text)
