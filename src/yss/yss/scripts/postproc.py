@@ -19,7 +19,6 @@ from pyramid.traversal import find_resource
 from yss.utils import get_redis
 
 logger = logging.getLogger('postproc')
-logging.basicConfig()
 
 def main(argv=sys.argv):
     def usage(msg):
@@ -42,10 +41,16 @@ def main(argv=sys.argv):
     redis = get_redis(env['request'])
     while True:
         logger.info('Waiting for another recording')
-        path = redis.blpop('yss.new-recordings', 0)[1] # blocking pop
-        path = path.decode('utf-8')
+        pathandtime = redis.blpop('yss.new-recordings', 0)[1] # blocking pop
+        path = pathandtime.decode('utf-8')
+        try:
+            path, enqueued = path.rsplit('|', 1)
+        except ValueError:
+            enqueued = time.time()
+        else:
+            enqueued = float(enqueued)
         logger.info(f'Received request for {path}')
-        time.sleep(1)
+        time.sleep(0.25)
         transaction.abort()
         try:
             recording = find_resource(root, path)
@@ -57,7 +62,11 @@ def main(argv=sys.argv):
                     logger.warning(f'not committed yet: {path}')
                     redis.rpush('yss.new-recordings', path)
                 else:
+                    logger.info(f'Processing {path} enqueued at {enqueued}')
                     postprocess(recording, redis)
+                    end = time.time()
+                    logger.info(
+                        f'Time from enqeue-to-done for {path}: {end-enqueued}')
             except:
                 logger.warning(
                     f'Unexpected error when processing {path}',
@@ -76,7 +85,7 @@ def postprocess(recording, redis):
     tmpdir = recording.tmpfolder
     curdir = os.getcwd()
     roid = recording.__oid__
-    start = time.time()
+    mixstart = time.time()
     try:
         progress_key = f'mixprogress-{roid}'
         logger.info(f'Progress key is {progress_key}')
@@ -258,6 +267,6 @@ def postprocess(recording, redis):
         redis.persist(progress_key)
         recording.postproc_failure = True # currently not exposed
     finally:
-        end = time.time()
-        logger.info(f'total time: {end-start}')
+        mixend = time.time()
+        logger.info(f'total mix time: {mixend-mixstart}')
         os.chdir(curdir)
