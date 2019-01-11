@@ -16,7 +16,7 @@ def login_validator(node, kw):
     def _login_validator(node, value):
         principals = find_service(context, 'principals')
         users = principals['users']
-        user = users.get('value')
+        user = users.get(value)
         if user is None:
             raise colander.Invalid(node, 'No such user %s' % value)
         if not user.email:
@@ -29,6 +29,7 @@ class ResetRequestSchema(Schema):
     """ The schema for validating password reset requests."""
     login = colander.SchemaNode(
         colander.String(),
+        title='Your login name (password reset instructions will be emailed)',
         validator = login_validator,
         )
 
@@ -42,7 +43,7 @@ def password_reset_request(context, request):
     schema = ResetRequestSchema().bind(request=request, context=context)
     form = deform.Form(schema, buttons=('Send',))
     rendered = None
-    if 'Reset' in request.POST:
+    if 'Send' in request.POST:
         controls = request.POST.items()
         try:
             appstruct = form.validate(controls)

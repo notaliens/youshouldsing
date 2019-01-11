@@ -27,7 +27,7 @@
                    class="btn btn-primary btn-block" i18n:attributes="value"
                    value="Log In" />
           </form>
-          <a href="request.resource_url(root, '@@resetpassword')">Forgot password?</a>
+          <a href="${request.resource_url(request.virtual_root, '@@resetpassword')}">Forgot password?</a>
         </div>
       </div>
     </div>

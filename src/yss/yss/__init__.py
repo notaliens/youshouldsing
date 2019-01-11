@@ -13,6 +13,18 @@ from pyramid_redis_sessions import session_factory_from_settings
 random.seed()
 
 def main(global_config, **settings):
+    # we dont want these values in our settings.ini
+    mail_settings = {
+        'mail.host':os.environ.get('YSS_MAIL_HOST', 'localhost'),
+        'mail.port':os.environ.get('YSS_MAIL_PORT', '25'),
+        'mail.username':os.environ.get('YSS_MAIL_USERNAME', None),
+        'mail.password':os.environ.get('YSS_MAIL_PASSWORD', None),
+        }
+    settings.update(mail_settings)
+    settings['redis.sessions.secret'] = os.environ.get(
+        'YSS_REDIS_SESSIONS_SECRET', 'seekr1t')
+    settings['substanced.secret'] = os.environ.get(
+        'YSS_SUBSTANCED_SECRET', 'seekri1')
     mimetypes.add_type('application/font-woff', '.woff')
     secret = settings['substanced.secret']
     authn_policy = YSSAuthenticationPolicy(secret)
