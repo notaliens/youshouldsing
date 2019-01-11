@@ -303,10 +303,21 @@ class RecordingView(object):
 
 class GlobalRecordingsView(object):
     default_sort = 'created'
+    default_sort_reversed = True
     batch_size = 20
     def __init__(self, context, request):
         self.context = context
         self.request = request
+
+    def get_sort_params(self):
+        request = self.request
+        sorting = request.params.get('sorting', None)
+        if sorting is None:
+            sorting = self.default_sort
+            reverse = self.default_sort_reversed
+        else:
+            reverse = asbool(request.params.get('reverse'))
+        return sorting, reverse
 
     def query(self):
         request = self.request
@@ -325,15 +336,8 @@ class GlobalRecordingsView(object):
         if filter_genre:
             q = q & find_index(context, 'yss', 'genre').eq(filter_genre)
         resultset = q.execute()
-        sorting = request.params.get('sorting')
-        reverse = request.params.get('reverse')
-        if reverse == 'false':
-            reverse = False
-        reverse = bool(reverse)
-        if sorting:
-            resultset = self.sort_by(resultset, sorting, reverse)
-        else:
-            resultset = self.sort_by(resultset, self.default_sort, False)
+        sorting, reverse = self.get_sort_params()
+        resultset = self.sort_by(resultset, sorting, reverse)
         return resultset
 
     def sort_by(self, rs, token, reverse):
@@ -376,10 +380,8 @@ class GlobalRecordingsView(object):
     def sort_tag(self, token, title):
         request = self.request
         context = self.context
-        reverse = request.params.get('reverse', 'false')
-        reverse = asbool(reverse)
-        sorting = request.params.get('sorting')
-        if sorting == token or (not sorting and token == self.default_sort):
+        sorting, reverse = self.get_sort_params()
+        if sorting == token:
             if reverse:
                 icon = 'glyphicon glyphicon-chevron-up'
             else:

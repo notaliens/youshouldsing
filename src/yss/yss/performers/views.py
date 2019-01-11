@@ -31,6 +31,7 @@ from yss.utils import get_photodata
 @view_defaults(context=IPerformer)
 class PerformerView(object):
     batch_size = 20
+    default_sort_reversed = False
     def __init__(self, context, request):
         self.context = context
         self.request = request
@@ -197,11 +198,9 @@ class PerformerView(object):
     def sort_tag(self, token, title):
         request = self.request
         context = self.context
-        reverse = request.params.get('reverse', 'false')
-        reverse = asbool(reverse)
-        sorting = request.params.get('sorting')
+        sorting, reverse = self.get_sort_params()
         view_name = request.view_name
-        if sorting == token or (not sorting and token == self.default_sort):
+        if sorting == token:
             if reverse:
                 icon = 'glyphicon glyphicon-chevron-up'
             else:
@@ -230,10 +229,20 @@ class PerformerView(object):
             icon
             )
 
+    def get_sort_params(self):
+        request = self.request
+        sorting = request.params.get('sorting', None)
+        if sorting is None:
+            sorting = self.default_sort
+            reverse = self.default_sort_reversed
+        else:
+            reverse = asbool(request.params.get('reverse'))
+        return sorting, reverse
 
 @view_defaults(context=IPerformer)
 class PerformerRecordingsView(PerformerView):
     default_sort = 'created'
+    default_sort_reversed = True
     def sort_by(self, rs, token, reverse):
         context = self.context
         title = find_index(context, 'yss', 'title')
@@ -278,15 +287,8 @@ class PerformerRecordingsView(PerformerView):
                 if text.check_query(term):
                     q = q & text.eq(term)
         resultset = q.execute()
-        sorting = request.params.get('sorting')
-        reverse = request.params.get('reverse')
-        if reverse == 'false':
-            reverse = False
-        reverse = bool(reverse)
-        if sorting:
-            resultset = self.sort_by(resultset, sorting, reverse)
-        else:
-            resultset = self.sort_by(resultset, self.default_sort, False)
+        sorting, reverse = self.get_sort_params()
+        resultset = self.sort_by(resultset, sorting, reverse)
         return resultset
 
     @view_config(
@@ -361,15 +363,8 @@ class PerformerSongsLikedView(PerformerView):
                 if text.check_query(term):
                     q = q & text.eq(term)
         resultset = q.execute()
-        sorting = request.params.get('sorting')
-        reverse = request.params.get('reverse')
-        if reverse == 'false':
-            reverse = False
-        reverse = bool(reverse)
-        if sorting:
-            resultset = self.sort_by(resultset, sorting, reverse)
-        else:
-            resultset = self.sort_by(resultset, self.default_sort, False)
+        sorting, reverse = self.get_sort_params()
+        resultset = self.sort_by(resultset, sorting, reverse)
         return resultset
 
 
@@ -447,15 +442,8 @@ class PerformerSongsUploadedView(PerformerView):
                 if text.check_query(term):
                     q = q & text.eq(term)
         resultset = q.execute()
-        sorting = request.params.get('sorting')
-        reverse = request.params.get('reverse')
-        if reverse == 'false':
-            reverse = False
-        reverse = bool(reverse)
-        if sorting:
-            resultset = self.sort_by(resultset, sorting, reverse)
-        else:
-            resultset = self.sort_by(resultset, self.default_sort, False)
+        sorting, reverse = self.get_sort_params()
+        resultset = self.sort_by(resultset, sorting, reverse)
         return resultset
 
 
@@ -521,15 +509,8 @@ class PerformerPerformersLikedView(PerformerView):
         if filter_genre:
             q = q & find_index(context, 'yss', 'genre').eq(filter_genre)
         resultset = q.execute()
-        sorting = request.params.get('sorting')
-        reverse = request.params.get('reverse')
-        if reverse == 'false':
-            reverse = False
-        reverse = bool(reverse)
-        if sorting:
-            resultset = self.sort_by(resultset, sorting, reverse)
-        else:
-            resultset = self.sort_by(resultset, self.default_sort, False)
+        sorting, reverse = self.get_sort_params()
+        resultset = self.sort_by(resultset, sorting, reverse)
         return resultset
 
     @view_config(
@@ -556,6 +537,7 @@ class PerformerPerformersLikedView(PerformerView):
 @view_defaults(context=IPerformer)
 class PerformerRecordingsLikedView(PerformerView):
     default_sort='created'
+    default_sort_reversed = True
 
     def sort_by(self, rs, token, reverse):
         context = self.context
@@ -596,15 +578,8 @@ class PerformerRecordingsLikedView(PerformerView):
         if filter_genre:
             q = q & find_index(context, 'yss', 'genre').eq(filter_genre)
         resultset = q.execute()
-        sorting = request.params.get('sorting')
-        reverse = request.params.get('reverse')
-        if reverse == 'false':
-            reverse = False
-        reverse = bool(reverse)
-        if sorting:
-            resultset = self.sort_by(resultset, sorting, reverse)
-        else:
-            resultset = self.sort_by(resultset, self.default_sort, False)
+        sorting, reverse = self.get_sort_params()
+        resultset = self.sort_by(resultset, sorting, reverse)
         return resultset
 
     @view_config(
@@ -777,10 +752,21 @@ class PerformerPrivacyView(PerformerView):
 
 class PerformersView(object):
     default_sort = 'name'
+    default_sort_reversed = False
     batch_size = 20
     def __init__(self, context, request):
         self.context = context
         self.request = request
+
+    def get_sort_params(self):
+        request = self.request
+        sorting = request.params.get('sorting', None)
+        if sorting is None:
+            sorting = self.default_sort
+            reverse = self.default_sort_reversed
+        else:
+            reverse = asbool(request.params.get('reverse'))
+        return sorting, reverse
 
     def query(self):
         request = self.request
@@ -799,15 +785,8 @@ class PerformersView(object):
         if filter_genre:
             q = q & find_index(context, 'yss', 'genre').eq(filter_genre)
         resultset = q.execute()
-        sorting = request.params.get('sorting')
-        reverse = request.params.get('reverse')
-        if reverse == 'false':
-            reverse = False
-        reverse = bool(reverse)
-        if sorting:
-            resultset = self.sort_by(resultset, sorting, reverse)
-        else:
-            resultset = self.sort_by(resultset, self.default_sort, False)
+        sorting, reverse = self.get_sort_params()
+        resultset = self.sort_by(resultset, sorting, reverse)
         return resultset
 
     def sort_by(self, rs, token, reverse):
@@ -848,10 +827,8 @@ class PerformersView(object):
     def sort_tag(self, token, title):
         request = self.request
         context = self.context
-        reverse = request.params.get('reverse', 'false')
-        reverse = asbool(reverse)
-        sorting = request.params.get('sorting')
-        if sorting == token or (not sorting and token == 'name'):
+        sorting, reverse = self.get_sort_params()
+        if sorting == token:
             if reverse:
                 icon = 'glyphicon glyphicon-chevron-up'
             else:
