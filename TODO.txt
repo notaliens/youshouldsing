@@ -11,7 +11,6 @@
   - tests
   - invitations***
   - page titles
-  - get substanced.secret out of shared.ini
   - contests
   - https://css-tricks.com/centering-css-complete-guide/
   - Profile/songs export
@@ -54,14 +53,13 @@
   - Crowdsource lyric retimings... allow uploader to accept lyric timing
     suggestions.
   - Recognize dupe song metadata and group together on other recordings page.
-  - Performers who like this song inline ***
   - Notification when someone records a song that you uploaded.
   - Notification when someone likes a song you uploaded.
-  - Year in metadata***
 
 Songs
 
   - Filter by genre
+  - Filter by year
 
 - Homepage:
 
@@ -161,11 +159,13 @@ Songs
   - It's too easy to hit cancel on a new recording and lose it.
   - Allow 16x9
   - Remember camera and mic choices.***
+  - More effects (flanger, pitch).
 
-- Search:
+- Search songs:
 
   - Search by lyrics.
   - Filter genre.
+  - Filter year.
   
 - JS:
 

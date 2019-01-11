@@ -64,6 +64,11 @@ class SongSchema(FilePropertiesSchema):
         colander.String(),
         widget=deform.widget.Select2Widget(values=language_choices),
     )
+    year = colander.SchemaNode(
+        colander.Int(),
+        validator=colander.Range(0, 3000),
+        )
+
 
 class SongPropertySheet(PropertySheet):
     schema = SongSchema()
@@ -104,6 +109,7 @@ class Song(File):
     alt_timings = ''
     retiming_blob = None
     retiming = False
+    year = colander.null
 
     def __init__(self, title, artist, lyrics, timings, audio_stream,
                  audio_mimetype='audio/mpeg', language='en-US'):

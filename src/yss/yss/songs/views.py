@@ -247,6 +247,7 @@ class SongsView(object):
                     'info')
                 song.language = appstruct['language']
                 song.genre = appstruct['genre']
+                song.year = appstruct['year']
                 songname = slug.slug(appstruct['title'])
                 hashval = md5.hexdigest()
                 songname = f'{songname}-{hashval}'
@@ -270,6 +271,7 @@ class SongsView(object):
                 'genre':colander.null,
                 'language':colander.null,
                 'lyrics':colander.null,
+                'year':colander.null,
                 }
         if rendered is None:
             rendered = form.render(appstruct, readonly=False)
@@ -619,6 +621,7 @@ class SongView(object):
                 context.genre = appstruct['genre']
                 context.language = appstruct['language']
                 context.lyrics = appstruct['lyrics']
+                context.year = appstruct['year']
                 find_catalog(context, 'yss').reindex_resource(context)
                 find_catalog(context, 'system').reindex_resource(context)
                 request.session.flash('Song edited.', 'info')
@@ -630,6 +633,7 @@ class SongView(object):
                 'genre':context.genre,
                 'language':context.language,
                 'lyrics':context.lyrics,
+                'year':context.year,
                 }
         if rendered is None:
             rendered = form.render(appstruct, readonly=False)
@@ -823,6 +827,10 @@ class SongEditSchema(Schema):
         colander.String(),
         validator=colander.Length(max=20000),
         widget=deform.widget.TextAreaWidget(style="height: 200px;"),
+    )
+    year = colander.SchemaNode(
+        colander.Int(),
+        validator=colander.Range(0, 3000)
     )
 
 class SongUploadSchema(SongEditSchema):

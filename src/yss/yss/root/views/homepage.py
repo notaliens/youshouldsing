@@ -8,21 +8,19 @@ class HomepageView(object):
         self.request = request
 
     def featured_recordings(self, limit=10):
-        request = self.request
         context = self.context
         q = find_index(context, 'system', 'content_type').eq('Recording')
         q = q & find_index(context, 'system', 'allowed').allows(
-            request, 'yss.indexed')
+            ['system.Everyone'], 'yss.indexed')
         num_likes = find_index(context, 'yss', 'num_likes')
         resultset = q.execute()
         return resultset.sort(num_likes, reverse=True, limit=limit)
 
     def recent_recordings(self, limit=10):
-        request = self.request
         context = self.context
         q = find_index(context, 'system', 'content_type').eq('Recording')
         q = q & find_index(context, 'system', 'allowed').allows(
-            request, 'yss.indexed')
+            ['system.Everyone'], 'yss.indexed')
         created = find_index(context, 'yss', 'created')
         resultset = q.execute()
         return resultset.sort(created, reverse=True, limit=limit)
