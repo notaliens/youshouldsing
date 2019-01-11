@@ -168,6 +168,7 @@ Songs
   - Search by lyrics.
   - Filter genre.
   - Filter year.
+  - "make it" doesnt find make it wit chu
   
 - JS:
 
