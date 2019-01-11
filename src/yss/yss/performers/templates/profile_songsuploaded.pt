@@ -30,7 +30,7 @@
               <tr>
                 <!-- doesnt add up to 100 but works on phone -->
                 <th width="13%">
-                    ${structure:view.sort_tag('created', 'Created')}
+                    ${structure:view.sort_tag('created', 'Uploaded')}
                 </th>
                 <th width="25%">
                     ${structure:view.sort_tag('artist', 'Artist')}

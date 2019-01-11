@@ -113,28 +113,20 @@ class SongsView(object):
 
     def sort_by(self, rs, token, reverse):
         context = self.context
-        title = find_index(context, 'yss', 'title')
-        artist = find_index(context, 'yss', 'artist')
-        num_likes = find_index(context, 'yss', 'num_likes')
-        num_recordings = find_index(context, 'yss', 'num_recordings')
-        genre = find_index(context, 'yss', 'genre')
         created = find_index(context, 'yss', 'created')
+        title = find_index(context, 'yss', 'title')
+        num_likes = find_index(context, 'yss', 'num_likes')
+        artist = find_index(context, 'yss', 'artist')
+        num_recordings = find_index(context, 'yss', 'num_recordings')
         duration = find_index(context, 'yss', 'duration')
+        num_likes = find_index(context, 'yss', 'num_likes')
         sorting = {
-            'date':
-            (created, num_recordings, num_likes, title, artist, genre),
-            'title':
-            (title, artist, num_recordings, num_likes, genre, created),
-            'artist':
-            (artist, title, num_recordings, num_likes, genre, created),
-            'genre':
-            (genre, artist, title, num_recordings, num_likes, created),
-            'num_likes':
-            (num_likes, artist, title, num_recordings, genre, created),
-            'num_recordings':
-            (num_recordings, artist, title, num_likes, genre, created),
-            'duration':
-            (duration, artist, title, genre, created, num_likes,num_recordings),
+            'created':(created, artist, title, num_recordings, num_likes),
+            'title':(title, artist, num_recordings, created, num_likes),
+            'artist':(artist, title, num_recordings, created, num_likes),
+            'num_likes':(num_likes, artist, title, num_recordings),
+            'num_recordings':(num_recordings, artist, title, num_likes),
+            'duration':(duration, artist, title, num_recordings, num_likes),
             }
         indexes = sorting.get(token, sorting[self.default_sort])
         for idx in indexes[1:]:
