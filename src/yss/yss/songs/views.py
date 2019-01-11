@@ -37,8 +37,8 @@ from substanced.sdi import mgmt_view
 
 from substanced.util import (
     Batch,
-    find_catalog,
     find_index,
+    find_catalog,
     set_acl,
     get_acl,
     )
@@ -557,6 +557,8 @@ class SongView(object):
         tmpdir_name = f'{sane_name}-{recording_id}'
         tmpdir = get_recording_tempdir(request, tmpdir_name)
         recording = request.registry.content.create('Recording', tmpdir)
+        description = request.params['description'][:5000]
+        recording.description = description
         recordings[recording_id] = recording
         performer = request.user.performer
         recording.performer = performer
@@ -573,17 +575,15 @@ class SongView(object):
         except (TypeError, ValueError):
             # use default musicvolume of 0 set at class level
             pass
-        description = request.params['description'][:5000]
-        recording.description = description
         with recording.dry_blob.open("w") as saveto:
             shutil.copyfileobj(f, saveto)
         workflow = get_workflow(request, 'Visibility', 'Recording')
         workflow.reset(recording, request) # private by default
         visibility = request.params.get('visibility', 'Private')
         workflow.transition_to_state(recording, request, visibility)
-        # reindex visibility state
-        index = find_index(recording, 'yss', 'visibility_state')
-        index.reindex_doc(recording.__oid__, visibility)
+        # reindex visibility state and other stuff for good measure
+        catalog = find_catalog(recording, 'yss')
+        catalog.reindex_resource(recording)
         redis = get_redis(request)
         redis.rpush("yss.new-recordings", resource_path(recording))
         print ("finished", tmpdir, resource_path(recording))
