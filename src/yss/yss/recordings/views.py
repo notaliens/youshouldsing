@@ -294,13 +294,14 @@ class RecordingView(object):
         permission='yss.edit'
     )
     def delete(self):
-        parent = self.context.__parent__
+        recordings = self.context.__parent__
         name = self.context.__name__
-        del parent[name]
-        self.request.session.flash('Recording deleted', 'info')
-        return HTTPFound(self.request.resource_url(parent))
+        del recordings[name]
+        performer = recordings.__parent__
+        self.request.session.flash('Recording deleted', 'danger')
+        return HTTPFound(self.request.resource_url(performer, '@@recordings'))
 
-class RecordingsView(object):
+class GlobalRecordingsView(object):
     default_sort = 'created'
     batch_size = 20
     def __init__(self, context, request):

@@ -60,6 +60,7 @@ class PerformerView(object):
             tabs.append(
                 {'title':'Recordings',
                  'id':'button-recordings',
+                 # NB: the *view*, not the subobject
                  'url':self.request.resource_url(performer, '@@recordings'),
                  'class':state == 'recordings' and 'active' or '',
                  'enabled':True,
@@ -259,9 +260,10 @@ class PerformerRecordingsView(PerformerView):
     def query(self):
         request = self.request
         context = self.context
+        recordings = context['recordings']
         q = find_index(context, 'system', 'content_type').eq('Recording')
         q = q & find_index(context, 'system', 'path').eq(
-            request.resource_path(context, 'recordings')
+            request.resource_path(recordings)
         )
         permission = (
             (context == request.performer and 'view' or 'yss.indexed')
