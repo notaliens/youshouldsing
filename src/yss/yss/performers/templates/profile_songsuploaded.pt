@@ -29,6 +29,9 @@
             <thead>
               <tr>
                 <!-- doesnt add up to 100 but works on phone -->
+                <th width="13%">
+                    ${structure:view.sort_tag('created', 'Created')}
+                </th>
                 <th width="25%">
                     ${structure:view.sort_tag('artist', 'Artist')}
                 </th>
@@ -41,21 +44,20 @@
                 <th width="13%">
                     ${structure:view.sort_tag('num_recordings', '&#x23F9;')}
                 </th>
-                <th width="13%">
-                    ${structure:view.sort_tag('duration', '&#x23F3;')}
-                </th>
               </tr>
             </thead>
             
             <tbody>
               <tr tal:repeat="item batch">
+                <td>
+                  <a href="${request.resource_url(item)}">${layout.short_created_local(item)}</a>
+                </td>
                 <td>${item.artist}</td>
                 <td>
                   <a href="${request.resource_url(item)}">${item.title}</a>
                 </td>
                 <td>${item.num_likes}</td>
                 <td>${item.num_recordings}</td>
-                <td>${item.duration_str()}</td>
               </tr>
             </tbody>
           </table>

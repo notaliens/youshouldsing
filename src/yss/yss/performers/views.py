@@ -320,26 +320,20 @@ class PerformerSongsLikedView(PerformerView):
 
     def sort_by(self, rs, token, reverse):
         context = self.context
+        created = find_index(context, 'yss', 'created')
         title = find_index(context, 'yss', 'title')
         num_likes = find_index(context, 'yss', 'num_likes')
         artist = find_index(context, 'yss', 'artist')
         num_recordings = find_index(context, 'yss', 'num_recordings')
         duration = find_index(context, 'yss', 'duration')
         num_likes = find_index(context, 'yss', 'num_likes')
-        genre = find_index(context, 'yss', 'genre')
         sorting = {
-            'title':
-            (title, artist, num_recordings, num_likes, genre),
-            'artist':
-            (artist, title, num_recordings, num_likes, genre),
-            'genre':
-            (genre, artist, title, num_recordings, num_likes),
-            'num_likes':
-            (num_likes, artist, title, num_recordings, genre),
-            'num_recordings':
-            (num_recordings, artist, title, num_likes, genre),
-            'duration':
-            (duration, artist, title, genre, num_likes, num_recordings),
+            'created':(created, artist, title, num_recordings, num_likes),
+            'title':(title, artist, num_recordings, created, num_likes),
+            'artist':(artist, title, num_recordings, created, num_likes),
+            'num_likes':(num_likes, artist, title, num_recordings),
+            'num_recordings':(num_recordings, artist, title, num_likes),
+            'duration':(duration, artist, title, num_recordings, num_likes),
             }
         indexes = sorting.get(token, sorting[self.default_sort])
         for idx in indexes[1:]:
@@ -391,30 +385,25 @@ class PerformerSongsLikedView(PerformerView):
 
 @view_defaults(context=IPerformer)
 class PerformerSongsUploadedView(PerformerView):
-    default_sort='artist'
+    default_sort='created'
+    default_sort_reversed = True
 
     def sort_by(self, rs, token, reverse):
         context = self.context
+        created = find_index(context, 'yss', 'created')
         title = find_index(context, 'yss', 'title')
         num_likes = find_index(context, 'yss', 'num_likes')
         artist = find_index(context, 'yss', 'artist')
         num_recordings = find_index(context, 'yss', 'num_recordings')
         duration = find_index(context, 'yss', 'duration')
         num_likes = find_index(context, 'yss', 'num_likes')
-        genre = find_index(context, 'yss', 'genre')
         sorting = {
-            'title':
-            (title, artist, num_recordings, num_likes, genre),
-            'artist':
-            (artist, title, num_recordings, num_likes, genre),
-            'genre':
-            (genre, artist, title, num_recordings, num_likes),
-            'num_likes':
-            (num_likes, artist, title, num_recordings, genre),
-            'num_recordings':
-            (num_recordings, artist, title, num_likes, genre),
-            'duration':
-            (duration, artist, title, genre, num_likes, num_recordings),
+            'created':(created, artist, title, num_recordings, num_likes),
+            'title':(title, artist, num_recordings, created, num_likes),
+            'artist':(artist, title, num_recordings, created, num_likes),
+            'num_likes':(num_likes, artist, title, num_recordings),
+            'num_recordings':(num_recordings, artist, title, num_likes),
+            'duration':(duration, artist, title, num_recordings, num_likes),
             }
         indexes = sorting.get(token, sorting[self.default_sort])
         for idx in indexes[1:]:

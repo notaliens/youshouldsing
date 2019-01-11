@@ -104,7 +104,6 @@ Songs
     tempfiles are cleaned up, not always).
   - Notification when someone likes you.***
   - Default recording settings (visibility/allow likes/shares/comments).
-  - Songs uploaded should be sortable by created.
 
 - Profile Recordings
 
