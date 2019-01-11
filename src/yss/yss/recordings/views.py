@@ -1,5 +1,7 @@
 import colander
 import deform
+import time
+
 from pyramid.response import FileResponse
 from pyramid.view import (
     view_config,
@@ -159,7 +161,7 @@ class RecordingView(object):
         redis = get_redis(self.request)
         recording = self.context
         progress = decode_redis_hash(
-            redis.hgetall(f'mixprogress-{self.context.__name__}')
+            redis.hgetall(f'mixprogress-{self.context.__oid__}')
             )
         progress['done'] = (
             (recording.mixed_blob and not recording.remixing) and 1 or 0
@@ -240,7 +242,8 @@ class RecordingView(object):
         if needs_remix:
             recording.remixing = True
             redis = get_redis(request)
-            redis.rpush("yss.new-recordings", resource_path(self.context))
+            redis.rpush(
+                "yss.new-recordings", f'{recording.__oid__}|{time.time()}')
 
         return request.resource_url(self.context)
 

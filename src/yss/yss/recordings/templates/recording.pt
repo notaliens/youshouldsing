@@ -69,7 +69,7 @@
            var has_edit_permission = ${has_edit_permission};
            $.ajax(
              {
-               "url":"${request.resource_url(context, 'mixprogress')}",
+               "url":"${request.resource_url(context, '@@mixprogress')}",
                "success": function(data) {
                  if (data['done']) {
                    rand = Math.random().toString(36).replace(/[^a-z]+/g, ''

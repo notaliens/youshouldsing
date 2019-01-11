@@ -15,7 +15,9 @@ from pyramid.paster import (
     setup_logging,
     bootstrap,
     )
-from pyramid.traversal import find_resource
+
+from substanced.objectmap import find_objectmap
+
 from yss.utils import get_redis
 
 logger = logging.getLogger('postproc')
@@ -39,55 +41,56 @@ def main(argv=sys.argv):
     env = bootstrap(config_uri)
     root = env['root']
     redis = get_redis(env['request'])
+    objectmap = find_objectmap(root)
     while True:
         logger.info('Waiting for another recording')
-        pathandtime = redis.blpop('yss.new-recordings', 0)[1] # blocking pop
-        path = pathandtime.decode('utf-8')
+        oidandtime = redis.blpop('yss.new-recordings', 0)[1] # blocking pop
+        oidandtime = oidandtime.decode('utf-8')
         try:
-            path, enqueued = path.rsplit('|', 1)
+            oid, enqueued = oidandtime.rsplit('|', 1)
         except ValueError:
+            oid = int(oidandtime)
             enqueued = time.time()
         else:
+            oid = int(oid)
             enqueued = float(enqueued)
-        logger.info(f'Received request for {path}')
+        logger.info(f'Received request for {oid}')
         time.sleep(0.25)
         transaction.abort()
-        try:
-            recording = find_resource(root, path)
-        except KeyError:
-            logger.warning(f'Could not find {path}')
+        recording = objectmap.object_for(oid)
+        if recording is None:
+            logger.warning(f'Could not find {oid}')
         else:
             try:
                 if not bool(recording.dry_blob):
-                    logger.warning(f'not committed yet: {path}')
-                    redis.rpush('yss.new-recordings', path)
+                    logger.warning(f'not committed yet: {recording.__name__}')
+                    redis.rpush('yss.new-recordings', oidandtime)
                 else:
-                    logger.info(f'Processing {path} enqueued at {enqueued}')
+                    logger.info(f'Processing {oid} enqueued at {enqueued}')
                     postprocess(recording, redis)
                     end = time.time()
                     logger.info(
-                        f'Time from enqeue-to-done for {path}: {end-enqueued}')
+                        f'Time from enqeue-to-done for {oid}: {end-enqueued}')
             except:
                 logger.warning(
-                    f'Unexpected error when processing {path}',
+                    f'Unexpected error when processing {oid}',
                     exc_info=True
                 )
-                progress_key = f'mixprogress-{recording.__name__}'
+                progress_key = f'mixprogress-{recording.__oid__}'
                 redis.hmset(
                     progress_key,
                     {'pct':-1, 'status':'Mix failed; unexpected error'}
                 )
                 redis.persist(progress_key) # clear only on good
-                redis.rpush('yss.new-recordings', path)
+                redis.rpush('yss.new-recordings', oidandtime)
                 raise
 
 def postprocess(recording, redis):
     tmpdir = recording.tmpfolder
     curdir = os.getcwd()
-    roid = recording.__oid__
     mixstart = time.time()
     try:
-        progress_key = f'mixprogress-{roid}'
+        progress_key = f'mixprogress-{recording.__oid__}'
         logger.info(f'Progress key is {progress_key}')
         redis.hmset(
             progress_key, {'pct':1, 'status':'Preparing'}

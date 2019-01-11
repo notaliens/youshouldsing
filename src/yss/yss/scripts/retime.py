@@ -13,7 +13,8 @@ from pyramid.paster import (
     setup_logging,
     bootstrap,
     )
-from pyramid.traversal import find_resource
+from substanced.objectmap import find_objectmap
+
 from yss.utils import get_redis, format_timings
 
 from google.cloud import storage
@@ -43,28 +44,36 @@ def main(argv=sys.argv):
     env = bootstrap(config_uri)
     root = env['root']
     redis = get_redis(env['request'])
+    objectmap = find_objectmap(root)
     while True:
         logger.info('Waiting for another retiming')
-        path = redis.blpop('yss.new-retimings', 0)[1] # blocking pop
-        path = path.decode('utf-8')
+        oidandtime = redis.blpop('yss.new-retimings', 0)[1] # blocking pop
+        oidandtime = oidandtime.decode('utf-8')
+        try:
+            oid, enqueued = oidandtime.rsplit('|', 1)
+        except ValueError:
+            oid = int(oidandtime)
+            enqueued = time.time()
+        else:
+            oid = int(oid)
+            enqueued = float(enqueued)
         time.sleep(1)
         transaction.abort()
-        try:
-            song = find_resource(root, path)
-        except KeyError:
-            logger.warning('Could not find %s' % path)
+        song = objectmap.object_for(oid)
+        if song is None:
+            logger.warning(f'Could not find {oid}')
 
         else:
-            progress_key = f'retimeprogress-{song.__name__}'
+            progress_key = f'retimeprogress-{oid}'
             try:
                 if not bool(song.retiming_blob):
                     # not committed yet
-                    redis.rpush('yss.new-retimings', path)
+                    redis.rpush('yss.new-retimings', oidandtime)
                 else:
                     retime(song, redis, env)
             except SystemExit:
                 redis.persist(progress_key) # clear only on good
-                redis.rpush('yss.new-retimings', path)
+                redis.rpush('yss.new-retimings', oidandtime)
                 raise
             except:
                 redis.hmset(
@@ -72,7 +81,7 @@ def main(argv=sys.argv):
                     {'pct':-1, 'status':'Retiming failed; unexpected error'}
                 )
                 redis.persist(progress_key) # clear only on good
-                redis.rpush('yss.new-retimings', path)
+                redis.rpush('yss.new-retimings', oidandtime)
                 raise
 
 def get_retime_tempdir(registry, song_id):
@@ -86,7 +95,7 @@ def retime(song, redis, env):
     )
     curdir = os.getcwd()
     try:
-        progress_key = f'retimeprogress-{song.__name__}'
+        progress_key = f'retimeprogress-{song.__oid__}'
         redis.hmset(
             progress_key, {'pct':1, 'status':'Preparing'}
         )

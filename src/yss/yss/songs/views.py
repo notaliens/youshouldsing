@@ -7,6 +7,7 @@ import os
 import random
 import slug
 import shutil
+import time
 import uuid
 
 from ZODB.blob import Blob
@@ -460,7 +461,8 @@ class SongView(object):
             shutil.copyfileobj(file_stream, saveto)
 
         redis = get_redis(self.request)
-        redis.rpush("yss.new-retimings", resource_path(self.context))
+        redisval = f'{self.context.__oid__}|{time.time()}'
+        redis.rpush("yss.new-retimings", redisval)
         set_acl(song,
                 [
                     (Allow, request.user.__oid__, ['yss.edit']),
@@ -506,7 +508,7 @@ class SongView(object):
         redis = get_redis(self.request)
         song = self.context
         progress = decode_redis_hash(
-            redis.hgetall(f'retimeprogress-{self.context.__name__}')
+            redis.hgetall(f'retimeprogress-{self.context.__oid__}')
             )
         progress['done'] = not song.retiming and 1 or 0
         return progress
@@ -579,8 +581,9 @@ class SongView(object):
         catalog = find_catalog(recording, 'yss')
         catalog.reindex_resource(recording)
         redis = get_redis(request)
-        redis.rpush("yss.new-recordings", resource_path(recording))
-        print ("finished", tmpdir, resource_path(recording))
+        redis.rpush(
+            "yss.new-recordings", f'{recording.__oid__}|{time.time()}'
+        )
         return request.resource_url(recording)
 
     def generate_recording_id(self, recordings):

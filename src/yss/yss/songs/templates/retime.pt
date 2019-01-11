@@ -174,7 +174,7 @@
        console.log('progress check');
        $.ajax(
          {
-           "url":"${request.resource_url(context, 'retimeprogress')}",
+           "url":"${request.resource_url(context, '@@retimeprogress')}",
            "success": function(data) {
              console.log(data);
              if (data['done']) {
