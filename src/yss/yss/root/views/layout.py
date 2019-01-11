@@ -69,8 +69,8 @@ class MainLayout(object):
                     'Recordings',
                     '@@recordings',
                     lambda c: c is root and request.view_name == 'recordings',
-                    {'sorting':'created', 'reverse':'true'})
-                ,
+                    None,
+                ),
                 (
                     'My Profile',
                     performer,
