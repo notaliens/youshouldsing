@@ -29,6 +29,14 @@
   - Consumer issue tracker.***
   - Private messages.
 
+- Docs Videos
+
+  - howtoenterthecode
+
+- Invite codes
+
+  - Attach note
+
 - Licensing
 
   - https://pep.rocks/programs/gem***
@@ -181,6 +189,7 @@ Songs
   - It's too easy to hit cancel on a new recording and lose it.
   - Allow 16x9
   - More effects (flanger, pitch).
+  - Video off from mic audio.*** See make it witchu private.
 
 - Search songs:
 

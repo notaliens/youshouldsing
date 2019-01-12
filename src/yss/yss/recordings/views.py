@@ -108,6 +108,18 @@ class RecordingView(object):
             }
 
     @view_config(
+        context=IRecording,
+        name='dry',
+        renderer='templates/recording.pt',
+        permission='yss.edit',
+    )
+    def dry(self):
+        # for debugging: /dry, never intended to be exposed in the UI
+        vars = self.view()
+        vars['video_url'] = self.request.resource_url(self.context, 'drymovie')
+        return vars
+
+    @view_config(
         name='edit',
         renderer='templates/edit.pt',
         permission='yss.edit',
@@ -289,11 +301,24 @@ class RecordingView(object):
         name='movie',
         permission='view'
     )
-    def stream_movie(self):
+    def stream_mixed(self):
         recording = self.context
         if recording.mixed_blob:
             return FileResponse(
                 recording.mixed_blob.committed(),
+                content_type='video/webm'
+            )
+        return HTTPBadRequest('Video still processing')
+
+    @view_config(
+        name='drymovie',
+        permission='yss.edit'
+    )
+    def stream_dry(self):
+        recording = self.context
+        if recording.dry_blob:
+            return FileResponse(
+                recording.dry_blob.committed(),
                 content_type='video/webm'
             )
         return HTTPBadRequest('Video still processing')
