@@ -28,6 +28,7 @@ requires = [
     'google-cloud-speech',
     'pillow',
     'ffmpeg-python',
+    'isso',
     ]
 
 setup(name='yss',

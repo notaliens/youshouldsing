@@ -127,9 +127,14 @@ Songs
   - "Likes disabled" instead of "0 performers have liked this recording"
     when like permission is not available.
   - "Other recordings you might like if you like this one"
-  - Disqus***  (remarkbox?)
   - Share links.
   - Show number of views.
+
+- Commenting
+
+  - Server side security
+  - Link username to profile page
+  - Show profile image next to username
 
 - Likes
 
