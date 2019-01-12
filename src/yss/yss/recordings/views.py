@@ -12,7 +12,6 @@ from pyramid.httpexceptions import (
     HTTPBadRequest,
     HTTPFound,
     )
-from pyramid.traversal import resource_path
 
 from substanced.interfaces import IRoot
 
@@ -36,6 +35,11 @@ class RecordingView(object):
     def __init__(self, context, request):
         self.context = context
         self.request = request
+
+    @reify
+    def page_title(self):
+        recording = self.context
+        return f'{recording.title} performed by {recording.performer.__name__}'
 
     @reify
     def is_processed(self):
@@ -150,6 +154,7 @@ class RecordingView(object):
             rendered = form.render(appstruct, readonly=False)
         return {
             'form':rendered,
+            'page_title': f'Editing {self.page_title}'
             }
 
     @view_config(
@@ -183,6 +188,7 @@ class RecordingView(object):
             'stream_url':self.request.resource_url(
                 self.context, 'movie'),
             'already':self.context.remixing,
+            'page_title':f'Remixing {self.page_title}'
             }
 
     @view_config(
@@ -308,6 +314,7 @@ class GlobalRecordingsView(object):
     default_sort = 'created'
     default_sort_reversed = True
     batch_size = 20
+    page_title = 'Recordings'
     def __init__(self, context, request):
         self.context = context
         self.request = request

@@ -9,7 +9,6 @@
   - privacy policy***
   - caching
   - tests
-  - page titles
   - contests
   - https://css-tricks.com/centering-css-complete-guide/
   - Profile/songs export
@@ -84,7 +83,6 @@ Songs
 - Profile:
 
   - Change password***
-  - Forgot password***
   - Singlist
   - Description requires nl2br or full HTML editing.
   - Delete account

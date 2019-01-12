@@ -16,10 +16,8 @@ from pyramid.httpexceptions import HTTPBadRequest
 from pyramid.settings import asbool
 from pyramid.httpexceptions import HTTPFound
 from pyramid.decorator import reify
-from pyramid.traversal import (
-    find_root,
-    resource_path,
-    )
+from pyramid.traversal import find_root
+
 from pyramid.security import (
     Allow,
     Deny,
@@ -73,6 +71,7 @@ logger = logging.getLogger('yss')
 class SongsView(object):
 
     default_sort = 'title'
+    page_title = 'Songs'
     default_sort_reversed = False
     batch_size = 20
 
@@ -270,7 +269,7 @@ class SongsView(object):
                 }
         if rendered is None:
             rendered = form.render(appstruct, readonly=False)
-        return {'form':rendered}
+        return {'form':rendered, 'page_title':'Upload Song'}
 
     def tabs(self):
         songs = self.context
@@ -306,6 +305,11 @@ class SongView(object):
     def __init__(self, context, request):
         self.context = context
         self.request = request
+
+    @reify
+    def page_title(self):
+        song = self.context
+        return f'{song.title}/{song.artist}'
 
     @reify
     def has_edit_permission(self):
@@ -420,27 +424,29 @@ class SongView(object):
         renderer='templates/retime.pt',
     )
     def retime(self):
-        alt_timings = getattr(self.context, 'alt_timings', '').strip()
+        song = self.context
+        alt_timings = getattr(song, 'alt_timings', '').strip()
         timings = alt_timings.strip()
         if not timings:
-            timings = self.context.timings.strip()
+            timings = song.timings.strip()
         if not timings:
             timings = '[]'
         formatted_timings = format_timings(timings)
-        if self.context.retiming:
+        if song.retiming:
             processed = 0
         else:
             processed = 1
         return {
-            "stream_url": self.request.resource_url(self.context, '@@stream'),
+            "stream_url": self.request.resource_url(song, '@@stream'),
             "timings": timings,
             "formatted_timings":formatted_timings,
             'processed':processed,
             'accept_url':self.request.resource_url(
-                self.context, '@@accept_retime'
+                song, '@@accept_retime'
             ),
             'needs_accept':int(bool(alt_timings)),
-            'lyrics':self.context.lyrics,
+            'lyrics':song.lyrics,
+            'page_title': f'Retime Lyrics for {self.page_title}'
         }
 
     @view_config(
@@ -532,6 +538,7 @@ class SongView(object):
             "stream_url": self.request.resource_url(song, '@@stream'),
             "timings": song.timings,
             "max_framerate": root.max_framerate,
+            'page_title': f'Recording {self.page_title}'
         }
 
     @view_config(
@@ -601,9 +608,9 @@ class SongView(object):
         permission='yss.edit',
     )
     def edit(self):
-        context = self.context
+        song = self.context
         request = self.request
-        schema = SongEditSchema().bind(request=request, context=context)
+        schema = SongEditSchema().bind(request=request, context=song)
         form = deform.Form(schema, buttons=('Save',))
         rendered = None
         if 'Save' in request.POST:
@@ -613,28 +620,28 @@ class SongView(object):
             except deform.ValidationFailure as e:
                 rendered = e.render()
             else:
-                context.title = appstruct['title']
-                context.artist = appstruct['artist']
-                context.genre = appstruct['genre']
-                context.language = appstruct['language']
-                context.lyrics = appstruct['lyrics']
-                context.year = appstruct['year']
-                find_catalog(context, 'yss').reindex_resource(context)
-                find_catalog(context, 'system').reindex_resource(context)
+                song.title = appstruct['title']
+                song.artist = appstruct['artist']
+                song.genre = appstruct['genre']
+                song.language = appstruct['language']
+                song.lyrics = appstruct['lyrics']
+                song.year = appstruct['year']
+                find_catalog(song, 'yss').reindex_resource(song)
+                find_catalog(song, 'system').reindex_resource(song)
                 request.session.flash('Song edited.', 'info')
-                return HTTPFound(request.resource_url(context, '@@edit'))
+                return HTTPFound(request.resource_url(song, '@@edit'))
         else:
             appstruct = {
-                'title':context.title,
-                'artist':context.artist,
-                'genre':context.genre,
-                'language':context.language,
-                'lyrics':context.lyrics,
-                'year':context.year,
+                'title':song.title,
+                'artist':song.artist,
+                'genre':song.genre,
+                'language':song.language,
+                'lyrics':song.lyrics,
+                'year':song.year,
                 }
         if rendered is None:
             rendered = form.render(appstruct, readonly=False)
-        return {'form':rendered}
+        return {'form':rendered, 'page_title': f'Editing {self.page_title}'}
 
     @view_config(
         name="recordings",
@@ -649,8 +656,9 @@ class SongView(object):
         return {
             'batch':batch,
             'filter_text':request.params.get('filter_text'),
-            'reverse':request.params.get('reverse', 'false')
-            }
+            'reverse':request.params.get('reverse', 'false'),
+            'page_title': f'Recordings of {self.page_title}'
+        }
 
     def query(self):
         request = self.request

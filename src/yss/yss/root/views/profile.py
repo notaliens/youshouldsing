@@ -207,3 +207,4 @@ def create_profile(context, request):
     return {
         'form':rendered,
         }
+create_profile.page_title = 'Create Profile'

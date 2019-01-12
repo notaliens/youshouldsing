@@ -69,6 +69,7 @@ def password_reset_request(context, request):
     return {
         'form':rendered,
         }
+password_reset_request.page_title = 'Request Password Reset'
 
 class ResetSchema(Schema):
     """ The schema for validating password reset requests."""
@@ -110,3 +111,4 @@ def password_reset(context, request):
     return {
         'form':rendered,
         }
+password_reset.page_title = 'Reset Password'

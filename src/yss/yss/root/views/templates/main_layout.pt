@@ -4,7 +4,7 @@
 
     <more tal:omit-tag="" metal:define-slot="head-first"></more>
     <meta charset="utf-8"/>
-    <title>${page_title|layout.page_title|'You Should Sing'}</title>
+    <title>${page_title|view.page_title|layout.page_title|'You Should Sing'}</title>
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0"/>
     <link rel="stylesheet" href="${layout.static('css/yss.css')}"

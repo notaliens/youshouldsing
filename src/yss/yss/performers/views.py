@@ -38,6 +38,11 @@ class PerformerView(object):
         self.request = request
 
     @reify
+    def page_title(self):
+        performer = self.context
+        return performer.__name__
+
+    @reify
     def has_edit_permission(self):
         performer = self.context
         return self.request.has_permission('yss.edit', performer)
@@ -280,6 +285,11 @@ class PerformerView(object):
 class PerformerRecordingsView(PerformerView):
     default_sort = 'created'
     default_sort_reversed = True
+
+    @reify
+    def page_title(self):
+        return f'Recordings by {self.context.__name__}'
+
     def sort_by(self, rs, token, reverse):
         context = self.context
         title = find_index(context, 'yss', 'title')
@@ -355,6 +365,10 @@ class PerformerRecordingsView(PerformerView):
 class PerformerSongsLikedView(PerformerView):
     default_sort='artist'
 
+    @reify
+    def page_title(self):
+        return f'Songs liked by {self.context.__name__}'
+
     def sort_by(self, rs, token, reverse):
         context = self.context
         created = find_index(context, 'yss', 'created')
@@ -424,6 +438,10 @@ class PerformerSongsLikedView(PerformerView):
 class PerformerSongsUploadedView(PerformerView):
     default_sort='created'
     default_sort_reversed = True
+
+    @reify
+    def page_title(self):
+        return f'Songs uploaded by {self.context.__name__}'
 
     def sort_by(self, rs, token, reverse):
         context = self.context
@@ -498,6 +516,10 @@ class PerformerSongsUploadedView(PerformerView):
 class PerformerPerformersLikedView(PerformerView):
     default_sort = 'name'
 
+    @reify
+    def page_title(self):
+        return f'Performers liked by {self.context.__name__}'
+
     def sort_by(self, rs, token, reverse):
         context = self.context
         name = find_index(context, 'system', 'name')
@@ -565,6 +587,10 @@ class PerformerRecordingsLikedView(PerformerView):
     default_sort='created'
     default_sort_reversed = True
 
+    @reify
+    def page_title(self):
+        return f'Recordings liked by {self.context.__name__}'
+
     def sort_by(self, rs, token, reverse):
         context = self.context
         title = find_index(context, 'yss', 'title')
@@ -631,6 +657,9 @@ class PerformerRecordingsLikedView(PerformerView):
 
 @view_defaults(context=IPerformer)
 class PerformerEditView(PerformerView):
+    @reify
+    def page_title(self):
+        return f'Editing {self.context.__name__}'
 
     @view_config(
         renderer='templates/profile_edit.pt',
@@ -700,6 +729,10 @@ class PerformerEditView(PerformerView):
 
 @view_defaults(context=IPerformer)
 class PerformerPrivacyView(PerformerView):
+
+    @reify
+    def page_title(self):
+        return f'Privacy settings for {self.context.__name__}'
 
     @view_config(
         renderer='templates/profile_privacy.pt',
@@ -783,6 +816,10 @@ class PerformersView(object):
     def __init__(self, context, request):
         self.context = context
         self.request = request
+
+    @reify
+    def page_title(self):
+        return 'Performers'
 
     def get_sort_params(self):
         request = self.request
