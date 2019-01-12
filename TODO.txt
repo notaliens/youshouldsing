@@ -89,7 +89,7 @@ Songs
   - Deleting a profile should delete its associated user (otherwise, problems
     when someone relogs in using that oauth account)***
   - Accept gravatar image as initial photo from oauth
-  - Member since***
+  - Member since
   - Show which authorizer (google/twitter/etc) in profile somehow.
   - Maybe medium sized prescaled photo for profile header.
   - Profile header photo when clicked should show large sized photo in
@@ -106,7 +106,7 @@ Songs
     tempfiles are cleaned up, not always).
   - Notification when someone likes you.***
   - Default recording settings (visibility/allow likes/shares/comments).
-  - Format personal values in header.***
+  - Format personal values in header.
 
 - Profile Recordings
 
@@ -154,7 +154,7 @@ Songs
   - Safari (mobile or desktop) doesn't support MediaRecorder.
     https://www.gmass.co/blog/record-audio-mobile-web-page-ios-android/***
     (detect and warn).
-  - Mic volume slider has no effect.***
+  - Mic volume slider has no effect.
   - Unhelpful errors when camera is already used (e.g. by OBS).
   - Handle conflict errors in postprocessing.
   - Maybe instead of building some system to arbitrarily time-align
@@ -166,7 +166,7 @@ Songs
   - Set guessed latency on initial record.
   - Karaoke display seems random which line is chosen next to display
     upcoming lyrics.***
-  - Negative mic latency.***
+  - Negative mic latency.
   - It's too easy to hit cancel on a new recording and lose it.
   - Allow 16x9
   - More effects (flanger, pitch).
