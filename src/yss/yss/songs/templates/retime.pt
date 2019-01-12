@@ -151,6 +151,7 @@
     </div>
   </div>
   <div metal:fill-slot="tail">
+    <script type="text/javascript" src="${layout.static('yss.songs:static/js.cookie.js')}"></script>
     <script type="text/javascript" src="${layout.static('yss.songs:static/ricekaraoke.js')}"></script>
     <script type="text/javascript" src="${layout.static('yss.songs:static/simplekaraokedisplay.js')}"></script>
     <script type="text/javascript" src="${layout.static('yss.songs:static/yssrecorder.js')}"></script>
