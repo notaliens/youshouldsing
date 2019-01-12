@@ -140,6 +140,7 @@ Songs
   - Cheat sheet
   - "comments on my recordings"
   - embed youtube / yss links
+  - edit and delete links still show up when not logged in
 
 - Likes
 

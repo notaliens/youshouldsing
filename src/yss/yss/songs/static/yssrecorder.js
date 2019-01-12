@@ -3,7 +3,9 @@ var karaoke = (function(stream_url, timings) {
     var paused = true;
     var show = null;
     var player = new Audio();
-    player.setAttribute('src', stream_url);
+    // cachebust
+    rand = Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 5);
+    player.setAttribute('src', stream_url + '?x=' + rand);
     var lastPosition = 0;
 
     function getTimeString(t) {
