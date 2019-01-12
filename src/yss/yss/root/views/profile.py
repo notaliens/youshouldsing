@@ -1,4 +1,5 @@
 import colander
+import datetime
 import deform
 import io
 import PIL.Image
@@ -10,7 +11,7 @@ from pyramid.traversal import find_root
 from substanced.schema import Schema
 
 from pyramid.view import view_config
-from substanced.util import find_service, set_acl, get_oid
+from substanced.util import find_service, set_acl, get_oid, find_index
 from substanced.file import FileNode
 
 from pyramid.security import Allow
@@ -43,6 +44,24 @@ def profilename_validator(node, kw):
         if value in performers:
             raise colander.Invalid(node, 'Username already taken %s' % value)
     return _profilename_validator
+
+@colander.deferred
+def invite_code_validator(node, kw):
+    context = kw['context']
+    def _invite_code_validator(node, value):
+        if not value:
+            raise colander.Invalid(node, f'Invitation code required')
+        value = value.upper()
+        ctindex = find_index(context, 'system', 'content_type')
+        nameindex = find_index(context, 'system', 'name')
+        q = ctindex.eq('Invitation') & nameindex.eq(value)
+        results = list(q.execute())
+        if not results:
+            raise colander.Invalid(node, f'No such invite code {value}')
+        if results[0].redeemer:
+            raise colander.Invalid(
+                node, f'Sorry, invite code {value} was already redeemed')
+    return _invite_code_validator
 
 class CreatePerformerSchema(Schema):
     """ Property schema to create a Performer.
@@ -96,6 +115,11 @@ class CreatePerformerSchema(Schema):
         title='Favorite Genre',
         widget=deform.widget.SelectWidget(values=genre_choices),
     )
+    invite_code = colander.SchemaNode(
+        colander.String(),
+        title='Invite Code',
+        validator=invite_code_validator,
+        )
 
 @view_config(
     name='create_profile',
@@ -122,6 +146,8 @@ def create_profile(context, request):
             performer = registry.content.create('Performer')
             root['performers'][username] = performer
             performer['recordings'] = registry.content.create('Recordings')
+            performer['invitations'] = registry.content.create('Invitations')
+            performer['invitations'].add_more(10)
             phdata = appstruct['photo']
             fp = phdata.get('fp')
             if fp is not None:
@@ -150,6 +176,16 @@ def create_profile(context, request):
             performer.genre = appstruct['genre']
             performer.tzname = appstruct['tzname']
             performer.location = appstruct['location']
+            ctindex = find_index(context, 'system', 'content_type')
+            nameindex = find_index(context, 'system', 'name')
+            q = ctindex.eq('Invitation') & nameindex.eq(
+                appstruct['invite_code'].upper())
+            results = list(q.execute())
+            if results:
+                invitation = results[0]
+                invitation.redeemer = performer
+                invitation.redemption_date = datetime.datetime.utcnow(
+                ).replace(tzinfo=pytz.UTC)
             set_acl(performer, [(Allow, user.__oid__, ['yss.edit'])])
             headers = remember(request, get_oid(user))
             return HTTPFound(request.resource_url(performer), headers=headers)

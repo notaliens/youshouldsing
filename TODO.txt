@@ -9,21 +9,24 @@
   - privacy policy***
   - caching
   - tests
-  - invitations***
   - page titles
   - contests
   - https://css-tricks.com/centering-css-complete-guide/
   - Profile/songs export
-  - DMCA claim handler.***
+  - DMCA claim handler.
   - Show account activity.
   - Allow screen name change.
-  - Marketing/about page.***
+  - Marketing/about page.
   - Docs page.
   - Replace all manual form renderings with a RetailForm class.
   - What is system.Identified?
-  - Cookie policy***
+  - Cookie policy
   - Factor out "sort_tag", it should be boilerplate.
   - Send enqueue-to-done data to datadog.
+  - Send substanced.event.ObjectModified events instead of handling reindexing
+    manually.
+  - Set up something to notify of tracebacks.***
+  - De-cripple sdi views for custom content types.
 
 - Licensing
 
@@ -32,13 +35,13 @@
 - Login:
 
   - Non-oauth signups.***
-  - Facebook login.***
+  - Facebook login.
   - How do we deal with someone forgetting which service he used to
     login with?  How do we deal with it if a user wants to log in
     to the same yss account using two different oauth providers?
   - Impersonation.
   - Require user to validate email address and do captcha at
-    registration.*** (probably not necessary during invite phase)
+    registration.
   - Know what happens when we need to change consumer secret or details about
     app in developer settings.
   - Keep around original google/twitter login name so we can manually
@@ -92,9 +95,9 @@ Songs
   - Show which authorizer (google/twitter/etc) in profile somehow.
   - Maybe medium sized prescaled photo for profile header.
   - Profile header photo when clicked should show large sized photo in
-    overlay.***
+    overlay.
   - All uses of photos in img tags should be surrounded by fixed size div
-    box.***
+    box.
   - Don't use "title" as realname, too easy to mistakenly expose.
   - Do better when people log in from Google getting profile create
     fields right***
@@ -105,6 +108,7 @@ Songs
     tempfiles are cleaned up, not always).
   - Notification when someone likes you.***
   - Default recording settings (visibility/allow likes/shares/comments).
+  - Format personal values in header.***
 
 - Profile Recordings
 
@@ -147,7 +151,8 @@ Songs
 - Record:
 
   - Safari (mobile or desktop) doesn't support MediaRecorder.
-    https://www.gmass.co/blog/record-audio-mobile-web-page-ios-android/
+    https://www.gmass.co/blog/record-audio-mobile-web-page-ios-android/***
+    (detect and warn).
   - Mic volume slider has no effect.***
   - Unhelpful errors when camera is already used (e.g. by OBS).
   - Handle conflict errors in postprocessing.

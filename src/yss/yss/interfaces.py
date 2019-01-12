@@ -28,6 +28,12 @@ class IPerformer(Interface):
 class IPerformerPhoto(Interface):
     """ Marker interface for a performer photo """
 
+class IInvitation(Interface):
+    """ Marker interface for an invitation """
+
+class IInvitations(Interface):
+    """ Marker interface for an invitations folder """
+
 class PerformerLikesPerformer(ReferenceType):
     """ Map a "like" from a performer to another performer.
     """
@@ -62,6 +68,10 @@ class RecordingToSong(ReferenceType):
     source_ordered = True
     # delete recordings when their associated songs are deleted
     target_integrity = Cascading.DELETE
+
+class InvitationToRedeemer(ReferenceType):
+    """ Map an invitation to a redeemer-performer"""
+    pass
 
 def performers_choices(context, request):
     performers = request.virtual_root.get('performers')

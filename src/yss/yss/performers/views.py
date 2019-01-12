@@ -3,6 +3,7 @@ import colander
 import deform
 import io
 import PIL.Image
+import pytz
 
 from pyramid.decorator import reify
 from pyramid.httpexceptions import HTTPBadRequest
@@ -116,6 +117,15 @@ class PerformerView(object):
                  'url':self.request.resource_url(performer, '@@privacy'),
                  'class':state=='privacy' and 'active' or '',
                  'enabled':True,
+                 })
+            if 'invitations' in self.context:
+                tabs.append(
+                    {'title':'Invite Codes',
+                     'id':'button-invitations',
+                     # NB: the *view*, not the subobject
+                     'url':self.request.resource_url(performer,'@@invitations'),
+                     'class':state == 'invitations' and 'active' or '',
+                     'enabled':True,
                  })
         return tabs
 
@@ -238,6 +248,33 @@ class PerformerView(object):
         else:
             reverse = asbool(request.params.get('reverse'))
         return sorting, reverse
+
+    @view_config(
+        renderer='templates/invitations.pt',
+        name='invitations',
+        permission='view',
+    )
+    def invitations(self):
+        vals = self.view()
+        request = self.request
+        resultset = sorted(self.context['invitations'].values(),
+                           key=lambda i: i.created)
+        batch = Batch(resultset, request, seqlen=len(resultset),
+                      default_size=self.batch_size)
+        vals.update({
+            'batch':batch,
+            'filter_text':request.params.get('filter_text'),
+            'reverse':request.params.get('reverse', 'false')
+            })
+        return vals
+
+    def redemption_date(self, invitation):
+        tzname = getattr(self.request.user, 'tzname', 'UTC')
+        if invitation.redemption_date is None:
+            return 'unknown date'
+        localized = invitation.redemption_date.replace(
+            tzinfo=pytz.timezone(tzname))
+        return localized.strftime('%b %d %Y')
 
 @view_defaults(context=IPerformer)
 class PerformerRecordingsView(PerformerView):
