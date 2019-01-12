@@ -12,7 +12,7 @@
   - contests
   - https://css-tricks.com/centering-css-complete-guide/
   - Profile/songs export
-  - DMCA claim handler.
+  - DMCA claim handler.***
   - Show account activity.
   - Allow screen name change.
   - Marketing/about page.
@@ -162,7 +162,7 @@ Songs
 - Record:
 
   - Safari (mobile or desktop) doesn't support MediaRecorder.
-    https://www.gmass.co/blog/record-audio-mobile-web-page-ios-android/***
+    https://www.gmass.co/blog/record-audio-mobile-web-page-ios-android/
     (detect and warn).
   - Mic volume slider has no effect.
   - Unhelpful errors when camera is already used (e.g. by OBS).
