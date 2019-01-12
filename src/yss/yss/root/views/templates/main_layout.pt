@@ -152,8 +152,7 @@
     <div id="footer">
       <div class="container">
         <p class="text-muted credit">
-       A <a href="http://pylonsproject.org">Pylons Project</a> Jaunt by the
-          <a href="http://wsgiwar.com/teams/c2/definitely-not-built-by-aliens/">Definitely Not Built By Aliens</a> Team.  <a href="/@@tos">Terms of Service</a>
+          <a href="/@@tos">Terms of Service</a>
         </p>
       </div>
     </div>
