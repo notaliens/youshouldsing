@@ -27,6 +27,7 @@
     manually.
   - Set up something to notify of tracebacks.***
   - De-cripple sdi views for custom content types.
+  - Consumer issue tracker.***
 
 - Licensing
 
