@@ -191,6 +191,8 @@ var rtc_recorder = (function(exports, karaoke, max_framerate, upload_handler) {
         $('select#audioSource option').remove();
         $('select#videoSource option').remove();
         // then add new ones
+        selectedVideo = Cookies.get('videodevice');
+        selectedAudio = Cookies.get('audiodevice');
         for (var i = 0; i !== deviceInfos.length; ++i) {
             var deviceInfo = deviceInfos[i];
             var option = document.createElement('option');
@@ -199,16 +201,25 @@ var rtc_recorder = (function(exports, karaoke, max_framerate, upload_handler) {
                 option.text = deviceInfo.label ||
                     'microphone ' + (audioSelect.length + 1);
                 audioSelect.appendChild(option);
+                if (option.value == selectedAudio) {
+                    option.selected = true;
+                }
             } else if (deviceInfo.kind === 'videoinput' && videoSelect) {
                 option.text = deviceInfo.label || 'camera ' +
                     (videoSelect.length + 1);
                 videoSelect.appendChild(option);
+                if (option.value == selectedVideo) {
+                    option.selected = true;
+                }
             }
         }
         if (videoSelect) {
             nocam_option = document.createElement('option');
             nocam_option.value = '';
             nocam_option.text = 'No Camera';
+            if (selectedVideo === '') {
+                nocam_option.selected = true;
+            }
             videoSelect.appendChild(nocam_option);
         }
     }
@@ -429,14 +440,24 @@ var rtc_recorder = (function(exports, karaoke, max_framerate, upload_handler) {
         $('#play-me')[0].onclick = karaoke.playtoggle;
     }
 
+    function setAudioAndGetStream() {
+        Cookies.set('audiodevice', this.value);
+        return getStream();
+    }
+
+    function setVideoAndGetStream() {
+        Cookies.set('videodevice', this.value);
+        return getStream();
+    }
+
     function init() {
         navigator.mediaDevices.enumerateDevices().then(gotDevices).then(
             getStream);
         if (audioSelect) {
-            audioSelect.onchange = getStream;
+            audioSelect.onchange = setAudioAndGetStream;
         }
         if (videoSelect) {
-            videoSelect.onchange = getStream;
+            videoSelect.onchange = setVideoAndGetStream;
         }
         initEvents();
     }

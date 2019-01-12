@@ -41,7 +41,7 @@
     to the same yss account using two different oauth providers?
   - Impersonation.
   - Require user to validate email address and do captcha at
-    registration.
+    registration. (post beta)
   - Know what happens when we need to change consumer secret or details about
     app in developer settings.
   - Keep around original google/twitter login name so we can manually
@@ -90,7 +90,6 @@ Songs
     when someone relogs in using that oauth account)***
   - Accept gravatar image as initial photo from oauth
   - Member since***
-  - # of public songs recorded on header of profile views***
   - Show which authorizer (google/twitter/etc) in profile somehow.
   - Maybe medium sized prescaled photo for profile header.
   - Profile header photo when clicked should show large sized photo in
@@ -125,14 +124,17 @@ Songs
 
 - View recording:
 
-  - Dropdown for who liked instead of inline table*** (maybe as part of like
-    macro)
   - "Likes disabled" instead of "0 performers have liked this recording"
     when like permission is not available.
   - "Other recordings you might like if you like this one"
   - Disqus***  (remarkbox?)
   - Share links.
   - Show number of views.
+
+- Likes
+
+  - Dropdown for who liked***
+  - Better icons
 
 - Edit recording:
 
@@ -167,7 +169,6 @@ Songs
   - Negative mic latency.***
   - It's too easy to hit cancel on a new recording and lose it.
   - Allow 16x9
-  - Remember camera and mic choices.***
   - More effects (flanger, pitch).
 
 - Search songs:
