@@ -33,7 +33,11 @@ class Invitations(Folder):
         i = 0
         while True:
             invite_id = ''.join(
-                random.choices(string.ascii_uppercase + string.digits, k=8))
+                random.choices(
+                    list(set(string.ascii_uppercase) - set('IO')) +
+                    list(set(string.digits) - set('10')),
+                    k=8)
+            )
             q = baseq & nameindex.eq(invite_id)
             # dont create more than one invite with the same name globally
             rs = q.execute()
