@@ -263,6 +263,8 @@ class RecordingView(object):
             redis.rpush(
                 "yss.new-recordings", f'{recording.__oid__}|{time.time()}')
 
+        request.response.set_cookie('latency', str(latency))
+
         return request.resource_url(self.context)
 
     @view_config(

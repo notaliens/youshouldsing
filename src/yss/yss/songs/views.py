@@ -560,6 +560,12 @@ class SongView(object):
         tmpdir_name = f'{sane_name}-{recording_id}'
         tmpdir = get_recording_tempdir(request, tmpdir_name)
         recording = request.registry.content.create('Recording', tmpdir)
+        latency = request.cookies.get('latency', 0)
+        try:
+            latency = float(latency)
+        except ValueError:
+            latency = 0
+        recording.latency = latency
         description = request.params['description'][:5000]
         recording.description = description
         recordings[recording_id] = recording

@@ -105,143 +105,78 @@ def postprocess(recording, redis):
         dry_webm = recording.dry_blob.committed()
         open('dry_blob_filename', 'w').write(dry_webm)
         redis.hmset(
-            progress_key, {'pct':10, 'status':'Extracting dry mic audio'}
+            progress_key, {'pct':50, 'status':'Mixing'}
         )
-        soxexe = distutils.spawn.find_executable('sox')
         ffmpegexe = distutils.spawn.find_executable('ffmpeg')
-
-        ffextract = [
-            ffmpegexe,
-            "-threads", "4",
-            '-thread_queue_size', '512',
-            "-y", # clobber
-            "-i", dry_webm,
-            "-vn", # no video
-            "-ar", "48000", # it will always be 48K from chrome
-            "-acodec", "copy",
-            "-f", "opus",
-            "micdry.opus"
-            ]
-
-        logger.info(f'Extracting dry mic into {tmpdir}/micdry.opus using')
-        logger.info(' '.join(ffextract))
-
-        pffextract = subprocess.Popen(
-            ffextract,
-            shell=False
-        )
-        pffextract.communicate()
-        duration = audioread.audio_open('micdry.opus').duration
-
-        sox2wet = [
-            soxexe,
-            '--buffer', '20000',
-            '-t', 'opus',
-            '-v', '0.1', # pertains to micdry.opus to prevent clipping
-            'micdry.opus',
-            '-r', '48000',
-            '-t', 'flac',
-            '-',
-        ]
-        # compressor always enabled
-        sox2wet.extend(
-            "compand 0.3,1 -90,-90,-70,-70,-60,-20,0,0 -5 0 0.2".split(' ')
-            )
-        if 'effect-reverb' in recording.effects:
-            sox2wet.extend(["reverb", "40"])
-        if 'effect-chorus' in recording.effects:
-            s = "chorus 0.6 0.9 50.0 0.4 0.25 2.0 -t 60.0 0.32 0.4 1.3 -s"
-            sox2wet.extend(s.split(' '))
         song_audio_filename = recording.song.blob.committed()
-        open('song_audio_filename', 'w').write(song_audio_filename)
-        musicvolume = recording.musicvolume
-        latency = recording.latency
-        sox2mixed = [
-            soxexe,
-            '--buffer', '20000',
-            '-t', 'flac',
-            '-',
-            "-M",
-            "-t", "opus",
-            # applies to song_audio_filename (0.5 is default on slider)
-            "-v", f"{float(musicvolume)}", # x5 is a guess
-            song_audio_filename,
-            '-t', 'flac',
-            "-r", "48000",
-            '-',
-        ]
-        sox2mixed.extend(["trim", "0", str(duration)])
-        if latency:
-            # apply latency adj, must come before other options or voice is
-            # doubled
-            sox2mixed.extend(['delay', "0", str(latency)])
-        # center vocals (see https://stackoverflow.com/questions/14950823/sox-exe-mixing-mono-vocals-with-stereo-music)
-        sox2mixed.extend(["remix", "-m", "1,2", "2,1"])
-
-        ffm2webm = [
+        ffmix = [
             ffmpegexe,
             "-threads", "4",
             '-thread_queue_size', '512',
             "-y", # clobber
             "-i", dry_webm,
-            "-i", "pipe:",
-            # vp8/opus combination supported by both FF and chrome
-            "-c:a", "libopus",
-            "-map", "1:a:0",
+            "-i", song_audio_filename,
+            "-shortest",
             "-b:a", "128000",
             "-vbr", "on",
             "-compression_level", "10",
-            "-shortest",
             ]
+        webmfilter = ['volume=50']
+        songfilter = []
+        if recording.latency:
+            latency = recording.latency
+            abslatency = abs(recording.latency)
+            #latency_ms = int(abslatency*1000)
+            #adelay = f'adelay={latency_ms}|{latency_ms}' #ms
+            atrim =f'atrim={abslatency}' #seconds
+            if abslatency == latency: # fix mic audio ahead of backing track
+                webmfilter.append(atrim) # mono
+            else: # fix backing track ahead of mic audio
+                songfilter.append(atrim) # stereo
+        songfilter.append(f'volume={recording.musicvolume*5}')
+
+        webmfilter.append('acompressor')
+        if 'effect-reverb' in recording.effects:
+            webmfilter.append('aecho=0.6:0.3:50:0.25')
+        if 'effect-chorus' in recording.effects:
+            webmfilter.append(
+                'chorus=0.5:0.9:50|60|40:0.4|0.32|0.3:0.25|0.4|0.3:2|2.3|1.3')
+
+        allfilter = f"[0:a]{','.join(webmfilter)}[a0]; [1:a]{','.join(songfilter)}[a1]; [a0][a1]amix=inputs=2:duration=shortest[aout]"
+
+        ffmix.extend([
+            '-filter_complex',
+            allfilter,
+            '-map', '[aout]',
+            '-ac', '2',
+            "-ar", "48000", # it will always be 48K from chrome
+            ])
         if recording.show_camera:
-            ffm2webm.extend([
+            ffmix.extend([
                 "-c:v", "vp8",
                 "-map", "0:v:0?", # ? at end makes it opt (recs with no cam)
                 ])
         else:
-            ffm2webm.append('-vn') # no video
-        ffm2webm.extend([
+            ffmix.extend([
+                '-vn',
+            ]) # no video
+
+        ffmix.extend([
             # https://stackoverflow.com/questions/20665982/convert-videos-to-webm-via-ffmpeg-faster
             '-cpu-used', '8', # gofast (default is 1, quality suffers)
             '-deadline', 'realtime', # gofast
             'mixed.webm'
         ])
 
-        redis.hmset(
-            progress_key, {'pct':60, 'status':'Creating mix'}
-        )
+        logger.info(f'Mixing using')
+        logger.info(' '.join(ffmix))
 
-        logger.info(f'Creating mix in {tmpdir}/mixed.webm')
-        logger.info('pipeline:')
-        logger.info(
-            ' '.join(sox2wet) + ' | ' +
-            ' '.join(sox2mixed) + ' | ' +
-            ' '.join(ffm2webm)
-        )
-
-        # look at it go
-        psox2wet = subprocess.Popen(
-            sox2wet,
-            stdout=subprocess.PIPE,
+        pffextract = subprocess.Popen(
+            ffmix,
             shell=False
         )
+        pffextract.communicate()
 
-        psox2mixed = subprocess.Popen(
-            sox2mixed,
-            stdin=psox2wet.stdout,
-            stdout=subprocess.PIPE,
-            shell=False
-        )
-
-        pff2webm = subprocess.Popen(
-            ffm2webm,
-            stdin=psox2mixed.stdout,
-            shell=False,
-            )
-
-        psox2wet.stdout.close()
-        psox2mixed.stdout.close()
-        pff2webm.communicate()
         logger.info(f'finished mixing {tmpdir}')
 
         recording.mixed_blob = Blob()
@@ -262,6 +197,7 @@ def postprocess(recording, redis):
         # don't remove tempdir until commit succeeds
         #shutil.rmtree(tmpdir, ignore_errors=True)
     except FileNotFoundError:
+        raise
         logger.warning('no such file or dir when chdir')
         redis.hmset(
             progress_key,
