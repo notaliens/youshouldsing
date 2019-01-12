@@ -130,10 +130,8 @@
            if (el.className === 'isso-postbox') {
              // show the text block and the buttons
              el.style.display = 'block';
-           }
-           if (el.nodeName == 'INPUT' && el.name == 'author') {
-             // set our performer name as the author name
-             el.value = "${getattr(performer, '__name__', '')}";
+             $('[name=author]', el)[0].value = "${getattr(performer, '__name__'\
+, '')}";
            }
          }
        });
