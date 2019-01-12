@@ -5,7 +5,7 @@
   - should probably use browser timezone instead of user-specified SDI timezone
   - Relstorage
   - i18n
-  - terms of service***
+  - terms of service*** (looks bad on phone)
   - privacy policy***
   - caching
   - tests
@@ -135,6 +135,11 @@ Songs
   - Server side security
   - Link username to profile page
   - Show profile image next to username
+  - Get replies working
+  - Get notifications working
+  - Cheat sheet
+  - "comments on my recordings"
+  - embed youtube / yss links
 
 - Likes
 

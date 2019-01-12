@@ -119,17 +119,20 @@
             tal:define="performer request.performer">
      liker();
      function callback(records) {
-       // zomg
+       // zomg; dynamically change isso values as it adds crap to the DOM.
+       // we can't do this in onload or domready because I can't seem
+       // to figure out how to be the very last.
        records.forEach(function (record) {
          var list = record.addedNodes;
          var i = list.length - 1;
          for ( ; i > -1; i-- ) {
            el = list[i];
-           console.log(list[i]);
            if (el.className === 'isso-postbox') {
+             // show the text block and the buttons
              el.style.display = 'block';
            }
            if (el.nodeName == 'INPUT' && el.name == 'author') {
+             // set our performer name as the author name
              el.value = "${getattr(performer, '__name__', '')}";
            }
          }
