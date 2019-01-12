@@ -308,7 +308,8 @@ class RecordingView(object):
         if recording.mixed_blob:
             return FileResponse(
                 recording.mixed_blob.committed(),
-                content_type='video/webm'
+                content_type='video/webm',
+                cache_max_age=0,
             )
         return HTTPBadRequest('Video still processing')
 
@@ -321,7 +322,8 @@ class RecordingView(object):
         if recording.dry_blob:
             return FileResponse(
                 recording.dry_blob.committed(),
-                content_type='video/webm'
+                content_type='video/webm',
+                cache_max_age=0,
             )
         return HTTPBadRequest('Video still processing')
 

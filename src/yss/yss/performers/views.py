@@ -1053,4 +1053,4 @@ class PerformerProfilePrivacySchema(Schema):
 #    http_cache=0, # XXX
     )
 def view_file(context, request):
-    return context.get_response(request=request)
+    return context.get_response(request=request, cache_max_age=0)

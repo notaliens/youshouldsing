@@ -524,7 +524,7 @@ class SongView(object):
         permission='view',
     )
     def stream(self):
-        return self.context.get_response(request=self.request)
+        return self.context.get_response(request=self.request, cache_max_age=0)
 
     @view_config(
         name="record",
