@@ -6,7 +6,10 @@ import PIL.Image
 import pytz
 
 from pyramid.decorator import reify
-from pyramid.httpexceptions import HTTPBadRequest
+from pyramid.httpexceptions import (
+    HTTPBadRequest,
+    HTTPFound,
+    )
 from pyramid.settings import asbool
 from pyramid.view import (
     view_config,
@@ -24,6 +27,8 @@ from yss.interfaces import (
     IPerformer,
     IPerformers,
     )
+
+from yss.root.views.passwordreset import ResetSchema
 
 from yss.performers import PerformerProfileSchema
 
@@ -53,14 +58,15 @@ class PerformerView(object):
         return self.request.has_permission('view', performer)
 
     def tabs(self):
-        state = self.request.view_name
+        request = self.request
+        state = request.view_name
         performer = self.context
         tabs = []
         if self.has_view_permission:
             tabs.append(
                 {'title':'View',
                  'id':'button-view',
-                 'url':self.request.resource_url(performer),
+                 'url':request.resource_url(performer),
                  'class':state == '' and 'active' or '',
                  'enabled':True,
                  })
@@ -68,7 +74,7 @@ class PerformerView(object):
                 {'title':'Recordings',
                  'id':'button-recordings',
                  # NB: the *view*, not the subobject
-                 'url':self.request.resource_url(performer, '@@recordings'),
+                 'url':request.resource_url(performer, '@@recordings'),
                  'class':state == 'recordings' and 'active' or '',
                  'enabled':True,
                  })
@@ -76,7 +82,7 @@ class PerformerView(object):
                 tabs.append(
                     {'title':'Recordings Liked',
                      'id':'button-recordingsliked',
-                     'url':self.request.resource_url(
+                     'url':request.resource_url(
                          performer, '@@recordingsliked'),
                      'class':state == 'recordingsliked' and 'active' or '',
                      'enabled':True,
@@ -85,7 +91,7 @@ class PerformerView(object):
                 tabs.append(
                     {'title':'Songs Liked',
                      'id':'button-songsliked',
-                     'url':self.request.resource_url(performer, '@@songsliked'),
+                     'url':request.resource_url(performer, '@@songsliked'),
                      'class':state == 'songsliked' and 'active' or '',
                      'enabled':True,
                     })
@@ -93,7 +99,7 @@ class PerformerView(object):
                 tabs.append(
                     {'title':'Performers Liked',
                      'id':'button-performersliked',
-                     'url':self.request.resource_url(
+                     'url':request.resource_url(
                          performer, '@@performersliked'),
                      'class':state == 'performersliked' and 'active' or '',
                      'enabled':True,
@@ -102,7 +108,7 @@ class PerformerView(object):
                 tabs.append(
                     {'title':'Songs Uploaded',
                      'id':'button-songsuploaded',
-                     'url':self.request.resource_url(
+                     'url':request.resource_url(
                          performer, '@@songsuploaded'),
                      'class':state == 'songsuploaded' and 'active' or '',
                      'enabled':True,
@@ -112,14 +118,24 @@ class PerformerView(object):
             tabs.append(
                 {'title':'Edit',
                  'id':'button-edit',
-                 'url':self.request.resource_url(performer, '@@edit'),
+                 'url':request.resource_url(performer, '@@edit'),
                  'class':state=='edit' and 'active' or '',
                  'enabled':True,
                  })
+            if request.authentication_type == 'internal':
+                tabs.append(
+                    {'title':'Change Password',
+                     'id':'button-change-password',
+                     'url':request.resource_url(
+                         performer, '@@changepassword'),
+                     'class':state=='changepassword' and 'active' or '',
+                     'enabled':True,
+                    })
+
             tabs.append(
                 {'title':'Privacy',
                  'id':'button-privacy',
-                 'url':self.request.resource_url(performer, '@@privacy'),
+                 'url':request.resource_url(performer, '@@privacy'),
                  'class':state=='privacy' and 'active' or '',
                  'enabled':True,
                  })
@@ -128,7 +144,7 @@ class PerformerView(object):
                     {'title':'Invite Codes',
                      'id':'button-invitations',
                      # NB: the *view*, not the subobject
-                     'url':self.request.resource_url(performer,'@@invitations'),
+                     'url':request.resource_url(performer,'@@invitations'),
                      'class':state == 'invitations' and 'active' or '',
                      'enabled':True,
                  })
@@ -808,6 +824,48 @@ class PerformerPrivacyView(PerformerView):
         vars['form'] = rendered
         return vars
 
+
+@view_defaults(context=IPerformer)
+class PerformerChangePasswordView(PerformerView):
+
+    @reify
+    def page_title(self):
+        return f'Change password for {self.context.__name__}'
+
+    @view_config(
+        renderer='templates/profile_changepassword.pt',
+        name='changepassword',
+        permission='yss.edit',
+    )
+    def __call__(self):
+        vars = self.view()
+        context = self.context
+        request = self.request
+        schema = ResetSchema().bind(request=request, context=context)
+        form = deform.Form(schema, buttons=('Save',))
+        rendered = None
+        if 'Save' in request.POST:
+            controls = request.POST.items()
+            try:
+                appstruct = form.validate(controls)
+            except deform.ValidationFailure as e:
+                rendered = e.render()
+            else:
+                password = appstruct['new_password']
+                user = request.user
+                user.set_password(password)
+                request.sdiapi.flash('Your password was changed.')
+                home = request.resource_url(request.context)
+                return HTTPFound(location=home)
+        else:
+            appstruct = {
+                'csrf_token': request.session.get_csrf_token(),
+                'login': request.user.__name__,
+            }
+        if rendered is None:
+            rendered = form.render(appstruct, readonly=False)
+        vars['form'] = rendered
+        return vars
 
 class PerformersView(object):
     default_sort = 'name'

@@ -45,6 +45,7 @@ def authentication_type(request):
             return 'twitter'
         if request.user.__name__.startswith('accounts.google.com_'):
             return 'google'
+        return 'internal'
 
 def get_photodata(context, request):
     photo = context['photo']

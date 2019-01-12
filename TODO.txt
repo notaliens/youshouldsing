@@ -82,7 +82,6 @@ Songs
 
 - Profile:
 
-  - Change password***
   - Singlist
   - Description requires nl2br or full HTML editing.
   - Delete account
