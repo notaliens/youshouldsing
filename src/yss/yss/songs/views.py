@@ -478,7 +478,7 @@ class SongView(object):
         self.request.session.flash(
             'This is gonna take a while. It\'s not magic. But after the '
             'retiming is done processing, listen and watch to see that your '
-            'spoken lyrics line up with the song acceptably, and hit accept if '
+            'spoken lyrics line up with the song, and hit accept if '
             'you are happy with the result. Remember: it\'s just karaoke.',
             'info')
         return self.request.resource_url(self.context, '@@retime')
