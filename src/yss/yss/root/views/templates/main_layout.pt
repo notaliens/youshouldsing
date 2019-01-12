@@ -42,7 +42,7 @@
               <span class="icon-bar"></span>
             </button>
             <a class="navbar-brand" href="/"><i
-              class="fas fa-microphone fa-sm"> </i> You should sing</a>
+              class="fas fa-microphone fa-sm"> </i> You should sing</a> <small>BETA</small>
           </div>
           <div class="navbar-collapse collapse" id="navbar-main">
 
