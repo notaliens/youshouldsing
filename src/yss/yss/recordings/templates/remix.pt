@@ -87,11 +87,11 @@
               <span class="form-check">
                 <input type="number" id="latency" min="0" max="2" step="0.1" value="${context.latency}" size="6">
                 <label class="form-check-label" for="latency">
-                  Adjust up if mic vocals are out of sync with music
+                  Adjust if mic vocals are out of sync with backing track music.
                 </label>
               </span>
               <div style="padding-top: 5px;">
-               Protip: Your camera video will always be in sync with your microphone audio.  But it's common that your mic audio will be out of sync with the backing track.  If your mic audio is out of sync with the backing track, you might need to play around with the mic latency value and remix repeatedly to get it just right.  But remixing takes much longer if you leave "Show Camera Video" checked.  To make remixes faster, turn off "Show Camera Video" while you're adjusting the mic latency.  Then, once you've gotten the right latency value, if you want to show video in the recording, turn "Show Camera Video" back on and remix one last time.
+               Protip: Your camera video will always be in sync with your microphone audio.  But it's common that your mic audio will be out of sync with the backing track.  If your mic audio is out of sync with the backing track, you will need to adjust the mic latency, remix, and relisten repeatedly to get it just right.  But remixing takes much longer if you leave "Show Camera Video" checked.  To make remixes faster, turn off "Show Camera Video" in remixes while you're adjusting the mic latency.  After a few remixes, the mic vocals will line up with the backing track.  After that, if you want to show video in the recording, turn "Show Camera Video" back on and remix one last time.
               </div>
             </div>
           </div>

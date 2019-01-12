@@ -1,5 +1,9 @@
 <div metal:use-macro="main_template">
 
+  <more tal:omit-tag="" metal:fill-slot="head-more">
+    <meta name="google" content="notranslate"/>
+  </more>
+
   <div metal:fill-slot="main_content" class="container">
 
     <div class="row">
