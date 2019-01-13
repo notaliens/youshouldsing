@@ -460,6 +460,7 @@ class SongView(object):
         file_stream = self.request.params['data'].file
 
         song = self.context
+        # XXX do this as methods of the song
         song.retiming = True
         song.retiming_blob = Blob()
 
@@ -554,7 +555,7 @@ class SongView(object):
         performer = self.request.user.performer
         recordings = performer['recordings']
         recording_id = self.generate_recording_id(recordings)
-        f = request.params['data'].file
+        stream = request.params['data'].file
         # disallow /, .., etc
         sane_name = ''.join(c for c in performer.__name__ if c.isalnum())
         tmpdir_name = f'{sane_name}-{recording_id}'
@@ -572,7 +573,6 @@ class SongView(object):
         performer = request.user.performer
         recording.performer = performer
         recording.song = song
-        recording.dry_blob = Blob()
         recording.effects = tuple([ # not currently propsheet-exposed
             x for x in request.params.getall('effects') if x in known_effects
         ])
@@ -584,8 +584,8 @@ class SongView(object):
         except (TypeError, ValueError):
             # use default voladjust of 0 set at class level
             pass
-        with recording.dry_blob.open("w") as saveto:
-            shutil.copyfileobj(f, saveto)
+        recording.set_dry_stream(stream)
+
         workflow = get_workflow(request, 'Visibility', 'Recording')
         workflow.reset(recording, request) # private by default
         visibility = request.params.get('visibility', 'Private')

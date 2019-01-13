@@ -90,7 +90,6 @@ var yssmixer = (function(stream_url, submit_handler) {
     }
 
     function init() {
-        // Create the karaoke engine and get a show instance
         $('#forward')[0].onclick = function() {
             player.currentTime = player.currentTime + 5;
         };

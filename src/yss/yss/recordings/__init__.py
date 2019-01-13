@@ -1,7 +1,9 @@
+import audioread
 import persistent
 import shutil
 
 from zope.interface import implementer
+from ZODB.blob import Blob
 
 from substanced._compat import is_nonstr_iter
 from substanced.content import content
@@ -60,6 +62,8 @@ class Recording(persistent.Persistent):
     latency = 0
     voladjust = 0
     description = ''
+    dry_duration = 0
+    mixed_duration = 0
 
     def __init__(self, tmpfolder):
         self.dry_blob = None
@@ -77,6 +81,24 @@ class Recording(persistent.Persistent):
     @property
     def num_likes(self):
         return len(self.liked_by_ids)
+
+    def set_dry_blob(self, stream):
+        if self.dry_blob is None:
+            self.dry_blob = Blob()
+        with self.dry_blob.open("w") as saveto:
+            shutil.copyfileobj(stream, saveto)
+        # cache duration for use in progress
+        self.dry_duration = audioread.audio_open(
+            self.dry_blob._p_blob_uncommitted).duration
+
+    def set_mixed_blob(self, stream):
+        if self.mixed_blob is None:
+            self.mixed_blob = Blob()
+        with self.mixed_blob.open("w") as saveto:
+            shutil.copyfileobj(stream, saveto)
+        # cache duration for use in progress
+        self.mixed_duration = audioread.audio_open(
+            self.mixed_blob._p_blob_uncommitted).duration
 
 @subscribe_will_be_removed(content_type='Recording')
 def recording_will_be_removed(event):

@@ -99,7 +99,7 @@
                    $('#mixprogress').attr('style', 'width: ' + data['pct'] +'%; min-width: 10em;');
                    if (data['pct'] != -1) {
                      // if it's not in a terminal failure state, do it again
-                     setTimeout(progresscheck, 2000); //every 2 secs
+                     setTimeout(progresscheck, 2000); //every 2 sec
                    }
                  }
                }
