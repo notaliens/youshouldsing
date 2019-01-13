@@ -32,6 +32,7 @@
     change it.
   - Block user.
   - Report inappropriate behavior.
+  - "Original song" song
 
 - Docs Videos
 
@@ -189,6 +190,7 @@ Songs
     upcoming lyrics.***
   - It's too easy to hit cancel on a new recording and lose it.
   - Allow 16x9
+  - Allow no mic
 
 - Remix
 

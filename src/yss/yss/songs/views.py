@@ -584,7 +584,7 @@ class SongView(object):
         except (TypeError, ValueError):
             # use default voladjust of 0 set at class level
             pass
-        recording.set_dry_stream(stream)
+        recording.set_dry_blob(stream)
 
         workflow = get_workflow(request, 'Visibility', 'Recording')
         workflow.reset(recording, request) # private by default
