@@ -30,6 +30,8 @@
   - Private messages.
   - Performer __name__ should probably not be in URL in case they need to
     change it.
+  - Block user.
+  - Report inappropriate behavior.
 
 - Docs Videos
 
