@@ -116,6 +116,9 @@ var yssmixer = (function(stream_url, submit_handler) {
 
         $('#remix-me')[0].onclick = uploadForm;
         $('#play-me')[0].onclick = playtoggle;
+        $('#latency').change(function() {
+            $('#latencydisplay')[0].innerHTML = this.value;
+        });
     }
 
     init();

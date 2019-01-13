@@ -154,9 +154,9 @@ def postprocess(recording, redis):
 
         normfilter.extend([
             'acompressor', # compress
-            'dynaudnorm' # windowed-normalize (not peak)
+            'dynaudnorm', # windowed-normalize (not peak)
             # alternative to dynaudnorm (sounds better but introduces vid lat)
-            # 'ladspa=vlevel-ladspa:vlevel_mono'
+            # 'ladspa=vlevel-ladspa:vlevel_mono',
             ])
 
         micstreams = [
