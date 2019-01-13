@@ -161,8 +161,7 @@ def postprocess(recording, redis):
             # probably too hall-y but #7 is verb type and #27 is "large room"
             webmfilter.append('ladspa=file=tap_reverb:tap_reverb:c=c7=27') 
         if 'effect-chorus' in recording.effects:
-            webmfilter.append(
-                'chorus=0.5:0.9:50|60|40:0.4|0.32|0.3:0.25|0.4|0.3:2|2.3|1.3')
+            webmfilter.append('ladspa=file=tap_chorusflanger:tap_chorusflanger')
 
         # NB: duration=shortest required in aout when no video, because ffmpeg
         # cant tell audio duration from webm container even with -shortest,

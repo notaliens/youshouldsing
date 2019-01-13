@@ -186,10 +186,10 @@ Songs
   - Duet
   - Karaoke display seems random which line is chosen next to display
     upcoming lyrics.***
-  - Negative mic latency.
   - It's too easy to hit cancel on a new recording and lose it.
   - Allow 16x9
   - More effects (flanger, pitch).
+  - Side-chain effects, don't pile them on top of each other.***
 
 - Search songs:
 
