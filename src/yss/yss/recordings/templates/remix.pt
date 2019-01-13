@@ -42,7 +42,7 @@
             </div>
             <div>
               <input id="voladjust" name="voladjust" type="range" min="-1" max="1" value="${voladjust}"
-                     step="0.1"/>
+                     step="0.01"/>
               <label class="form-check-label" for="voladjust">
                   Relative Volumes (up for louder vocals, down for louder backing track)
               </label>
