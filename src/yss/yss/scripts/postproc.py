@@ -122,23 +122,29 @@ def postprocess(recording, redis):
             "-vbr", "on",
             "-compression_level", "10",
             ]
-        webmfilter = ['volume=50']
+        webmfilter = []
         songfilter = []
         if recording.latency:
-            latency = recording.latency
+            latency = recording.latency # float
             abslatency = abs(recording.latency)
             #latency_ms = int(abslatency*1000)
             #adelay = f'adelay={latency_ms}|{latency_ms}' #ms
             atrim =f'atrim={abslatency}' #seconds
             if abslatency == latency: # fix mic audio ahead of backing track
-                webmfilter.append(atrim) # mono
+                songfilter.append(atrim) # mono
             else: # fix backing track ahead of mic audio
-                songfilter.append(atrim) # stereo
-        songfilter.append(f'volume={recording.musicvolume*5}')
+                webmfilter.append(atrim) # stereo
+        songfilter.append(f'volume={recording.musicvolume}')
 
-        webmfilter.append('acompressor')
+        webmfilter.extend([
+            'acompressor', # compress
+            'dynaudnorm' # windowed-normalize (not peak)
+            # alternative to dynaudnorm (sounds better but introduces vid lat)
+            # 'ladspa=vlevel-ladspa:vlevel_mono'
+        ])
         if 'effect-reverb' in recording.effects:
-            webmfilter.append('aecho=0.6:0.3:50:0.25')
+            # probably too hall-y but #7 is verb type and #27 is "large room"
+            webmfilter.append('ladspa=file=tap_reverb:tap_reverb:c=c7=27') 
         if 'effect-chorus' in recording.effects:
             webmfilter.append(
                 'chorus=0.5:0.9:50|60|40:0.4|0.32|0.3:0.25|0.4|0.3:2|2.3|1.3')
@@ -215,3 +221,22 @@ def postprocess(recording, redis):
         mixend = time.time()
         logger.info(f'total mix time: {mixend-mixstart}')
         os.chdir(curdir)
+
+"""
+Show available plugins in tap_reverb
+ffmpeg -i dry.opus -filter ladspa=file=tap_reverb -f null /dev/null
+
+Show options for tap_reverb:tap_reverb
+ffmpeg -i dry.opus -filter ladspa=f=tap_reverb:p=tap_reverb:c=help -f null /dev/null
+
+[Parsed_ladspa_0 @ 0x558c85e9c940] The 'tap_reverb' plugin has the following input controls:
+[Parsed_ladspa_0 @ 0x558c85e9c940] c0: Decay [ms] [<float>, min: 0.000000, max: 10000.000000 (default 2500.000000)]
+[Parsed_ladspa_0 @ 0x558c85e9c940] c1: Dry Level [dB] [<float>, min: -70.000000, max: 10.000000 (default 0.000000)]
+[Parsed_ladspa_0 @ 0x558c85e9c940] c2: Wet Level [dB] [<float>, min: -70.000000, max: 10.000000 (default 0.000000)]
+[Parsed_ladspa_0 @ 0x558c85e9c940] c3: Comb Filters [toggled (1 or 0) (default 1)]
+[Parsed_ladspa_0 @ 0x558c85e9c940] c4: Allpass Filters [toggled (1 or 0) (default 1)]
+[Parsed_ladspa_0 @ 0x558c85e9c940] c5: Bandpass Filter [toggled (1 or 0) (default 1)]
+[Parsed_ladspa_0 @ 0x558c85e9c940] c6: Enhanced Stereo [toggled (1 or 0) (default 1)]
+[Parsed_ladspa_0 @ 0x558c85e9c940] c7: Reverb Type [<int>, min: 0, max: 42 (default 0)]
+
+"""

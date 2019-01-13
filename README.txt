@@ -8,7 +8,8 @@ sudo apt install build-essential timidity lame sox libsox-fmt-mp3 ffmpeg \
    libopusfile-dev libopencore-amrnb-dev libopencore-amrwb-dev libao-dev \
    libflac-dev libmp3lame-dev libtwolame-dev libltdl-dev libmad0-dev \
    libid3tag0-dev libvorbis-dev libpng-dev libsndfile1-dev libwavpack-dev \
-   libpulse-dev libclalsadrv-dev libasound2-dev opus-tools sqlite3 python-dev
+   libpulse-dev libclalsadrv-dev libasound2-dev opus-tools sqlite3 python-dev \
+   tap-plugins vlevel
 
 # XXX grr... some conflict between npm wanting libssl1-dev and another
 # lib wanting libssl-dev and they are mutually exclusive.

@@ -28,6 +28,8 @@
   - De-cripple sdi views for custom content types.
   - Consumer issue tracker.***
   - Private messages.
+  - Performer __name__ should probably not be in URL in case they need to
+    change it.
 
 - Docs Videos
 
