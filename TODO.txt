@@ -178,18 +178,24 @@ Songs
   - Mic volume slider has no effect.
   - Unhelpful errors when camera is already used (e.g. by OBS).
   - Handle conflict errors in postprocessing.
-  - Maybe instead of building some system to arbitrarily time-align
-    source audio and mic audio after latency, just let people clap
-    a pattern.  https://medium.com/@almeidneto/sound-pattern-recognition-with-python-9aff69edce5d
-  - Mix in browser, not on server.
+  - Maybe instead of time-aligning source audio and mic audio using an input
+    latency, just let people clap a pattern.
+    https://medium.com/@almeidneto/sound-pattern-recognition-with-python-9aff69edce5d
   - Remove recorded song from singlist.
   - Duet
   - Karaoke display seems random which line is chosen next to display
     upcoming lyrics.***
   - It's too easy to hit cancel on a new recording and lose it.
   - Allow 16x9
+
+- Remix
+
   - More effects (flanger, pitch).
-  - Side-chain effects, don't pile them on top of each other.***
+  - Mix in browser, not on server?
+  - If not browser remixing, then server remix should stream an ffmpeg chain
+    dynamically and when done, they can hit remix, instead of repeatedly
+    changing values and hitting remix ad infinitum.  It's so painful to
+    do that.
 
 - Search songs:
 

@@ -3,6 +3,7 @@ import optparse
 import os
 import shutil
 import shlex
+import string
 import sys
 import subprocess
 import time
@@ -26,7 +27,7 @@ def main(argv=sys.argv):
     def usage(msg):
         print (msg)
         sys.exit(2)
-    description = "Postprocess new recordings as they are made."
+    description = "Mix new recordings as they are made."
     parser = optparse.OptionParser(
         "usage: %prog config_uri",
         description=description
@@ -122,7 +123,7 @@ def postprocess(recording, redis):
             "-vbr", "on",
             "-compression_level", "10",
             ]
-        webmfilter = []
+        normfilter = []
         songfilter = []
         if recording.latency:
             latency = recording.latency # float
@@ -135,7 +136,7 @@ def postprocess(recording, redis):
                 songfilter.append(atrim) # mono
             else:
                 # fix backing track ahead of mic audio
-                webmfilter.append(atrim) # stereo
+                normfilter.append(atrim) # stereo
         if recording.voladjust:
             voladjust = recording.voladjust
             absvoladjust = abs(voladjust)
@@ -144,37 +145,69 @@ def postprocess(recording, redis):
                 # turn down song volume ("up for louder vocals")
                 avoladjust = f'volume={1-voladjust}'
                 songfilter.append(avoladjust)
-                webmfilter.append('volume=1.0')
+                normfilter.append('volume=1.0')
             else:
                 # turn down mic volume ("down for louder backing track")
                 avoladjust = f'volume={1+voladjust}'
-                webmfilter.append(avoladjust)
+                normfilter.append(avoladjust)
                 songfilter.append('volume=1.0')
 
-        webmfilter.extend([
+        normfilter.extend([
             'acompressor', # compress
             'dynaudnorm' # windowed-normalize (not peak)
             # alternative to dynaudnorm (sounds better but introduces vid lat)
             # 'ladspa=vlevel-ladspa:vlevel_mono'
-        ])
+            ])
+
+        micstreams = [
+            f"[0:a]{','.join(normfilter)}[a0a]" # normalized stream is a0a
+            ]
+
+        auxsends = []
+        auxstreams = []
+
         if 'effect-reverb' in recording.effects:
             # probably too hall-y but #7 is verb type and #27 is "large room"
-            webmfilter.append('ladspa=file=tap_reverb:tap_reverb:c=c7=27') 
+            auxsends.append('ladspa=file=tap_reverb:tap_reverb:c=c7=27')
         if 'effect-chorus' in recording.effects:
-            webmfilter.append('ladspa=file=tap_chorusflanger:tap_chorusflanger')
+            # XXX mess around with nondefault
+            auxsends.append('ladspa=file=tap_chorusflanger:tap_chorusflanger')
+
+        for i, send in enumerate(auxsends):
+            sendletter= string.ascii_lowercase[i+1]
+            # from normalized stream to a new output
+            auxstreams.append(f'[a0a]{send}[a0{sendletter}]')
+
+        micstreams.extend(auxstreams)
 
         # NB: duration=shortest required in aout when no video, because ffmpeg
         # cant tell audio duration from webm container even with -shortest,
         # and mixes that include -vn become as long as the backing track
-        allfilter = (f"[0:a]{','.join(webmfilter)}[a0]; "
-                     f"[1:a]{','.join(songfilter)}[a1]; "
-                     f"[a0][a1]amix=inputs=2:duration=shortest[aout]")
+
+        allfilter = [
+            f"{'; '.join(micstreams)};",
+            f"[1:a]{','.join(songfilter)}[a1]; "
+            ]
+
+        # render aout
+        if auxstreams:
+            # effect-wet audio
+            numaux = len(auxstreams)
+            letters = [ string.ascii_lowercase[i+1] for i in range(numaux) ]
+            p = ''.join([f'[a0{letter}]' for letter in letters ])
+            final = p + f'[a1]amix=inputs={numaux+1}:duration=shortest[aout]'
+            allfilter.append(final)
+        else:
+            # dry-but-normalized audio only
+            allfilter.append(f"[a0a][a1]amix=inputs=2:duration=shortest[aout]")
+
+        complex_filter = ' '.join(allfilter)
 
         ffmix.extend([
             '-filter_complex',
-            allfilter,
+            complex_filter,
             '-map', '[aout]',
-            '-ac', '2',
+            '-ac', '2', # output channels, "downmix" to stereo
             "-ar", "48000", # it will always be 48K from chrome
             ])
         if recording.show_camera:
@@ -213,7 +246,7 @@ def postprocess(recording, redis):
         with recording.mixed_blob.open("w") as saveto:
             with open("mixed.webm", "rb") as savefrom:
                 shutil.copyfileobj(savefrom, saveto)
-        logger.info("%s/%s" % (tmpdir, "mixed.webm"))
+        logger.info(f'{tmpdir}/mixed.webm')
         recording.remixing = False
         transaction.commit()
         open('mixed_blob_filename', 'w').write(recording.mixed_blob.committed())
