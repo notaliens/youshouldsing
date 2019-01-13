@@ -69,10 +69,6 @@
 - Song
 
   - Add to singlist
-  - Song timings editor (post-speech)
-  - Song timing word endings don't seem to be right... see whiter shade.
-  - Crowdsource lyric retimings... allow uploader to accept lyric timing
-    suggestions.
   - Recognize dupe song metadata and group together on other recordings page.
   - Notification when someone records a song that you uploaded.***
   - Notification when someone likes a song you uploaded.***
@@ -207,6 +203,14 @@ Songs
   - Filter genre.
   - Filter year.
   - "make it" doesnt find make it wit chu
+
+- Retime
+
+  - Needs a latency adjustment knob?
+  - Song timings editor (post-speech)
+  - Song timing word endings don't seem to be right... see whiter shade.
+  - Crowdsource lyric retimings... allow uploader to accept lyric timing
+    suggestions?
   
 - JS:
 
