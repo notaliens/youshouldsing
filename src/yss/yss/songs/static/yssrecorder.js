@@ -398,8 +398,8 @@ var rtc_recorder = (function(exports, karaoke, max_framerate, upload_handler) {
                 fd.append('effects', effect.id);
             }
         }
-        if ($('#musicvolume').length) {
-            fd.append('musicvolume', $('#musicvolume')[0].value);
+        if ($('#voladjust').length) {
+            fd.append('voladjust', $('#voladjust')[0].value);
         }
         fd.append('data', blob);
         fd.append('finished', '1');

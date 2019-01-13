@@ -577,12 +577,12 @@ class SongView(object):
             x for x in request.params.getall('effects') if x in known_effects
         ])
         try:
-            musicvolume = float(request.params['musicvolume'])
-            if (musicvolume < 0) or (musicvolume > 1):
+            voladjust = float(request.params['voladjust'])
+            if (voladjust < -1) or (voladjust > 1):
                 raise TypeError
-            recording.musicvolume = musicvolume
+            recording.voladjust = voladjust
         except (TypeError, ValueError):
-            # use default musicvolume of 0 set at class level
+            # use default voladjust of 0 set at class level
             pass
         with recording.dry_blob.open("w") as saveto:
             shutil.copyfileobj(f, saveto)

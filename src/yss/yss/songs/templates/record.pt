@@ -103,10 +103,10 @@
               </span>
             </div>
             <div>
-              <input id="musicvolume" type="range" min="0" max="1" value="0.5"
-                     step="0.01"/>
-              <label class="form-check-label" for="musicvolume">
-                  Relative Music Volume
+              <input id="voladjust" type="range" min="-1" max="1" value="0.5"
+                     step="0.1"/>
+              <label class="form-check-label" for="voladjust">
+                  Relative Volume (up for louder vocals, down for louder backng track)
               </label>
             </div>
           </div>

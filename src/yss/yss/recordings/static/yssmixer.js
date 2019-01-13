@@ -70,8 +70,8 @@ var yssmixer = (function(stream_url, submit_handler) {
                 fd.append('effects', effect.id);
             }
         }
-        if ($('#musicvolume')[0]) {
-            fd.append('musicvolume', $('#musicvolume')[0].value);
+        if ($('#voladjust')[0]) {
+            fd.append('voladjust', $('#voladjust')[0].value);
         }
         if ($('#show-camera')[0]) {
             fd.append('show-camera', $('#show-camera')[0].checked);

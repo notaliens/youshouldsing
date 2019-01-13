@@ -126,15 +126,30 @@ def postprocess(recording, redis):
         songfilter = []
         if recording.latency:
             latency = recording.latency # float
-            abslatency = abs(recording.latency)
+            abslatency = abs(latency)
             #latency_ms = int(abslatency*1000)
             #adelay = f'adelay={latency_ms}|{latency_ms}' #ms
             atrim =f'atrim={abslatency}' #seconds
-            if abslatency == latency: # fix mic audio ahead of backing track
+            if abslatency == latency:
+                # fix mic audio ahead of backing track
                 songfilter.append(atrim) # mono
-            else: # fix backing track ahead of mic audio
+            else:
+                # fix backing track ahead of mic audio
                 webmfilter.append(atrim) # stereo
-        songfilter.append(f'volume={recording.musicvolume}')
+        if recording.voladjust:
+            voladjust = recording.voladjust
+            absvoladjust = abs(voladjust)
+            avoladjust = f'volume={absvoladjust}'
+            if absvoladjust == voladjust:
+                # turn down song volume ("up for louder vocals")
+                avoladjust = f'volume={1-voladjust}'
+                songfilter.append(avoladjust)
+                webmfilter.append('volume=1.0')
+            else:
+                # turn down mic volume ("down for louder backing track")
+                avoladjust = f'volume={1+voladjust}'
+                webmfilter.append(avoladjust)
+                songfilter.append('volume=1.0')
 
         webmfilter.extend([
             'acompressor', # compress

@@ -195,7 +195,7 @@ class RecordingView(object):
         return {
             'submit_handler': self.request.resource_url(
                 self.context, 'finish_remix'),
-            'musicvolume': self.context.musicvolume,
+            'voladjust': self.context.voladjust,
             'effects':self.context.effects,
             'stream_url':self.request.resource_url(
                 self.context, 'movie'),
@@ -222,20 +222,18 @@ class RecordingView(object):
             needs_remix = True
             recording.effects = tuple(desired_effects)
 
-        # need to validate musicvolume and return an error
-
         try:
-            musicvolume = request.params.get('musicvolume', 0.5)
-            musicvolume = float(musicvolume)
-            if 0 > musicvolume > 1:
+            voladjust = request.params.get('voladjust', 0)
+            voladjust = float(voladjust)
+            if -1 > voladjust > 1:
                 raise ValueError
         except (TypeError, ValueError):
-            request.session.flash('Bad musicvolume', 'danger')
+            request.session.flash('Bad voladjust', 'danger')
             return request.resource_url(self.context, 'remix')
 
-        if str(musicvolume) != str(recording.musicvolume):
+        if str(voladjust) != str(recording.voladjust):
             needs_remix = True
-            recording.musicvolume = musicvolume
+            recording.voladjust = voladjust
 
         show_camera = request.params.get('show-camera', 'true')
         show_camera = show_camera == 'true' and True or False
