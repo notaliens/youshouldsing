@@ -1,8 +1,8 @@
-import audioread
 import distutils
 import optparse
 import os
 import shutil
+import shlex
 import sys
 import subprocess
 import time
@@ -109,6 +109,7 @@ def postprocess(recording, redis):
         )
         ffmpegexe = distutils.spawn.find_executable('ffmpeg')
         song_audio_filename = recording.song.blob.committed()
+        open('song_audio_filename', 'w').write(song_audio_filename)
         ffmix = [
             ffmpegexe,
             "-threads", "4",
@@ -142,7 +143,12 @@ def postprocess(recording, redis):
             webmfilter.append(
                 'chorus=0.5:0.9:50|60|40:0.4|0.32|0.3:0.25|0.4|0.3:2|2.3|1.3')
 
-        allfilter = f"[0:a]{','.join(webmfilter)}[a0]; [1:a]{','.join(songfilter)}[a1]; [a0][a1]amix=inputs=2:duration=shortest[aout]"
+        # NB: duration=shortest required in aout when no video, because ffmpeg
+        # cant tell audio duration from webm container even with -shortest,
+        # and mixes that include -vn become as long as the backing track
+        allfilter = (f"[0:a]{','.join(webmfilter)}[a0]; "
+                     f"[1:a]{','.join(songfilter)}[a1]; "
+                     f"[a0][a1]amix=inputs=2:duration=shortest[aout]")
 
         ffmix.extend([
             '-filter_complex',
@@ -169,7 +175,7 @@ def postprocess(recording, redis):
         ])
 
         logger.info(f'Mixing using')
-        logger.info(' '.join(ffmix))
+        logger.info(' '.join([shlex.quote(s) for s in ffmix]))
 
         pffextract = subprocess.Popen(
             ffmix,
