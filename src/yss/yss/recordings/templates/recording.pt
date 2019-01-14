@@ -28,8 +28,8 @@
                 <div class="embed-responsive embed-responsive-4by3">
 
                   <video id="thevideo" controls width="640" height="480"
-                         style="display: ${processed and 'inline-block' or 'none'};">
-                    <source id="thevideosource" src="${video_url}" type="video/webm"/>
+                         style="display: ${processed and 'inline-block' or 'none'};" preload="${processed and 'auto' or 'none'}">
+                    <source id="thevideosource" src="${video_url}"/>
                   </video>
 
                   <div class="well" id="processing"

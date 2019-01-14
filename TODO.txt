@@ -119,6 +119,8 @@ Songs
   - Default recording settings (visibility/allow likes/shares/comments).
   - Format personal values in header.
   - Songs uploaded is not correct for RBF (no table).
+  - "Change password" shows up inappropriately when admin on accounts
+    that are not internal accounts.
 
 - Profile Recordings
 

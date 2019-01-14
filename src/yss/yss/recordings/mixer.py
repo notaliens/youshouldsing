@@ -9,20 +9,14 @@ ffmpegexe = distutils.spawn.find_executable('ffmpeg')
 
 logger = logging.getLogger('ffmpegmixer')
 
-class Proxy(object):
-    def __init__(self, obj):
-        self.__dict__.update(dict(obj.__class__.__dict__))
-        self.__dict__.update(obj.__dict__)
-
 class FFMpegMixer(object):
     def __init__(self, recording):
         # ZODB connection will close before .stream iterated and we won't
         # be able to getattr on it without error, so retain its state info
         # only as a proxy
-        self.recording = Proxy(recording)
+        self.recording = recording
         self.dry_webm_filename = recording.dry_blob.committed()
         self.song_audio_filename = recording.song.blob.committed()
-        self.cpu_used = 8 # reset during mixing for speed
 
     def get_command(self, outfile):
         """ Returns a list of tokens representing a command that can be
@@ -136,7 +130,7 @@ class FFMpegMixer(object):
             ])
         if self.recording.show_camera:
             ffmix.extend([
-                "-c:v", "vp8",
+                "-c:v", "copy",
                 "-map", "0:v:0?", # ? at end makes it opt (recs with no cam)
                 ])
         else:
@@ -149,7 +143,7 @@ class FFMpegMixer(object):
 
         ffmix.extend([
             # https://stackoverflow.com/questions/20665982/convert-videos-to-webm-via-ffmpeg-faster
-            '-cpu-used', f'{self.cpu_used}', # gofast (default 1, qual suffers)
+            '-cpu-used', '8', # gofast (default 1, qual suffers)
             '-deadline', 'realtime', # gofast
             '-f', 'webm',
             f'{outfile}'
@@ -159,16 +153,15 @@ class FFMpegMixer(object):
         logger.info(' '.join([shlex.quote(s) for s in ffmix]))
 
         return ffmix
-        
+
     def stream(self):
-        self.cpu_used = 16 # go fastfast
         ffmix = self.get_command(None)
 
         pffmix = subprocess.Popen(
             ffmix,
             shell=False,
             stdout=subprocess.PIPE,
-            #stderr=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
         )
 
         # NB: webm data piped from ffmpeg to its stdout directly to write
@@ -191,7 +184,7 @@ class FFMpegMixer(object):
 
     fps_re = re.compile(r' fps=\s*(\d+)')
     time_re = re.compile(r' time=(\d{2}):(\d{2}):(\d{2})')
-    
+
     def progress(self, outfile):
         """Render recording to outfile.  Return an generator which yields a
         dict containing progress percentage each time it's called. Must be
@@ -228,7 +221,7 @@ class FFMpegMixer(object):
                         fps = int(fps_result.group(1))
                     except ValueError:
                         pass
-                    
+
             if duration and current:
                 pct = current * 100 / duration
             else:
@@ -259,4 +252,3 @@ ffmpeg -i dry.opus -filter ladspa=f=tap_reverb:p=tap_reverb:c=help -f null /dev/
 [Parsed_ladspa_0 @ 0x558c85e9c940] c7: Reverb Type [<int>, min: 0, max: 42 (default 0)]
 
 """
-            

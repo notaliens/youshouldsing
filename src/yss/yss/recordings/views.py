@@ -31,8 +31,6 @@ from yss.utils import get_redis, decode_redis_hash
 
 from yss.interfaces import IRecording
 
-#from yss.recordings.mixer import FFMpegMixer
-
 @view_defaults(context=IRecording)
 class RecordingView(object):
     def __init__(self, context, request):
@@ -308,21 +306,28 @@ class RecordingView(object):
                 'can_like':request.layout_manager.layout.can_like(recording),
         }
 
-    def _stream_blob(self, blob, duration):
-        print (f'stream_blob called with {list(self.request.headers.items())}')
-        if blob:
-            response = FileResponse(
-                blob.committed(),
-                request = self.request,
-                content_type='video/webm',
-                cache_max_age=0,
-            )
-            response.accept_ranges = 'bytes'
-            if duration: # only for BW compat
-                response.headers['X-Content-Duration'] = str(duration)
-                response.headers['Content-Duration'] = str(duration)
-            return response
-        return HTTPBadRequest('Video still processing')
+    def _stream_file(self, filename, content_type):
+        request = self.request
+        if request.range:
+            if request.range.start == 0 and request.range.end == None:
+                # it's ff or chrome seeing if we support range requests, return
+                # a smaller amount because initial requests from those browsers
+                # drop the connection and throw any data we send anyway.
+                request.range = 'bytes=0-4096'
+
+        response = FileResponse(
+            filename,
+            request=self.request,
+            content_type=content_type,
+            cache_max_age=0,
+        )
+        response.accept_ranges = 'bytes'
+        return response
+
+    def _stream_blob(self, blob, content_type):
+        if not blob:
+            return HTTPBadRequest('Video still processing')
+        return self._stream_file(blob.committed(), content_type)
 
     @view_config(
         name='movie',
@@ -330,16 +335,16 @@ class RecordingView(object):
     )
     def stream_mixed(self):
         recording = self.context
-        return self._stream_blob(recording.mixed_blob, recording.mixed_duration)
+        return self._stream_blob(recording.mixed_blob, 'video/webm')
 
     @view_config(
         name='drymovie',
         permission='yss.edit'
     )
     def stream_dry(self):
+        # never expose this publicly
         recording = self.context
-        return self._stream_blob(recording.dry_blob, recording.dry_duration)
-
+        return self._stream_blob(recording.dry_blob, 'video/webm')
 
     @view_config(
         name='delete',

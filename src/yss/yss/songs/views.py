@@ -538,9 +538,6 @@ class SongView(object):
         response = self.context.get_response(
             request=self.request, cache_max_age=0)
         response.accept_ranges = 'bytes' # XXX FileResponse should do this?
-        duration = self.context.duration
-        response.headers['Content-Duration'] = str(duration)
-        response.headers['X-Content-Duration'] = str(duration)
         return response
 
     @view_config(
