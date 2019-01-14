@@ -33,6 +33,8 @@
   - Block user.
   - Report inappropriate behavior.
   - "Original song" song
+  - zeopack.
+  - "Unsortable"
 
 - Docs Videos
 
@@ -117,6 +119,7 @@ Songs
   - Notification when someone likes you.***
   - Default recording settings (visibility/allow likes/shares/comments).
   - Format personal values in header.
+  - Songs uploaded is not correct for RBF (no table).
 
 - Profile Recordings
 

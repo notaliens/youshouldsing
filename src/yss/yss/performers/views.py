@@ -540,7 +540,7 @@ class PerformerPerformersLikedView(PerformerView):
         context = self.context
         name = find_index(context, 'system', 'name')
         num_likes = find_index(context, 'yss', 'num_likes')
-        num_recordings = find_index(context, 'yss', 'num_likes')
+        num_recordings = find_index(context, 'yss', 'num_recordings')
         created = find_index(context, 'yss', 'created')
         sorting = {
             'created':(created, num_likes, num_recordings, name),
@@ -914,7 +914,7 @@ class PerformersView(object):
         context = self.context
         name = find_index(context, 'system', 'name')
         num_likes = find_index(context, 'yss', 'num_likes')
-        num_recordings = find_index(context, 'yss', 'num_likes')
+        num_recordings = find_index(context, 'yss', 'num_recordings')
         created = find_index(context, 'yss', 'created')
         sorting = {
             'created':(created, num_likes, num_recordings, name),
