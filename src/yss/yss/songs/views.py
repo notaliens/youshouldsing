@@ -119,7 +119,6 @@ class SongsView(object):
         artist = find_index(context, 'yss', 'artist')
         num_recordings = find_index(context, 'yss', 'num_recordings')
         duration = find_index(context, 'yss', 'duration')
-        num_likes = find_index(context, 'yss', 'num_likes')
         sorting = {
             'created':(created, artist, title, num_recordings, num_likes),
             'title':(title, artist, num_recordings, created, num_likes),
