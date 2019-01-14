@@ -1,18 +1,16 @@
 import optparse
 import os
-import shutil
 import sys
 import time
 import transaction
 import logging
-
-from ZODB.blob import Blob
 
 from pyramid.paster import (
     setup_logging,
     bootstrap,
     )
 
+from substanced.event import ObjectModified
 from substanced.objectmap import find_objectmap
 
 from yss.utils import get_redis
@@ -65,7 +63,7 @@ def main(argv=sys.argv):
                     redis.rpush('yss.new-recordings', oidandtime)
                 else:
                     logger.info(f'Processing {oid} enqueued at {enqueued}')
-                    postprocess(recording, redis)
+                    postprocess(recording, redis, env)
                     end = time.time()
                     logger.info(
                         f'Time from enqeue-to-done for {oid}: {end-enqueued}')
@@ -83,10 +81,11 @@ def main(argv=sys.argv):
                 redis.rpush('yss.new-recordings', oidandtime)
                 raise
 
-def postprocess(recording, redis):
+def postprocess(recording, redis, env):
     tmpdir = recording.tmpfolder
     curdir = os.getcwd()
     mixstart = time.time()
+    registry = env['registry']
     try:
         progress_key = f'mixprogress-{recording.__oid__}'
         logger.info(f'Progress key is {progress_key}')
@@ -118,6 +117,8 @@ def postprocess(recording, redis):
             recording.set_mixed_blob(savefrom)
 
         recording.remixing = False
+        event = ObjectModified(recording)
+        registry.subscribers((event, recording), None)
         transaction.commit()
         open('mixed_blob_filename', 'w').write(recording.mixed_blob.committed())
         redis.hmset(
@@ -125,15 +126,6 @@ def postprocess(recording, redis):
         )
         # don't remove tempdir until commit succeeds
         #shutil.rmtree(tmpdir, ignore_errors=True)
-    except FileNotFoundError:
-        raise
-        logger.warning('no such file or dir when chdir')
-        redis.hmset(
-            progress_key,
-            {'pct':-1, 'status':'Mix failed; temporary files missing'}
-        )
-        redis.persist(progress_key)
-        recording.postproc_failure = True # currently not exposed
     finally:
         mixend = time.time()
         logger.info(f'total mix time: {mixend-mixstart}')

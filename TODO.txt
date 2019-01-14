@@ -22,8 +22,6 @@
   - Cookie policy
   - Factor out "sort_tag", it should be boilerplate.
   - Send enqueue-to-done data to datadog.
-  - Send substanced.event.ObjectModified events instead of handling reindexing
-    manually.
   - Set up something to notify of tracebacks.***
   - De-cripple sdi views for custom content types.
   - Consumer issue tracker.***

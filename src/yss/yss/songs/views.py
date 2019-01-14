@@ -28,6 +28,7 @@ from pyramid.view import (
     view_defaults,
     )
 
+from substanced.event import ObjectModified
 from substanced.file import FileNode
 from substanced.form import FormView
 from substanced.folder.views import generate_text_filter_terms
@@ -255,6 +256,8 @@ class SongsView(object):
                             (Deny, Everyone, ['yss.indexed']),
                         ]
                 )
+                event = ObjectModified(song)
+                self.request.registry.subscribers((event, song), None)
                 return HTTPFound(request.resource_url(song, '@@retime'))
         else:
             appstruct = {
@@ -397,6 +400,8 @@ class SongView(object):
         if performer in self.context.liked_by:
             raise HTTPBadRequest("Already")
         self.context.liked_by.connect([performer])
+        event = ObjectModified(self.context)
+        self.request.registry.subscribers((event, self.context), None)
         return {'ok': True,
                 'num_likes': self.context.num_likes,
                 'can_like':request.layout_manager.layout.can_like(performer),
@@ -412,6 +417,8 @@ class SongView(object):
         performer = request.user.performer
         if performer in self.context.liked_by:
             self.context.liked_by.disconnect([performer])
+            event = ObjectModified(self.context)
+            self.request.registry.subscribers((event, self.context), None)
         return {'ok': True,
                 'num_likes': self.context.num_likes,
                 'can_like':request.layout_manager.layout.can_like(performer),
@@ -469,6 +476,8 @@ class SongView(object):
         redis = get_redis(self.request)
         redisval = f'{self.context.__oid__}|{time.time()}'
         redis.rpush("yss.new-retimings", redisval)
+        event = ObjectModified(song)
+        self.request.registry.subscribers((event, song), None)
         set_acl(song,
                 [
                     (Allow, request.user.__oid__, ['yss.edit']),
@@ -500,6 +509,8 @@ class SongView(object):
                 continue
             new_acl.append(ace)
         set_acl(song, new_acl)
+        event = ObjectModified(song)
+        self.request.registry.subscribers((event, song), None)
         self.request.session.flash(
             'Retime accepted, song will show up in searches, and may now be '
             'recorded by everyone. Nice work.', 'info')
@@ -589,9 +600,8 @@ class SongView(object):
         workflow.reset(recording, request) # private by default
         visibility = request.params.get('visibility', 'Private')
         workflow.transition_to_state(recording, request, visibility)
-        # reindex visibility state and other stuff for good measure
-        catalog = find_catalog(recording, 'yss')
-        catalog.reindex_resource(recording)
+        event = ObjectModified(recording)
+        self.request.registry.subscribers((event, recording), None)
         redis = get_redis(request)
         redis.rpush(
             "yss.new-recordings", f'{recording.__oid__}|{time.time()}'
@@ -631,8 +641,8 @@ class SongView(object):
                 song.language = appstruct['language']
                 song.lyrics = appstruct['lyrics']
                 song.year = appstruct['year']
-                find_catalog(song, 'yss').reindex_resource(song)
-                find_catalog(song, 'system').reindex_resource(song)
+                event = ObjectModified(song)
+                self.request.registry.subscribers((event, song), None)
                 request.session.flash('Song edited.', 'info')
                 return HTTPFound(request.resource_url(song, '@@edit'))
         else:

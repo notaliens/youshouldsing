@@ -13,6 +13,8 @@ from pyramid.paster import (
     setup_logging,
     bootstrap,
     )
+
+from substanced.event import ObjectModified
 from substanced.objectmap import find_objectmap
 
 from yss.utils import get_redis, format_timings
@@ -94,6 +96,7 @@ def retime(song, redis, env):
         song.__name__.strip('/').strip('\\\\').strip('..')
     )
     curdir = os.getcwd()
+    registry = env['registry']
     try:
         progress_key = f'retimeprogress-{song.__oid__}'
         redis.hmset(
@@ -173,6 +176,8 @@ def retime(song, redis, env):
             song.retiming_failure = True
             song.retiming = False
             song.retiming_blob = None
+            event = ObjectModified(song)
+            registry.subscribers((event, song), None)
             transaction.commit()
             return
 
@@ -192,15 +197,9 @@ def retime(song, redis, env):
         )
         song.retiming = False
         song.retiming_blob = None
+        event = ObjectModified(song)
+        registry.subscribers((event, song), None)
         transaction.commit()
-    except FileNotFoundError:
-        # no such file or dir when chdir
-        redis.hmset(
-            progress_key,
-            {'pct':-1, 'status':'Retime failed; temporary files missing'}
-        )
-        redis.persist(progress_key) # XXX when does it die
-        song.retime_failure = True # currently not exposed
     finally:
         try:
             blob.delete()

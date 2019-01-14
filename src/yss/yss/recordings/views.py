@@ -13,6 +13,7 @@ from pyramid.httpexceptions import (
     HTTPFound,
     )
 
+from substanced.event import ObjectModified
 from substanced.interfaces import IRoot
 
 from substanced.util import (
@@ -147,12 +148,11 @@ class RecordingView(object):
                 visibility_wf.transition_to_state(
                     recording, request, appstruct['visibility']
                 )
-                # reindex visibility state
-                index = find_index(recording, 'yss', 'visibility_state')
-                index.reindex_doc(recording.__oid__, appstruct['visibility'])
                 if appstruct['allow_likes']:
                     # XXXX
                     pass
+                event = ObjectModified(recording)
+                self.request.registry.subscribers((event, recording), None)
                 request.session.flash('Recording edited', 'info')
                 return HTTPFound(request.resource_url(recording, 'edit'))
         else:
@@ -257,6 +257,8 @@ class RecordingView(object):
 
         if needs_remix:
             recording.remixing = True
+            event = ObjectModified(recording)
+            self.request.registry.subscribers((event, recording), None)
             redis = get_redis(request)
             redis.rpush(
                 "yss.new-recordings", f'{recording.__oid__}|{time.time()}')
@@ -276,6 +278,9 @@ class RecordingView(object):
         performer = request.performer
         if not performer in recording.liked_by:
             recording.liked_by.connect([performer])
+            event = ObjectModified(recording)
+            self.request.registry.subscribers((event, recording), None)
+
         return {'ok': True,
                 'num_likes': recording.num_likes,
                 'can_like':request.layout_manager.layout.can_like(recording),
@@ -292,6 +297,9 @@ class RecordingView(object):
         performer = request.performer
         if performer in recording.liked_by:
             recording.liked_by.disconnect([performer])
+            event = ObjectModified(recording)
+            self.request.registry.subscribers((event, recording), None)
+
         return {'ok': True,
                 'num_likes': recording.num_likes,
                 'can_like':request.layout_manager.layout.can_like(recording),

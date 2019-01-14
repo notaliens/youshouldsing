@@ -15,6 +15,8 @@ from pyramid.paster import (
     bootstrap,
     )
 
+from substanced.event import ObjectModified
+
 from yss.scripts import midi
 
 logger = logging.getLogger('yss')
@@ -133,6 +135,8 @@ def main(argv=sys.argv):
                 songs[name] = song
             blameme = root['performers']['blameme']
             song.uploader = blameme
+            event = ObjectModified(song)
+            registry.subscribers((event, song), None)
             print ('done %s, %s, %s' % (name, title, artist))
             transaction.commit()
             songs._p_jar.sync()

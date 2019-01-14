@@ -15,6 +15,8 @@ from pyramid.view import (
     view_config,
     view_defaults,
     )
+
+from substanced.event import ObjectModified
 from substanced.folder.views import generate_text_filter_terms
 from substanced.util import (
     Batch,
@@ -201,8 +203,8 @@ class PerformerView(object):
         if performer in context.liked_by:
             raise HTTPBadRequest("Already")
         context.liked_by.connect([performer])
-        find_index(self.context, 'yss', 'num_likes').reindex_doc(
-            context.__oid__, len(context.liked_by))
+        event = ObjectModified(context)
+        self.request.registry.subscribers((event, context), None)
         return {'ok': True,
                 'num_likes': context.num_likes,
                 'can_like':request.layout_manager.layout.can_like(performer),
@@ -219,8 +221,8 @@ class PerformerView(object):
         performer = request.performer
         if performer in context.liked_by:
             context.liked_by.disconnect([performer])
-        find_index(self.context, 'yss', 'num_likes').reindex_doc(
-            context.__oid__, len(context.liked_by))
+        event = ObjectModified(context)
+        self.request.registry.subscribers((event, context), None)
         return {'ok': True,
                 'num_likes': context.num_likes,
                 'can_like':request.layout_manager.layout.can_like(performer),
@@ -722,6 +724,8 @@ class PerformerEditView(PerformerView):
                 context.tzname = appstruct['tzname']
                 context.location = appstruct['location']
                 context.description = appstruct['description']
+                event = ObjectModified(context)
+                self.request.registry.subscribers((event, context), None)
                 request.session.flash('Profile edited', 'info')
         else:
             photodata = get_photodata(context, request)
@@ -784,6 +788,8 @@ class PerformerPrivacyView(PerformerView):
                 context.divulge_genre = tf(appstruct['divulge_genre'])
                 context.divulge_songuploads = tf(
                     appstruct['divulge_songuploads'])
+                event = ObjectModified(context)
+                self.request.registry.subscribers((event, context), None)
                 request.session.flash('Profile privacy edited', 'info')
         else:
             def tf(val):
