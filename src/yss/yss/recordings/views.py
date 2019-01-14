@@ -7,6 +7,8 @@ from pyramid.view import (
     view_config,
     view_defaults,
     )
+from pyramid.decorator import reify
+
 from pyramid.settings import asbool
 from pyramid.httpexceptions import (
     HTTPBadRequest,
@@ -29,7 +31,7 @@ from yss.utils import get_redis, decode_redis_hash
 
 from yss.interfaces import IRecording
 
-from pyramid.decorator import reify
+#from yss.recordings.mixer import FFMpegMixer
 
 @view_defaults(context=IRecording)
 class RecordingView(object):
@@ -103,7 +105,7 @@ class RecordingView(object):
             'num_likes':recording.num_likes,
             'liked_by': recording.liked_by,
             'other_recordings':other_recordings,
-            'video_url': request.resource_url(recording, 'movie'),
+            'video_url': request.resource_url(recording, '@@movie'),
             'processed': int(self.is_processed),
             'has_edit_permission':int(self.has_edit_permission),
             }
@@ -117,7 +119,8 @@ class RecordingView(object):
     def dry(self):
         # for debugging: /dry, never intended to be exposed in the UI
         vars = self.view()
-        vars['video_url'] = self.request.resource_url(self.context, 'drymovie')
+        vars['video_url'] = self.request.resource_url(
+            self.context, '@@drymovie')
         return vars
 
     @view_config(
@@ -305,19 +308,29 @@ class RecordingView(object):
                 'can_like':request.layout_manager.layout.can_like(recording),
         }
 
+    def _stream_blob(self, blob, duration):
+        print (f'stream_blob called with {list(self.request.headers.items())}')
+        if blob:
+            response = FileResponse(
+                blob.committed(),
+                request = self.request,
+                content_type='video/webm',
+                cache_max_age=0,
+            )
+            response.accept_ranges = 'bytes'
+            if duration: # only for BW compat
+                response.headers['X-Content-Duration'] = str(duration)
+                response.headers['Content-Duration'] = str(duration)
+            return response
+        return HTTPBadRequest('Video still processing')
+
     @view_config(
         name='movie',
         permission='view'
     )
     def stream_mixed(self):
         recording = self.context
-        if recording.mixed_blob:
-            return FileResponse(
-                recording.mixed_blob.committed(),
-                content_type='video/webm',
-                cache_max_age=0,
-            )
-        return HTTPBadRequest('Video still processing')
+        return self._stream_blob(recording.mixed_blob, recording.mixed_duration)
 
     @view_config(
         name='drymovie',
@@ -325,13 +338,8 @@ class RecordingView(object):
     )
     def stream_dry(self):
         recording = self.context
-        if recording.dry_blob:
-            return FileResponse(
-                recording.dry_blob.committed(),
-                content_type='video/webm',
-                cache_max_age=0,
-            )
-        return HTTPBadRequest('Video still processing')
+        return self._stream_blob(recording.dry_blob, recording.dry_duration)
+
 
     @view_config(
         name='delete',

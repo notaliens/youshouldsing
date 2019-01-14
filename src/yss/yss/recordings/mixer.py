@@ -9,27 +9,34 @@ ffmpegexe = distutils.spawn.find_executable('ffmpeg')
 
 logger = logging.getLogger('ffmpegmixer')
 
+class Proxy(object):
+    def __init__(self, obj):
+        self.__dict__.update(dict(obj.__class__.__dict__))
+        self.__dict__.update(obj.__dict__)
+
 class FFMpegMixer(object):
     def __init__(self, recording):
-        self.recording = recording
+        # ZODB connection will close before .stream iterated and we won't
+        # be able to getattr on it without error, so retain its state info
+        # only as a proxy
+        self.recording = Proxy(recording)
+        self.dry_webm_filename = recording.dry_blob.committed()
+        self.song_audio_filename = recording.song.blob.committed()
+        self.cpu_used = 8 # reset during mixing for speed
 
-    def get_command(self, outfile=None):
+    def get_command(self, outfile):
         """ Returns a list of tokens representing a command that can be
         passed to subprocess.Popen.  If outfile is None, the stdout of
         the subprocess will be used.  Otherwise it must be a string
         representing a filename.  """
-        recording = self.recording
-        dry_webm_filename = recording.dry_blob.committed()
-        song_audio_filename = recording.song.blob.committed()
-
         ffmix = [
             ffmpegexe,
             '-hide_banner',
             "-threads", "4",
             '-thread_queue_size', '512',
             "-y", # clobber
-            "-i", dry_webm_filename,
-            "-i", song_audio_filename,
+            "-i", self.dry_webm_filename,
+            "-i", self.song_audio_filename,
             "-shortest",
             "-b:a", "128000",
             "-vbr", "on",
@@ -37,8 +44,8 @@ class FFMpegMixer(object):
             ]
         normfilter = []
         songfilter = []
-        if recording.latency:
-            latency = recording.latency # float
+        latency = self.recording.latency
+        if latency:
             abslatency = abs(latency)
             #latency_ms = int(abslatency*1000)
             #adelay = f'adelay={latency_ms}|{latency_ms}' #ms
@@ -49,8 +56,8 @@ class FFMpegMixer(object):
             else:
                 # fix backing track ahead of mic audio
                 normfilter.append(atrim) # stereo
-        if recording.voladjust:
-            voladjust = recording.voladjust
+        voladjust = self.recording.voladjust
+        if voladjust:
             absvoladjust = abs(voladjust)
             avoladjust = f'volume={absvoladjust}'
             if absvoladjust == voladjust:
@@ -81,10 +88,12 @@ class FFMpegMixer(object):
         auxsends = []
         auxstreams = []
 
-        if 'effect-reverb' in recording.effects:
+        effects = self.recording.effects
+
+        if 'effect-reverb' in effects:
             # probably too hall-y but #7 is verb type and #27 is "large room"
             auxsends.append('ladspa=file=tap_reverb:tap_reverb:c=c7=27')
-        if 'effect-chorus' in recording.effects:
+        if 'effect-chorus' in effects:
             # XXX mess around with nondefault
             auxsends.append('ladspa=file=tap_chorusflanger:tap_chorusflanger')
 
@@ -125,7 +134,7 @@ class FFMpegMixer(object):
             '-ac', '2', # output channels, "downmix" to stereo
             "-ar", "48000", # it will always be 48K from chrome
             ])
-        if recording.show_camera:
+        if self.recording.show_camera:
             ffmix.extend([
                 "-c:v", "vp8",
                 "-map", "0:v:0?", # ? at end makes it opt (recs with no cam)
@@ -140,7 +149,7 @@ class FFMpegMixer(object):
 
         ffmix.extend([
             # https://stackoverflow.com/questions/20665982/convert-videos-to-webm-via-ffmpeg-faster
-            '-cpu-used', '8', # gofast (default is 1, quality suffers)
+            '-cpu-used', f'{self.cpu_used}', # gofast (default 1, qual suffers)
             '-deadline', 'realtime', # gofast
             '-f', 'webm',
             f'{outfile}'
@@ -152,18 +161,23 @@ class FFMpegMixer(object):
         return ffmix
         
     def stream(self):
-        ffmix = self.get_command()
+        self.cpu_used = 16 # go fastfast
+        ffmix = self.get_command(None)
 
         pffmix = subprocess.Popen(
             ffmix,
             shell=False,
+            stdout=subprocess.PIPE,
+            #stderr=subprocess.DEVNULL,
         )
 
-        # We can't use webm data piped from ffmpeg stdout directly to write
-        # into files because the stream it produces has no duration; it must
-        # write the duration it has to seek to the beginning of the stream.
-        # we must use progress() to actually write the file if we want
-        # to get a duration.
+        # NB: webm data piped from ffmpeg to its stdout directly to write
+        # has no duration info because in order to write the duration it must
+        # seek to the beginning of the output stream, which it can't do if the
+        # output stream isn't seekable.  Use progress() with a "real" filename
+        # to actually write the file to disk if we want to get a duration in
+        # the rendered result.
+
         while True:
             # XXX timeout
             output = pffmix.stdout.read(1<<20) # 1M in bytes

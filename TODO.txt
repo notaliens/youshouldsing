@@ -7,7 +7,7 @@
   - i18n
   - terms of service*** (looks bad on phone)
   - privacy policy***
-  - caching
+  - http caching
   - tests
   - contests
   - https://css-tricks.com/centering-css-complete-guide/
@@ -37,6 +37,7 @@
 - Docs Videos
 
   - howtoenterthecode
+  - recordingsuccess
 
 - Invite codes
 
