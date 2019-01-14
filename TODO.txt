@@ -72,6 +72,7 @@
   - Recognize dupe song metadata and group together on other recordings page.
   - Notification when someone records a song that you uploaded.***
   - Notification when someone likes a song you uploaded.***
+  - Flag song lyrics as offensive
 
 Songs
 
@@ -138,6 +139,7 @@ Songs
   - "Other recordings you might like if you like this one"
   - Share links.
   - Show number of views.
+  - Flag recording as offensive.
 
 - Commenting
 
@@ -150,6 +152,7 @@ Songs
   - "comments on my recordings"
   - embed youtube / yss links
   - edit and delete links still show up when not logged in***
+  - Flag comment as offensive.
 
 - Likes
 
