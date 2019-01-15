@@ -41,12 +41,6 @@ class SongSchema(FilePropertiesSchema):
         title='Duration in seconds',
         widget = deform.widget.TextInputWidget(readonly=True),
         )
-    remixing = colander.SchemaNode(
-        colander.Bool(),
-        missing=colander.null,
-        title='Remixing',
-        widget = deform.widget.CheckboxWidget(),
-        )
     lyrics = colander.SchemaNode(
         colander.String(),
         widget=deform.widget.TextAreaWidget(style="height: 200px;"),

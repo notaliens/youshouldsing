@@ -336,6 +336,8 @@ class PerformerRecordingsView(PerformerView):
         context = self.context
         recordings = context['recordings']
         q = find_index(context, 'system', 'content_type').eq('Recording')
+        if context != request.performer:
+            q = q & find_index(context, 'yss', 'mixed').eq(True)
         q = q & find_index(context, 'system', 'path').eq(
             request.resource_path(recordings)
         )
@@ -635,6 +637,7 @@ class PerformerRecordingsLikedView(PerformerView):
         context = self.context
         q = find_index(context, 'yss', 'oid').any(context.likes_recordingids)
         q = q & find_index(context, 'system', 'content_type').eq('Recording')
+        q = q & find_index(context, 'yss', 'mixed').eq(True)
         q = q & find_index(context, 'system', 'allowed').allows(
             request, 'yss.indexed')
         filter_text = request.params.get('filter_text')

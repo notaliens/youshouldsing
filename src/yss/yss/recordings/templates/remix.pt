@@ -3,96 +3,155 @@
 
   <div metal:fill-slot="main_content" class="container">
 
-    <div class="row" style="padding-bottom: 10px;">
-      <div class="col-md-12">
-        <button id="play-me" style="width: 8em;" class="btn btn-primary"><i
-              class="fas fa-bullhorn"> </i> Listen</button>
-        <button id="remix-me" style="width: 8em; display: ${already and 'none' or 'inline'};" class="btn btn-danger"><i
-              class="fas fa-microphone"> </i> Remix</button>
-        <button id="reverse" style="width: 8em; display: none" class="btn btn-warning audiocontrol"><i
-              class="fas fa-backward"> </i></button>
-        <button id="forward" style="width: 8em; display: none" class="btn btn-warning audiocontrol"><i
-              class="fas fa-forward"> </i></button>
-      </div>
-    </div>
+    <div class="col-md-12">
 
-    <div class="row">
-      <div class="col-md-12">
+      <div class="panel panel-primary">
 
-        <div class="panel panel-warning">
-          <div class="panel-heading">
-            <h3 class="panel-title">Sound</h3>
+        <div class="panel-heading">
+          <div class="row">
+            <div class="col-md-12">
+              <a href="${request.resource_url(context.song)}">${context.song.title}</a> by                 <a href="${request.resource_url(performer)"><img src="${layout.performer_thumb_url(context.performer)}" alt=""/> ${context.performer.__name__}</a>
+            </div>
           </div>
-          <div class="panel-body">
+        </div>
 
-            <div>
-              <span style="padding-right: 10px;"><b>Effects</b></span>
-              <span class="form-check">
-                <input class="form-check-input effects" type="checkbox" value="" id="effect-reverb" name="effect-reverb" tal:attributes="checked 'effect-reverb' in effects">
-                <label class="form-check-label" for="effect-reverb">
+        <div class="panel-body">
+
+          <div class="row" style="padding-bottom: 10px;">
+            <div class="col-md-6">
+              <div class="embed-responsive embed-responsive-4by3">
+                <video id="player" controls width="640" height="400">
+                  <source id="thevideosource" src="${stream_url}"/>
+                </video>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+
+              <div class="panel panel-warning">
+                <div class="panel-heading">
+                  <h3 class="panel-title">Mic Latency (<span id="latencydisplay">${context.latency}</span> s)</h3>
+                </div>
+                <div class="panel-body">
+
+                  <div>
+                    <div class="form-check">
+                      <input id="latency" name="latency" type="range" min="-5"
+                             max="5" value="${context.latency}"
+                             step="0.1" class="knob"/>
+                      <label class="form-check-label" for="latency">
+                        ▶ if vocals are ahead of backing track <br/>
+                        ◀ if vocals lag behind backing track
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+
+              <div class="panel panel-warning">
+                <div class="panel-heading">
+                  <h3 class="panel-title">Sound</h3>
+                </div>
+                <div class="panel-body">
+
+                  <div>
+                    <span style="padding-right: 10px;"><b>Effects</b></span>
+                    <span class="form-check">
+                      <input class="form-check-input effects knob"
+                             type="checkbox" value="" id="effect-reverb"
+                             name="effect-reverb"
+                             tal:attributes="checked 'effect-reverb' in effects">
+                      <label class="form-check-label" for="effect-reverb">
                   Reverb
-                </label>
-              </span>
-              <span class="form-check">
-                <input class="form-check-input effects" type="checkbox" value="" id="effect-chorus" name="effect-chorus" tal:attributes="checked 'effect-chorus' in effects">
-                <label class="form-check-label" for="effect-chorus">
+                      </label>
+                    </span>
+                    <span class="form-check">
+                      <input class="form-check-input effects knob"
+                             type="checkbox" value="" id="effect-chorus"
+                             name="effect-chorus"
+                             tal:attributes="checked 'effect-chorus' in effects">
+                      <label class="form-check-label" for="effect-chorus">
                   Chorus
-                </label>
-              </span>
+                      </label>
+                    </span>
+                  </div>
+                  <div>
+                    <input id="voladjust" name="voladjust" class="knob"
+                           type="range" min="-1" max="1" value="${voladjust}"
+                           step="0.01"/>
+                    <label class="form-check-label" for="voladjust">
+                  ▶ louder vocals <br/>
+                  ◀ louder backing track
+                    </label>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div>
-              <input id="voladjust" name="voladjust" type="range" min="-1" max="1" value="${voladjust}"
-                     step="0.01"/>
-              <label class="form-check-label" for="voladjust">
-                  Relative Volumes (up for louder vocals, down for louder backing track)
-              </label>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
 
-    <div class="row">
-      <div class="col-md-12">
+            <div class="col-md-6">
 
-        <div class="panel panel-warning">
-          <div class="panel-heading">
-            <h3 class="panel-title">Video</h3>
-          </div>
-          <div class="panel-body">
+              <div class="panel panel-warning">
+                <div class="panel-heading">
+                  <h3 class="panel-title">Video</h3>
+                </div>
+                <div class="panel-body">
 
-            <div>
-              <span class="form-check">
-                <input class="form-check-input effects" type="checkbox" value="" id="show-camera" name="show-camera" tal:attributes="checked context.show_camera">
-                <label class="form-check-label" for="show-camera">
+                  <div>
+                    <span class="form-check">
+                      <input class="form-check-input effects knob" type="checkbox" value="" id="show-camera" name="show-camera" tal:attributes="checked context.show_camera">
+                      <label class="form-check-label" for="show-camera">
                   Show Camera Video
-                </label>
-              </span>
+                      </label>
+                    </span>
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-      </div>
-    </div>
 
-    <div class="row">
-      <div class="col-md-12">
+            <div class="col-md-6">
 
-        <div class="panel panel-warning">
-          <div class="panel-heading">
-            <h3 class="panel-title">Mic Latency (<span id="latencydisplay">${context.latency}</span> ms)</h3>
-          </div>
-          <div class="panel-body">
+              <div class="panel panel-warning">
+                <div class="panel-heading">
+                  <h3 class="panel-title">Description</h3>
+                </div>
+                <div class="panel-body">
 
-            <div>
-              <span class="form-check">
-                <input id="latency" name="latency" type="range" min="-5"
-                       max="5" value="${context.latency}" step="0.1"/>
-                <label class="form-check-label" for="latency">
-                  Adjust up if mic audio is ahead of backing track, adjust down if mic audio is behind backing track.
-                </label>
-              </span>
-              <div style="padding-top: 5px;">
-               Protip: Your cam video will always be in sync with your microphone audio.  But it's common that your mic audio will be out of sync with the backing track.  If your mic audio is out of sync with the backing track, you will need to adjust the mic latency, remix, and relisten repeatedly to get it just right.  But remixing takes much longer if you leave "Show Camera Video" checked.  To make remixes faster, turn off "Show Camera Video" in remixes while you're adjusting the mic latency.  After a few remixes, the mic vocals will line up with the backing track.  After that, if you want to show video in the recording, turn "Show Camera Video" back on and remix one last time.
+                  <div class="form-group">
+                    <label for="description">Description</label>
+                    <textarea class="form-control"
+                              id="description"
+                              name="description"
+                              rows="5"
+                                >${context.description}</textarea>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+
+              <div class="panel panel-warning">
+                <div class="panel-heading">
+                  <h3 class="panel-title">Visibility</h3>
+                </div>
+                <div class="panel-body">
+                  <div>
+                    <div class="form-check"
+                         tal:repeat="state visibility_states">
+                      <input class="form-check-input"
+                             type="radio"
+                             name="visibility"
+                             id="visibility-${state}"
+                             value="${state}"
+                             tal:attributes="checked visibility_state==state">
+                      <label class="form-check-label"
+                             for="visibility-${state}">${state}</label>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -100,13 +159,42 @@
       </div>
     </div>
 
+    <div id="remixing-overlay" class="finished-overlay" style="display: ${context.enqueued and 'block' or 'none'}">
+      <div id="remixing-overlay-text" class="finished-overlay-text">
+        <div class="progress">
+          <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 1%; min-width: 1em;" id="mixprogress"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row" style="padding-bottom: 10px;">
+      <div class="col-md-8 col-md-offset-2">
+        <button id="accept" style="width: 20em;" class="btn btn-success"><i
+              class="fas fa-save"> </i> Save It</button>
+        <button id="reject" style="width: 20em;"
+                class="btn btn-danger"><i
+              class="fa fa-trash"> </i> <span tal:omit-tag="" tal:content="ismixed and 'Delete This Recording' or 'Throw This Recording Away'"/></button>
+      </div>
+    </div>
+
   </div>
 
   <div metal:fill-slot="tail">
-    <script type="text/javascript" src="${layout.static('yss.recordings:static/yssmixer.js')}"></script>
+    <script
+       type="text/javascript"
+       src="${layout.static('yss.recordings:static/yssmixer.js')}"></script>
     <script type="text/javascript">
-     // exported by yssmixer
-     yssmixer("${stream_url}", "${submit_handler}")
+      mixer = yssmixer(
+       "${stream_url}",
+       "${remix_handler}",
+       "${acc_handler}",
+       "${rej_handler}",
+       "${progress_url}",
+       "${ismixed}"
+     )
+     if (${int(context.enqueued)}) {
+       setTimeout(mixer.progresscheck, 0);
+     };
     </script>
   </div>
 

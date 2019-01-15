@@ -52,7 +52,7 @@
                 </td>
                 <td>${item.num_likes}</td>
                 <td>
-                    ${view.visibility_state(item)}
+                    ${view.visibility_state(item)} <span tal:condition="not item.mixed">(Unmixed)</span>
                 </td>
               </tr>
             </tbody>

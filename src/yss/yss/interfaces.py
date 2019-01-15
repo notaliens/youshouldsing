@@ -166,3 +166,7 @@ language_choices = [
     ]
 for language in languages:
     language_choices.append((language['code'], language['name']))
+
+class UnrecoverableError(Exception):
+    """ Raise during encoding when we should ignore this recording and
+    go on to the next """

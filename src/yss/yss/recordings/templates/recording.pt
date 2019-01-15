@@ -28,12 +28,12 @@
                 <div class="embed-responsive embed-responsive-4by3">
 
                   <video id="thevideo" controls width="640" height="480"
-                         style="display: ${processed and 'inline-block' or 'none'};" preload="${processed and 'auto' or 'none'}">
-                    <source id="thevideosource" src="${video_url}"/>
+                         style="display: ${mixed and 'inline-block' or 'none'};" preload="${mixed and 'auto' or 'none'}">
+                    <source id="thevideosource" src="${stream_url}"/>
                   </video>
 
-                  <div class="well" id="processing"
-                       tal:condition="not processed">
+                  <div class="well" id="mixing"
+                       tal:condition="not mixed">
                     <div class="progress">
                       <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%; min-width: 10em;" id="mixprogress">Awaiting mixing</div>
                     </div>
@@ -72,7 +72,7 @@
         </div>
       </div>
 
-      <script type="text/javascript" tal:condition="not processed">
+      <script type="text/javascript" tal:condition="not mixed">
          var progresscheck = function() {
            console.log('progress check');
            var has_edit_permission = ${has_edit_permission};
@@ -84,11 +84,11 @@
                    rand = Math.random().toString(36).replace(/[^a-z]+/g, ''
                                                              ).substr(0, 5);
                    $('#thevideosource')[0].setAttribute(
-                     'src', "${video_url}?x=" + rand); // cachebust
+                     'src', "${stream_url}?x=" + rand); // cachebust
                    var video = $('#thevideo');
                    video.load();
                    video.show();
-                   $('#processing').hide();
+                   $('#mixing').hide();
                    if (has_edit_permission) {
                      $('#button-remix').show();
                      };

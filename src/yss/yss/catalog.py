@@ -31,6 +31,7 @@ class Indexes(object):
     text = Text()
     visibility_state = Field()
     oid = Field()
+    mixed = Field()
 
 class IndexViews(object):
     def __init__(self, resource):
@@ -85,6 +86,9 @@ class IndexViews(object):
             created = int(str(int(timetime))[:-2])
 
         return created
+
+    def mixed(self, default):
+        return getattr(self.resource, 'mixed', False)
 
     def lyrics(self, default):
         return getattr(self.resource, 'lyrics', default)
@@ -186,6 +190,13 @@ def includeme(config):  # pragma: no cover
         catalog_name='yss',
         index_name='visibility_state',
         attr='visibility_state',
+        context = IRecording,
+        )
+    config.add_indexview(
+        IndexViews,
+        catalog_name='yss',
+        index_name='mixed',
+        attr='mixed',
         context = IRecording,
         )
     config.add_indexview(

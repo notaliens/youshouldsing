@@ -13,6 +13,7 @@ from pyramid.paster import (
 from substanced.event import ObjectModified
 from substanced.objectmap import find_objectmap
 
+from yss.interfaces import UnrecoverableError
 from yss.utils import get_redis
 from yss.recordings.mixer import FFMpegMixer
 
@@ -67,17 +68,25 @@ def main(argv=sys.argv):
                     end = time.time()
                     logger.info(
                         f'Time from enqeue-to-done for {oid}: {end-enqueued}')
+            except UnrecoverableError:
+                logger.warning(
+                    f'Unrecoverable error when processing {oid}',
+                    exc_info=True
+                )
+                redis.hmset(
+                    recording.mixprogress_key,
+                    {'pct':-1, 'status':'Unrecoverable error'}
+                )
             except:
                 logger.warning(
                     f'Unexpected error when processing {oid}',
                     exc_info=True
                 )
-                progress_key = f'mixprogress-{recording.__oid__}'
                 redis.hmset(
-                    progress_key,
+                    recording.mixprogress_key,
                     {'pct':-1, 'status':'Mix failed; unexpected error'}
                 )
-                redis.persist(progress_key) # clear only on good
+                redis.persist(recording.mixprogress_key) # clear only on good
                 redis.rpush('yss.new-recordings', oidandtime)
                 raise
 
@@ -87,7 +96,7 @@ def postprocess(recording, redis, env):
     mixstart = time.time()
     registry = env['registry']
     try:
-        progress_key = f'mixprogress-{recording.__oid__}'
+        progress_key = recording.mixprogress_key
         logger.info(f'Progress key is {progress_key}')
         redis.expire(progress_key, 1200) # expire in 20 minutes
         logger.info(f'Changing dir to {tmpdir}')
@@ -101,33 +110,40 @@ def postprocess(recording, redis, env):
         open('dry_blob_filename', 'w').write(dry_webm)
         open('song_audio_filename', 'w').write(song_audio_filename)
         mixer = FFMpegMixer(recording)
-        for i, prog in enumerate(mixer.progress('mixed.webm')):
-            percent = prog['pct']
-            fps = prog['fps']
-            logger.debug(f'Mixing percent {percent} after {i+1} progress calls')
-            if fps:
-                status = f'Mixing ({fps} fps)'
-            else:
-                status = 'Mixing'
-            redis.hmset(
-                progress_key, {'pct':percent, 'status':status}
-            )
-        logger.info(f'Copying final mix to mixed blob')
-        with open('mixed.webm', 'rb') as savefrom:
-            recording.set_mixed_blob(savefrom)
+        outfile = 'remixed.webm'
+        try:
+            for i, prog in enumerate(mixer.progress(outfile)):
+                percent = prog['pct']
+                fps = prog['fps']
+                logger.debug(f'Mixing percent {percent} after {i+1} progress calls')
+                if fps:
+                    status = f'Mixing ({fps} fps)'
+                else:
+                    status = 'Mixing'
+                redis.hmset(
+                    progress_key, {'pct':percent, 'status':status}
+                )
+        except UnrecoverableError:
+            recording.enqueued = False
+            transaction.commit()
+            raise
+        else:
+            with open(outfile, 'rb') as savefrom:
+                logger.info(f'Remixed {recording.__name__}')
+                recording.set_remixing(savefrom)
+                recording.enqueued = False
+                event = ObjectModified(recording)
+                registry.subscribers((event, recording), None)
 
-        recording.remixing = False
-        event = ObjectModified(recording)
-        registry.subscribers((event, recording), None)
-        transaction.commit()
-        open('mixed_blob_filename', 'w').write(recording.mixed_blob.committed())
-        redis.hmset(
-            progress_key, {'pct':100, 'status':'Finished'}
-        )
-        # don't remove tempdir until commit succeeds
-        #shutil.rmtree(tmpdir, ignore_errors=True)
+            transaction.commit()
+            open('remixing_blob_filename', 'w').write(
+                recording.remixing_blob.committed()
+            )
+            redis.hmset(
+                progress_key, {'pct':100, 'status':'Finished'}
+            )
+
     finally:
         mixend = time.time()
         logger.info(f'total mix time: {mixend-mixstart}')
         os.chdir(curdir)
-

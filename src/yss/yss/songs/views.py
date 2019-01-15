@@ -38,7 +38,6 @@ from substanced.sdi import mgmt_view
 from substanced.util import (
     Batch,
     find_index,
-    find_catalog,
     set_acl,
     get_acl,
     )
@@ -580,12 +579,6 @@ class SongView(object):
         except ValueError:
             latency = 0
         recording.latency = latency
-        description = request.params['description'][:5000]
-        recording.description = description
-        recordings[recording_id] = recording
-        performer = request.user.performer
-        recording.performer = performer
-        recording.song = song
         recording.effects = tuple([ # not currently propsheet-exposed
             x for x in request.params.getall('effects') if x in known_effects
         ])
@@ -597,19 +590,17 @@ class SongView(object):
         except (TypeError, ValueError):
             # use default voladjust of 0 set at class level
             pass
-        recording.set_dry_blob(stream)
-
+        recordings[recording_id] = recording
+        performer = request.user.performer
+        recording.performer = performer
+        recording.song = song
+        recording.set_unmixed(stream)
+        recording.enqueue(request)
         workflow = get_workflow(request, 'Visibility', 'Recording')
         workflow.reset(recording, request) # private by default
-        visibility = request.params.get('visibility', 'Private')
-        workflow.transition_to_state(recording, request, visibility)
         event = ObjectModified(recording)
         self.request.registry.subscribers((event, recording), None)
-        redis = get_redis(request)
-        redis.rpush(
-            "yss.new-recordings", f'{recording.__oid__}|{time.time()}'
-        )
-        return request.resource_url(recording)
+        return request.resource_url(recording, '@@remixpage')
 
     def generate_recording_id(self, recordings):
         i = 0
@@ -683,6 +674,7 @@ class SongView(object):
         context = self.context
         q = find_index(context, 'yss', 'oid').any(context.recording_ids)
         q = q & find_index(context, 'system', 'content_type').eq('Recording')
+        q = q & find_index(context, 'yss', 'mixed').eq(True)
         q = q & find_index(context, 'system', 'allowed').allows(
             request, 'yss.indexed')
         filter_text = request.params.get('filter_text')

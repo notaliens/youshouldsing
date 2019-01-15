@@ -10,6 +10,7 @@ class HomepageView(object):
     def featured_recordings(self, limit=10):
         context = self.context
         q = find_index(context, 'system', 'content_type').eq('Recording')
+        q = q & find_index(context, 'yss', 'mixed').eq(True)
         q = q & find_index(context, 'system', 'allowed').allows(
             ['system.Everyone'], 'yss.indexed')
         num_likes = find_index(context, 'yss', 'num_likes')
@@ -19,6 +20,7 @@ class HomepageView(object):
     def recent_recordings(self, limit=10):
         context = self.context
         q = find_index(context, 'system', 'content_type').eq('Recording')
+        q = q & find_index(context, 'yss', 'mixed').eq(True)
         q = q & find_index(context, 'system', 'allowed').allows(
             ['system.Everyone'], 'yss.indexed')
         created = find_index(context, 'yss', 'created')

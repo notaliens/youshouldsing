@@ -38,6 +38,7 @@
 
   - howtoenterthecode
   - recordingsuccess
+  - https://support.rosettastone.com/en/language-learning/articles/Consumer-Allow-Chrome-Access-to-your-Camera-and-Microphone
 
 - Invite codes
 

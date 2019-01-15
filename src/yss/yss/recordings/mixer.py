@@ -5,6 +5,8 @@ import re
 import subprocess
 import string
 
+from yss.interfaces import UnrecoverableError
+
 ffmpegexe = distutils.spawn.find_executable('ffmpeg')
 
 logger = logging.getLogger('ffmpegmixer')
@@ -130,7 +132,7 @@ class FFMpegMixer(object):
             ])
         if self.recording.show_camera:
             ffmix.extend([
-                "-c:v", "copy",
+                "-c:v", "vp8", # should be "copy"
                 "-map", "0:v:0?", # ? at end makes it opt (recs with no cam)
                 ])
         else:
@@ -183,7 +185,7 @@ class FFMpegMixer(object):
         return int(h) * 3600 + int(m) * 60 + int(s) # ignore ms
 
     fps_re = re.compile(r' fps=\s*(\d+)')
-    time_re = re.compile(r' time=(\d{2}):(\d{2}):(\d{2})')
+    time_re = re.compile(r' time=-?(\d*):(\d{2}):(\d{2})')
 
     def progress(self, outfile):
         """Render recording to outfile.  Return an generator which yields a
@@ -215,6 +217,12 @@ class FFMpegMixer(object):
             current_result = self.time_re.search(line)
             if current_result:
                 current = self.to_seconds(*current_result.groups())
+                if current > 3600:
+                    # something is jacked up, nothing should be encoding
+                    # something this long
+                    pffmix.terminate()
+                    raise UnrecoverableError(
+                        f'encoding taking too long at {current}')
                 fps_result = self.fps_re.search(line)
                 if fps_result:
                     try:

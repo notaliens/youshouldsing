@@ -1,7 +1,3 @@
-import colander
-import deform
-import time
-
 from pyramid.response import FileResponse
 from pyramid.view import (
     view_config,
@@ -24,10 +20,7 @@ from substanced.util import (
     )
 
 from substanced.folder.views import generate_text_filter_terms
-from substanced.schema import Schema
 from substanced.workflow import get_workflow
-
-from yss.utils import get_redis, decode_redis_hash
 
 from yss.interfaces import IRecording
 
@@ -43,11 +36,6 @@ class RecordingView(object):
         return f'{recording.title} performed by {recording.performer.__name__}'
 
     @reify
-    def is_processed(self):
-        recording = self.context
-        return bool(recording.mixed_blob and not recording.remixing)
-
-    @reify
     def has_edit_permission(self):
         recording = self.context
         has_edit_permission = self.request.has_permission('yss.edit', recording)
@@ -56,7 +44,6 @@ class RecordingView(object):
     def tabs(self):
         state = self.request.view_name
         recording = self.context
-        processed = self.is_processed
         tabs = []
         if self.has_edit_permission:
             tabs.append(
@@ -69,16 +56,9 @@ class RecordingView(object):
             tabs.append(
                 {'title':'Edit',
                  'id':'button-edit',
-                 'url':self.request.resource_url(recording, '@@edit'),
-                 'class':(state == 'edit') and 'active' or '',
-                 'enabled':True,
-                 })
-            tabs.append(
-                {'title':'Remix',
-                 'id':'button-remix',
-                 'url':self.request.resource_url(recording, '@@remix'),
-                 'class':(state == 'remix') and 'active' or '',
-                 'enabled':processed,
+                 'url':self.request.resource_url(recording, '@@remixpage'),
+                 'class':(state == 'remixpage') and 'active' or '',
+                 'enabled':True # XXX if we are already remixing, disable
                  })
         return tabs
 
@@ -90,21 +70,13 @@ class RecordingView(object):
     def view(self):
         recording = self.context
         request = self.request
-        # XXX compute other_recordings more efficiently
-        other_recordings = [
-            other_recording for other_recording in
-            recording.song.recordings if
-            other_recording is not recording and
-            request.has_permission('yss.indexed', other_recording)
-            ]
         return {
             'title':recording.title,
             'performer':recording.performer,
             'num_likes':recording.num_likes,
             'liked_by': recording.liked_by,
-            'other_recordings':other_recordings,
-            'video_url': request.resource_url(recording, '@@movie'),
-            'processed': int(self.is_processed),
+            'stream_url': request.resource_url(recording, '@@movie'),
+            'mixed': recording.mixed,
             'has_edit_permission':int(self.has_edit_permission),
             }
 
@@ -117,99 +89,49 @@ class RecordingView(object):
     def dry(self):
         # for debugging: /dry, never intended to be exposed in the UI
         vars = self.view()
-        vars['video_url'] = self.request.resource_url(
+        vars['stream_url'] = self.request.resource_url(
             self.context, '@@drymovie')
         return vars
 
     @view_config(
-        name='edit',
-        renderer='templates/edit.pt',
-        permission='yss.edit',
-    )
-    def edit(self):
-        recording = self.context
-        request = self.request
-        visibility_wf = get_workflow(request, 'Visibility', 'Recording')
-        schema = EditRecordingSchema().bind(request=request, context=recording)
-        form = deform.Form(schema, buttons=('Save',))
-        # XXX wtf if I take this out, my visibility choices disappear
-        # on successful save until a process restart
-        form['visibility'].widget=deform.widget.RadioChoiceWidget(
-            values=zip(visibility_states, visibility_states)
-        )
-        rendered = None
-        if 'Save' in request.POST:
-            controls = request.POST.items()
-            try:
-                appstruct = form.validate(controls)
-            except deform.ValidationFailure as e:
-                rendered = e.render()
-            else:
-                recording.description = appstruct['description']
-                visibility_wf.transition_to_state(
-                    recording, request, appstruct['visibility']
-                )
-                if appstruct['allow_likes']:
-                    # XXXX
-                    pass
-                event = ObjectModified(recording)
-                self.request.registry.subscribers((event, recording), None)
-                request.session.flash('Recording edited', 'info')
-                return HTTPFound(request.resource_url(recording, 'edit'))
-        else:
-            appstruct = {
-                'csrf_token': request.session.get_csrf_token(),
-                'description': recording.description,
-                'visibility':visibility_wf.state_of(recording),
-                'allow_likes':False,
-            }
-        if rendered is None:
-            rendered = form.render(appstruct, readonly=False)
-        return {
-            'form':rendered,
-            'page_title': f'Editing {self.page_title}'
-            }
-
-    @view_config(
-        name='mixprogress',
-        renderer='json',
-        permission='view',
-    )
-    def mixprogress(self):
-        redis = get_redis(self.request)
-        recording = self.context
-        progress = decode_redis_hash(
-            redis.hgetall(f'mixprogress-{self.context.__oid__}')
-            )
-        progress['done'] = (
-            (recording.mixed_blob and not recording.remixing) and 1 or 0
-            )
-        return progress
-
-    @view_config(
-        name='remix',
+        name='remixpage',
         renderer='templates/remix.pt',
         permission='yss.edit',
         )
-    def remix(self):
-        # XXX check if dry blob is still around
+    def remixpage(self):
+        recording = self.context
+        request = self.request
+        visibility_wf = get_workflow(request, 'Visibility', 'Recording')
         return {
-            'submit_handler': self.request.resource_url(
-                self.context, 'finish_remix'),
-            'voladjust': self.context.voladjust,
-            'effects':self.context.effects,
-            'stream_url':self.request.resource_url(
-                self.context, 'movie'),
-            'already':self.context.remixing,
-            'page_title':f'Remixing {self.page_title}'
-            }
+            'remix_handler': request.resource_url(recording, '@@remix'),
+            'rej_handler': request.resource_url(recording, '@@remixreject'),
+            'acc_handler': request.resource_url(recording, '@@remixaccept'),
+            'voladjust': recording.voladjust,
+            'effects':recording.effects,
+            'stream_url':request.resource_url(recording, '@@remixmovie'),
+            'progress_url':request.resource_url(recording,'@@remixprogress'),
+            'page_title':f'Remixing {self.page_title}',
+            'enqeued':recording.enqueued,
+            # ismixed false means fresh from song record, and not a remix
+            'ismixed':bool(recording.mixed),
+            'visibility_state':visibility_wf.state_of(recording),
+            'visibility_states':visibility_states,
+        }
 
     @view_config(
-        name='finish_remix',
+        name='remixprogress',
+        renderer='json',
+        permission='view',
+    )
+    def remixprogress(self):
+        return self.context.get_mixprogress(self.request)
+
+    @view_config(
+        name='remix',
         permission='yss.edit',
         renderer='string',
     )
-    def finish_remix(self):
+    def remix(self):
         request = self.request
         recording = self.context
         needs_remix = False
@@ -256,17 +178,50 @@ class RecordingView(object):
             needs_remix = True
             recording.latency = latency
 
-        if needs_remix:
-            recording.remixing = True
-            event = ObjectModified(recording)
-            self.request.registry.subscribers((event, recording), None)
-            redis = get_redis(request)
-            redis.rpush(
-                "yss.new-recordings", f'{recording.__oid__}|{time.time()}')
-
         request.response.set_cookie('latency', str(latency))
 
-        return request.resource_url(self.context)
+        if needs_remix:
+            recording.enqueue(request)
+            event = ObjectModified(recording)
+            self.request.registry.subscribers((event, recording), None)
+            progress_url = request.resource_url(self.context, '@@remixprogress')
+            return progress_url
+
+        return ''
+
+    @view_config(
+        name='remixreject',
+        permission='yss.edit',
+        renderer='string',
+    )
+    def remix_reject(self):
+        request = self.request
+        recording = self.context
+        song = recording.song
+        del recording.__parent__[recording.__name__]
+        return request.resource_url(song, '@@record')
+
+    @view_config(
+        name='remixaccept',
+        permission='yss.edit',
+        renderer='string',
+    )
+    def remix_accept(self):
+        request = self.request
+        recording = self.context
+        description = request.params.get('description', '')
+        description = description[:2000]
+        recording.description = description
+        visibility = request.params.get('visibility', 'Private')
+        if not visibility in visibility_states:
+            visibility = 'Private'
+        visibility_wf = get_workflow(request, 'Visibility', 'Recording')
+        visibility_wf.transition_to_state(recording, request, visibility)
+        recording.set_mixed()
+        event = ObjectModified(recording)
+        self.request.registry.subscribers((event, recording), None)
+        request.session.flash('Recording changes accepted', 'info')
+        return request.resource_url(recording)
 
     @view_config(
         name='like',
@@ -338,6 +293,17 @@ class RecordingView(object):
         return self._stream_blob(recording.mixed_blob, 'video/webm')
 
     @view_config(
+        name='remixmovie',
+        permission='yss.edit'
+    )
+    def stream_remixing(self):
+        recording = self.context
+        blob = recording.remixing_blob
+        if blob is None:
+            blob = recording.mixed_blob
+        return self._stream_blob(blob, 'video/webm')
+
+    @view_config(
         name='drymovie',
         permission='yss.edit'
     )
@@ -383,6 +349,7 @@ class GlobalRecordingsView(object):
         q = find_index(context, 'system', 'content_type').eq('Recording')
         q = q & find_index(context, 'system', 'allowed').allows(
             ['system.Everyone'], 'yss.indexed')
+        q = q & find_index(context, 'yss', 'mixed').eq(True)
         filter_text = request.params.get('filter_text')
         if filter_text:
             terms = generate_text_filter_terms(filter_text)
@@ -473,32 +440,3 @@ visibility_states = (
     'Private',
     'Authenticated Only',
     ) # XXX probably should derive these from workflow
-
-@colander.deferred
-def visibility_widget(node, kw):
-    # XXX wtf if I just use RadioChoiceWidget directly without a deferral,
-    # my visibility choices disappear on successful save until a process restart
-    deform.widget.RadioChoiceWidget(
-        values=zip(visibility_states, visibility_states)
-    )
-
-class EditRecordingSchema(Schema):
-    """ Property schema to create a Performer.
-    """
-    description = colander.SchemaNode(
-        colander.String(),
-        title='Description',
-        validator=colander.Length(max=2000),
-        widget=deform.widget.TextAreaWidget(rows=6),
-        missing=colander.null,
-    )
-    visibility = colander.SchemaNode(
-        colander.String(),
-        title='Visibility',
-        widget=visibility_widget,
-    )
-
-    allow_likes = colander.SchemaNode(
-        colander.Bool(),
-        title='Allow Likes',
-    )

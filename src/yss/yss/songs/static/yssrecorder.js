@@ -403,12 +403,6 @@ var rtc_recorder = (function(exports, karaoke, max_framerate, upload_handler) {
         }
         fd.append('data', blob);
         fd.append('finished', '1');
-        if ($('#description').length) {
-            fd.append('description', $('#description')[0].value);
-        }
-        if ($('input[name=visibility]').length) {
-            fd.append('visibility', $('input[name=visibility]:checked').val());
-        }
         url = upload_handler || window.location;
         jQuery.ajax({
             xhr: function() {

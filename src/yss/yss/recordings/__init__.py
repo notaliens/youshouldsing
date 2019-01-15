@@ -1,6 +1,7 @@
 import audioread
 import persistent
 import shutil
+import time
 
 from zope.interface import implementer
 from ZODB.blob import Blob
@@ -32,6 +33,8 @@ from yss.interfaces import (
     RelatedPropertySheet,
     )
 
+from yss.utils import get_redis, decode_redis_hash
+
 @content(
     'Recordings',
     icon='glyphicon glyphicon-record',
@@ -58,16 +61,18 @@ class Recording(persistent.Persistent):
     liked_by_ids = multireference_targetid_property(PerformerLikesRecording)
     effects = ()
     show_camera = True
-    remixing = False
     latency = 0
     voladjust = 0
     description = ''
     dry_duration = 0
     mixed_duration = 0
+    remixing_duration = 0
+    dry_blob = None
+    remixing_blob = None
+    mixed_blob = None
+    enqueued = False
 
     def __init__(self, tmpfolder):
-        self.dry_blob = None
-        self.mixed_blob = None
         self.tmpfolder = tmpfolder
 
     @property
@@ -82,23 +87,75 @@ class Recording(persistent.Persistent):
     def num_likes(self):
         return len(self.liked_by_ids)
 
-    def set_dry_blob(self, stream):
+    @property
+    def mixed(self):
+        return bool(self.mixed_blob) and True or False
+
+    @property
+    def remixed(self):
+        return bool(self.remixing_blob) and True or False
+
+    @property
+    def mixprogress_key(self):
+        return f'mixprogress-{self.__oid__}'
+
+    def enqueue(self, request):
+        redis = get_redis(request)
+        redis.hmset(self.mixprogress_key,
+                    {'pct':0, 'status':'Enqueued'}
+        )
+        redis.rpush(
+            "yss.new-recordings", f'{self.__oid__}|{time.time()}'
+        )
+        self.enqueued = True
+
+    def get_mixprogress(self, request):
+        redis = get_redis(request)
+        progress = decode_redis_hash(
+            redis.hgetall(self.mixprogress_key)
+            )
+        progress['done'] = not bool(self.enqueued)
+        return progress
+
+    def initialize(self, stream, request):
+        self.set_unmixed(stream)
+
+    def set_unmixed(self, stream):
         if self.dry_blob is None:
             self.dry_blob = Blob()
-        with self.dry_blob.open("w") as saveto:
-            shutil.copyfileobj(stream, saveto)
+        if self.remixing_blob is None:
+            self.remixing_blob = Blob()
+        with self.dry_blob.open('w') as dry:
+            with self.remixing_blob.open('w') as remixing:
+                while True:
+                    data = stream.read(1<<19) # 512K
+                    if not data:
+                        break
+                    dry.write(data)
+                    remixing.write(data)
         # cache duration for use in progress
-        self.dry_duration = audioread.audio_open(
+        duration = audioread.audio_open(
             self.dry_blob._p_blob_uncommitted).duration
+        # cache duration for use in progress
+        self.dry_duration = duration
+        self.remixing_duration = duration
 
-    def set_mixed_blob(self, stream):
-        if self.mixed_blob is None:
-            self.mixed_blob = Blob()
-        with self.mixed_blob.open("w") as saveto:
+    def set_remixing(self, stream):
+        if self.remixing_blob is None:
+            self.remixing_blob = Blob()
+        with self.remixing_blob.open("w") as saveto:
             shutil.copyfileobj(stream, saveto)
         # cache duration for use in progress
-        self.mixed_duration = audioread.audio_open(
-            self.mixed_blob._p_blob_uncommitted).duration
+        self.remixing_duration = audioread.audio_open(
+            self.remixing_blob._p_blob_uncommitted).duration
+
+    def set_mixed(self):
+        if self.remixing_blob:
+            self.mixed_blob = self.remixing_blob
+            self.mixed_duration = self.remixing_duration
+            del self.remixing_blob
+            del self.remixing_duration
+
 
 @subscribe_will_be_removed(content_type='Recording')
 def recording_will_be_removed(event):
