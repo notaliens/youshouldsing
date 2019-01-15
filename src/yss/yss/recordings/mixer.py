@@ -1,9 +1,12 @@
 import distutils.spawn
 import logging
+import os
 import shlex
 import re
+import shutil
 import subprocess
 import string
+import tempfile
 
 from yss.interfaces import UnrecoverableError
 
@@ -20,6 +23,37 @@ class FFMpegMixer(object):
         self.dry_webm_filename = recording.dry_blob.committed()
         self.song_audio_filename = recording.song.blob.committed()
 
+    def dry_reencode(self):
+        _, tfn = tempfile.mkstemp()
+        try:
+            ffencode = [
+                ffmpegexe,
+                '-hide_banner',
+                "-threads", "4",
+                '-thread_queue_size', '512',
+                "-y", # clobber
+                "-i", self.dry_webm_filename,
+                "-b:a", "128000",
+                "-vbr", "on",
+                "-compression_level", "10",
+                "-c:v", "vp8",
+                "-c:a", "libopus",
+                '-f', 'webm',
+                tfn,
+                ]
+            logger.info(f'Dry reencode using')
+            logger.info(' '.join([shlex.quote(s) for s in ffencode]))
+            pffencode = subprocess.Popen(
+                ffencode,
+                shell=False,
+            )
+            pffencode.communicate()
+            with self.recording.dry_blob.open("w") as saveto:
+                with open(tfn, 'rb') as savefrom:
+                    shutil.copyfileobj(savefrom, saveto)
+        finally:
+            os.unlink(tfn)
+
     def get_command(self, outfile):
         """ Returns a list of tokens representing a command that can be
         passed to subprocess.Popen.  If outfile is None, the stdout of
@@ -33,9 +67,10 @@ class FFMpegMixer(object):
             "-y", # clobber
             "-i", self.dry_webm_filename,
             "-i", self.song_audio_filename,
-            "-shortest",
+            #"-shortest", # this gens len-0 audio when we use copy vid codec
             "-b:a", "128000",
             "-vbr", "on",
+            "-ar", "48000", # it will always be 48K from chrome
             "-compression_level", "10",
             ]
         normfilter = []
@@ -132,7 +167,7 @@ class FFMpegMixer(object):
             ])
         if self.recording.show_camera:
             ffmix.extend([
-                "-c:v", "vp8", # should be "copy"
+                "-c:v", "copy", # it will be a vp8
                 "-map", "0:v:0?", # ? at end makes it opt (recs with no cam)
                 ])
         else:

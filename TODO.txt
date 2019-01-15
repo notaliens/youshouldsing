@@ -32,7 +32,6 @@
   - Report inappropriate behavior.
   - "Original song" song
   - zeopack.
-  - "Unsortable"
 
 - Docs Videos
 
@@ -220,6 +219,7 @@ Songs
   - Song timing word endings don't seem to be right... see whiter shade.
   - Crowdsource lyric retimings... allow uploader to accept lyric timing
     suggestions?
+  - Maybe let people hit keyboard to signify explicit line break.
   
 - JS:
 

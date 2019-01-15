@@ -192,7 +192,7 @@
        "${progress_url}",
        "${ismixed}"
      )
-     if (${int(context.enqueued)}) {
+     if (${int(bool(context.enqueued))}) {
        setTimeout(mixer.progresscheck, 0);
      };
     </script>
