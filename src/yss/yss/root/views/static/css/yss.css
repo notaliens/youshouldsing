@@ -7364,6 +7364,20 @@ select#videoSource > option {
 #isso-thread .input-wrapper {
   display: none;
 }
+.table-avatar-box {
+  position: relative;
+  height: 40px;
+  width: 60%;
+  overflow: auto;
+}
+.table-avatar {
+  width: 50%;
+  transform: translate(-50%, -50%);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  overflow: auto;
+}
 .fa,
 .fas,
 .far,

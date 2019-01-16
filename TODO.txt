@@ -28,11 +28,12 @@
   - Private messages.
   - Performer __name__ should probably not be in URL in case they need to
     change it.
-  - Block user.
+  - Block user. (set a Deny ACE on the performer folder)
   - Report inappropriate behavior.
   - "Original song" song
   - zeopack.
-
+  - http://lrcgenerator.com/
+  
 - Docs Videos
 
   - howtoenterthecode
