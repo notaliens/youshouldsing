@@ -106,7 +106,7 @@ class FFMpegMixer(object):
             normfilter.append('volume=1.0')
 
         normfilter.extend([
-            'acompressor', # compress
+            'compand',
             'dynaudnorm', # windowed-normalize (not peak)
             # alternative to dynaudnorm (sounds better but introduces vid lat)
             # 'ladspa=vlevel-ladspa:vlevel_mono',
@@ -145,35 +145,48 @@ class FFMpegMixer(object):
         # cant tell audio duration from webm container even with -shortest,
         # and mixes that include -vn become as long as the backing track
 
+        numaux = len(auxstreams)
+        letters = [ string.ascii_lowercase[i+1] for i in range(numaux) ]
+
         if auxstreams:
             # effect-wet audio
-            numaux = len(auxstreams)
-            letters = [ string.ascii_lowercase[i+1] for i in range(numaux) ]
             p = ''.join([f'[a0{letter}]' for letter in letters ])
-            final = p + f'[a1]amix=inputs={numaux+1}:duration=shortest[aout]'
-            allfilter.append(final)
+            mix = p + f'[a1]amix=inputs={numaux+1}:duration=shortest[aout]'
+            allfilter.append(mix)
+            if not self.recording.show_camera:
+                waveform = '; ' + p + f'[a1]amix=inputs={numaux+1}:duration=shortest,showwaves=s=320x240:mode=cline,format=yuv420p[vout]'
+                allfilter.append(waveform)
         else:
             # dry-but-normalized audio only
-            allfilter.append(f"[a0a][a1]amix=inputs=2:duration=shortest[aout]")
+            mix = f"[a0a][a1]amix=inputs=2:duration=shortest[aout]"
+            allfilter.append(mix)
+            if not self.recording.show_camera:
+                waveform = f'; [a0a][a1]amix=inputs=2:duration=shortest,showwaves=s=320x200:mode=cline,format=yuv420p[vout]'
+                allfilter.append(waveform)
 
         complex_filter = ' '.join(allfilter)
 
         ffmix.extend([
             '-filter_complex',
             complex_filter,
-            '-map', '[aout]',
-            '-ac', '2', # output channels, "downmix" to stereo
-            "-ar", "48000", # it will always be 48K from chrome
             ])
+
         if self.recording.show_camera:
             ffmix.extend([
-                "-c:v", "copy", # it will be a vp8
+                "-c:v", "copy",   # show cam, will be a vp8
                 "-map", "0:v:0?", # ? at end makes it opt (recs with no cam)
+                '-map', '[aout]',
                 ])
         else:
             ffmix.extend([
-                '-vn',
-            ]) # no video
+                '-map', '[vout]', # show waveform
+                '-map', '[aout]',
+            ])
+
+        ffmix.extend([
+            '-ac', '2', # output channels, "downmix" to stereo
+            "-ar", "48000", # it will always be 48K from chrome
+            ])
 
         if outfile is None:
             outfile = 'pipe:1'
