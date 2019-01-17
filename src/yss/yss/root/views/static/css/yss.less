@@ -847,10 +847,14 @@ code {
 .karaoke-type-instrumental {
     color: #065BC4;
 }
+.karaoke-type-karaoke {
+   color: brown; // current whole-line
+}
+
 .karaoke-display {
     padding: 0 0 10px 0;
 }
-.karaoke-overlay {
+.karaoke-overlay { // overlays the brown as word fragments come in
     color: #FF0000;
     font-weight: normal;
     text-decoration: underline;
@@ -858,7 +862,11 @@ code {
 
 #loading-dialog{padding:20px;border:3px solid #CCCCCC;}
 
-#player {padding:20px;border:3px solid #CCCCCC;}
+#player {
+  padding:20px;
+  border:3px solid #CCCCCC;
+  background-color: black;
+}
 
 #karaoke-display{
     font-size:150%;
@@ -1233,16 +1241,16 @@ select#videoSource>option{
 .table-avatar-box {
   position: relative;
   height: 40px;
-  width: 60%;
+  width: 20%;
   overflow: auto;
 }
 
 .table-avatar {
-  width: 50%;
+//  width: 50%;
   transform: translate(-50%, -50%);
   position: absolute;
   top: 50%;
-  left: 50%;
+  left: 30%;
   overflow: auto;
 }
 @import "fontawesome/fontawesome";

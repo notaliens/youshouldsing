@@ -171,12 +171,6 @@ Songs
   - Description should allow links and embedded videos
   - When acl is empty, dont set it, when setting visibility, delete it instead.
 
-- Remix recording
-
-  - Show logo or something on vids without camera or who are remixed to not
-    allow.***
-  - Show video on remix page.***
-
 - Record:
 
   - Safari (mobile or desktop) doesn't support MediaRecorder.

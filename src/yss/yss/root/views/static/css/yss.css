@@ -7004,6 +7004,9 @@ code {
 .karaoke-type-instrumental {
   color: #065BC4;
 }
+.karaoke-type-karaoke {
+  color: brown;
+}
 .karaoke-display {
   padding: 0 0 10px 0;
 }
@@ -7019,6 +7022,7 @@ code {
 #player {
   padding: 20px;
   border: 3px solid #CCCCCC;
+  background-color: black;
 }
 #karaoke-display {
   font-size: 150%;
@@ -7367,15 +7371,14 @@ select#videoSource > option {
 .table-avatar-box {
   position: relative;
   height: 40px;
-  width: 60%;
+  width: 20%;
   overflow: auto;
 }
 .table-avatar {
-  width: 50%;
   transform: translate(-50%, -50%);
   position: absolute;
   top: 50%;
-  left: 50%;
+  left: 30%;
   overflow: auto;
 }
 .fa,
