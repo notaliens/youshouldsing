@@ -25,7 +25,9 @@
 
                 <thead>
                   <tr>
-                    <th width="60%">
+                    <th width="5%">
+                    </th>
+                    <th width="55%">
                     ${structure:view.sort_tag('name', 'Name')}
                     </th>
                     <th width="20%">
@@ -38,15 +40,13 @@
                 </thead>
 
                 <tbody>
-                  <tr tal:repeat="item batch">
+                  <tr tal:repeat="item batch" style="height: 50px;">
                     <td>
-                      <div class="table-avatar-box">
-                        <div class="table-avatar">
-                          <a href="${request.resource_url(item)}"
-                             ><img src="${layout.performer_thumb_url(item)}"
-                                   style="padding-right: 10px;"/>${item.__name__}</a>
-                        </div>
-                      </div>
+                      <a href="${request.resource_url(item)}"
+                         ><img src="${layout.performer_thumb_url(item)}"/></a>
+                    </td>
+                    <td>
+                      <a href="${request.resource_url(item)}">${item.__name__}</a>
                     </td>
                     <td>${item.num_likes}</td>
                     <td>${item.num_recordings}</td>
