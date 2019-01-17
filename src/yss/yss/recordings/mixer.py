@@ -161,7 +161,7 @@ class FFMpegMixer(object):
             mix = f"[a0a][a1]amix=inputs=2:duration=shortest[aout]"
             allfilter.append(mix)
             if not self.recording.show_camera:
-                waveform = f'; [a0a][a1]amix=inputs=2:duration=shortest,showwaves=s=320x200:mode=cline,format=yuv420p[vout]'
+                waveform = f'; [a0a][a1]amix=inputs=2:duration=shortest,showwaves=s=320x240:mode=cline,format=yuv420p[vout]'
                 allfilter.append(waveform)
 
         complex_filter = ' '.join(allfilter)
