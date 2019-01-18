@@ -1,4 +1,4 @@
-var karaoke = (function(stream_url, timings) {
+var karaoke = (function(stream_url) {
     var numDisplayLines = 4; // Number of lines to do the karaoke with
     var paused = true;
     var show = null;
@@ -85,15 +85,7 @@ var karaoke = (function(stream_url, timings) {
         player.currentTime = 0;
     }
 
-    function init(new_timings) {
-        // Create the karaoke engine and get a show instance
-        if (new_timings) {
-            timings = new_timings;
-        }
-        if (timings == undefined || timings == null) {
-            console.log('timings were undefined');
-            timings = [];
-        }
+    function init() {
         renderlyrics(0);
         player.addEventListener('timeupdate', function () {
             var ct = parseFloat(player.currentTime);
