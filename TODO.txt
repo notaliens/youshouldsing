@@ -184,12 +184,11 @@ Songs
     https://medium.com/@almeidneto/sound-pattern-recognition-with-python-9aff69edce5d
   - Remove recorded song from singlist.
   - Duet
-  - Karaoke display seems random which line is chosen next to display
-    upcoming lyrics.***
   - It's too easy to hit cancel on a new recording and lose it.
   - Allow 16x9
   - Allow no mic
   - Key shifting
+  - Countdown would be nice during lyrics display.
 
 - Remix
 
