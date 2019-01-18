@@ -34,13 +34,11 @@ var karaoke = (function(stream_url, timings) {
 
     function play() {
         $('.audiocontrol').show();
-        show.reset();
         player.play();
         paused = false;
     }
 
     function pause() {
-        show.reset();
         player.pause();
         $('.audiocontrol').hide();
         paused = true;
@@ -58,6 +56,30 @@ var karaoke = (function(stream_url, timings) {
         }
     }
 
+    function renderlyrics(when) {
+        var st = 0;
+        var et = 0;
+        $('.yss-karaoke-card').each(function(idx) {
+            card = $(this);
+            st = parseFloat(card.data('startTime'));
+            et = parseFloat(card.data('endTime'));
+            if ((st <= when) && (when < et)) {
+                card.show();
+            }
+            else {
+                card.hide();
+            }
+        });
+        $('.yss-karaoke-frag').css('color', '#999999');
+        $('.yss-karaoke-frag').each(function(idx) {
+            st = $(this).data('startTime');
+            if (st <= when) {
+                $(this).css('color', 'brown');
+            }
+        });
+    }
+
+
     function reset() {
         pause();
         player.currentTime = 0;
@@ -72,21 +94,14 @@ var karaoke = (function(stream_url, timings) {
             console.log('timings were undefined');
             timings = [];
         }
-        var rice = new RiceKaraoke(
-            RiceKaraoke.simpleTimingToTiming(timings));
-        var renderer = new SimpleKaraokeDisplayEngine(
-            'karaoke-display', numDisplayLines);
-        show = rice.createShow(renderer, numDisplayLines);
+        renderlyrics(0);
         player.addEventListener('timeupdate', function () {
-            var ct = player.currentTime;
-            if (ct < lastPosition) {
-                show.reset();
-            }
+            var ct = parseFloat(player.currentTime);
+            renderlyrics(ct);
             if (ct >= player.duration) {
                 reset();
             }
             $('#scrubber')[0].value = ct / player.duration * 100;
-            show.render(ct, false);
             updateStatus();
             lastPosition = ct;
         }, false);

@@ -2,11 +2,14 @@ import colander
 import deform.widget
 import ffmpeg
 import hashlib
+import html
+import json
 import logging
 import os
 import random
 import slug
 import shutil
+import statistics
 import time
 import uuid
 
@@ -375,6 +378,10 @@ class SongView(object):
         song = self.context
         song = self.context
         root = find_root(song)
+        words = list(krl_iterator(json.loads(song.timings)))
+        bw = mtbw(words)
+        cards = carder(words, bw*2)
+        divs = divver(cards)
         return {
             'title':song.title,
             'artist':song.artist,
@@ -386,6 +393,8 @@ class SongView(object):
             "stream_url": self.request.resource_url(song, '@@stream'),
             "timings": song.timings,
             "max_framerate": root.max_framerate,
+            'karaoke_cards':divs,
+            'mtbw':bw,
         }
 
     @view_config(
@@ -430,6 +439,10 @@ class SongView(object):
     )
     def retime(self):
         song = self.context
+        words = list(krl_iterator(json.loads(song.timings)))
+        bw = mtbw(words)
+        cards = carder(words, bw*2)
+        divs = divver(cards)
         alt_timings = getattr(song, 'alt_timings', '').strip()
         timings = alt_timings.strip()
         if not timings:
@@ -451,7 +464,9 @@ class SongView(object):
             ),
             'needs_accept':int(bool(alt_timings)),
             'lyrics':song.lyrics,
-            'page_title': f'Retime Lyrics for {self.page_title}'
+            'page_title': f'Retime Lyrics for {self.page_title}',
+            'karaoke_cards':divs,
+            'mtbw':bw,
         }
 
     @view_config(
@@ -547,11 +562,17 @@ class SongView(object):
     def record(self):
         song = self.context
         root = find_root(song)
+        words = list(krl_iterator(json.loads(song.timings)))
+        bw = mtbw(words)
+        cards = carder(words, bw*2)
+        divs = divver(cards)
         return {
             "stream_url": self.request.resource_url(song, '@@stream'),
             "timings": song.timings,
             "max_framerate": root.max_framerate,
-            'page_title': f'Recording {self.page_title}'
+            'page_title': f'Recording {self.page_title}',
+            'karaoke_cards':divs,
+            'mtbw':bw,
         }
 
     @view_config(
@@ -853,3 +874,58 @@ class SongUploadSchema(SongEditSchema):
         title='Backing Track (audio file like mp3/aac/wav)',
         validator=audio_validator,
     )
+
+def krl_iterator(krl):
+    for start, end, words in krl:
+        for i, (wordstart, word) in enumerate(words):
+            if i == 0:
+                word = f' {word}'
+            yield (float(start) + float(wordstart), word)
+
+def mtbw(iterable): # median time between words
+    laststart = None
+    times= []
+    for start, word in enumerate(iterable):
+        if laststart is None:
+            laststart = start
+        else:
+            times.append(start - laststart)
+            laststart = start
+    return statistics.median(times)
+
+max_words_per_card = 20
+
+def carder(iterable, break_secs=2):
+    cards = []
+    laststart = 0
+    for i, (start, word) in enumerate(iterable):
+        try:
+            cardlen = len(cards[-1])
+        except IndexError:
+            cardlen = 0
+        if (start > laststart + break_secs) or (
+                cardlen > max_words_per_card) or (not cards):
+            card = []
+            cards.append(card)
+        card.append((start, word))
+        laststart = start
+    return cards
+
+def divver(cards):
+    result = []
+    endlast = 0
+    for card in cards:
+        result.append(
+            f'<div class="yss-karaoke-card" '
+            f'data-start-time="{endlast}" data-end-time="{card[-1][0]}">'
+        )
+        words = []
+        for start, word in card:
+            words.append(
+                f'<span class="yss-karaoke-frag" '
+                f'       data-start-time="{start}">{html.escape(word)}</span>')
+            endlast = start
+        words = ''.join(words)
+        result.append(words)
+        result.append('</div>')
+    return '\n'.join(result)

@@ -34,9 +34,9 @@
               </div>
               <div class="row" style="padding-bottom: 10px;">
                 <div class="col-md-12">
-                  <div id="player" style="display: none">
-                    <div id="karaoke-wrapper">
-                      <div id="karaoke-display"></div>
+                  <div id="player">
+                    <div id="karaoke-display">
+                  ${structure:karaoke_cards}
                     </div>
                   </div>
                   <div id="status">0:00</div>
@@ -47,7 +47,6 @@
                   </div>
                 </div>
               </div>
-
             </div>
           </div>
         </div>
@@ -152,8 +151,6 @@
   </div>
   <div metal:fill-slot="tail">
     <script type="text/javascript" src="${layout.static('yss.songs:static/js.cookie.js')}"></script>
-    <script type="text/javascript" src="${layout.static('yss.songs:static/ricekaraoke.js')}"></script>
-    <script type="text/javascript" src="${layout.static('yss.songs:static/simplekaraokedisplay.js')}"></script>
     <script type="text/javascript" src="${layout.static('yss.songs:static/yssrecorder.js')}"></script>
     <script type="text/javascript">
      // karaoke and rtc_recorder are exported by yssrecorder
