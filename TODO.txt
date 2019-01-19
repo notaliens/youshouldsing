@@ -33,6 +33,7 @@
   - "Original song" song
   - zeopack.
   - http://lrcgenerator.com/
+  - mass-load songs***
   
 - Docs Videos
 
@@ -191,7 +192,6 @@ Songs
 
 - Remix
 
-  - More effects (flanger, pitch).
   - Up/down slider graphics.
 
 - Search songs:
@@ -208,7 +208,6 @@ Songs
   - Song timing word endings don't seem to be right... see whiter shade.
   - Crowdsource lyric retimings... allow uploader to accept lyric timing
     suggestions?
-  - Maybe let people hit keyboard to signify explicit line break.
   
 - JS:
 

@@ -127,6 +127,12 @@ class FFMpegMixer(object):
         if 'effect-chorus' in effects:
             # XXX mess around with nondefault
             auxsends.append('ladspa=file=tap_chorusflanger:tap_chorusflanger')
+        if 'effect-chipmunk' in effects: # inactive cant get rel pitch val right
+            auxsends.append('ladspa=file=tap_pitch:tap_pitch:c=c1=10.0')
+        if 'effect-echo' in effects:
+            auxsends.append(
+                'ladspa=file=tap_echo:tap_stereo_echo:c=c0=428.0|c1=29.70')
+
 
         for i, send in enumerate(auxsends):
             sendletter= string.ascii_lowercase[i+1]

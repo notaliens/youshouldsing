@@ -77,6 +77,15 @@
                   Chorus
                       </label>
                     </span>
+                    <span class="form-check">
+                      <input class="form-check-input effects knob"
+                             type="checkbox" value="" id="effect-echo"
+                             name="effect-echo"
+                             tal:attributes="checked 'effect-echo' in effects">
+                      <label class="form-check-label" for="effect-echo">
+                  Echo
+                      </label>
+                    </span>
                   </div>
                   <div>
                     <input id="voladjust" name="voladjust" class="knob"

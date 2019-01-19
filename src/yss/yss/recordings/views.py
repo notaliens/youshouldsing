@@ -22,7 +22,7 @@ from substanced.util import (
 from substanced.folder.views import generate_text_filter_terms
 from substanced.workflow import get_workflow
 
-from yss.interfaces import IRecording
+from yss.interfaces import IRecording, known_effect_names
 
 @view_defaults(context=IRecording)
 class RecordingView(object):
@@ -136,9 +136,9 @@ class RecordingView(object):
         recording = self.context
         needs_remix = False
 
-        known_effects = ('effect-chorus', 'effect-reverb') # XXX centralize
         desired_effects = tuple([
-            x for x in request.params.getall('effects') if x in known_effects
+            x for x in request.params.getall('effects') if x in
+            known_effect_names
         ])
 
         if set(desired_effects) != set(recording.effects):

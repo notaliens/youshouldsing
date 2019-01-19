@@ -170,3 +170,10 @@ for language in languages:
 class UnrecoverableError(Exception):
     """ Raise during encoding when we should ignore this recording and
     go on to the next """
+
+known_effect_names = (
+    'effect-chorus',
+    'effect-reverb',
+    'effect-chipmunk',
+    'effect-echo',
+)
