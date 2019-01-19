@@ -67,6 +67,11 @@ class SongSchema(FilePropertiesSchema):
         validator=colander.Range(0, 3000),
         missing=colander.null,
         )
+    source = colander.SchemaNode(
+        colander.String(),
+        missing='',
+        )
+
 
 
 class SongPropertySheet(PropertySheet):
@@ -108,7 +113,8 @@ class Song(File):
     alt_timings = ''
     retiming_blob = None
     retiming = False
-    year = colander.null
+    year = 0
+    source = ''
 
     def __init__(self, title, artist, lyrics, timings, stream,
                  mimetype='audio/mpeg', language='en-US'):

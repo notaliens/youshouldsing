@@ -47,7 +47,7 @@
 - Licensing
 
   - https://pep.rocks/programs/gem***
-  
+
 - Login:
 
   - Non-oauth signups.***
@@ -148,13 +148,12 @@ Songs
 
 - Commenting
 
-  - Server side security
   - Link username to profile page
   - Show profile image next to username
   - Get replies working
   - Get notifications working
   - Cheat sheet
-  - "comments on my recordings"
+  - "comments on my recordings"***
   - embed youtube / yss links
   - edit and delete links still show up when not logged in***
   - Flag comment as offensive.
@@ -193,11 +192,7 @@ Songs
 - Remix
 
   - More effects (flanger, pitch).
-  - Mix in browser, not on server?
-  - If not browser remixing, then server remix should stream an ffmpeg chain
-    dynamically and when done, they can hit remix, instead of repeatedly
-    changing values and hitting remix ad infinitum.  It's so painful to
-    do that.
+  - Up/down slider graphics.
 
 - Search songs:
 
