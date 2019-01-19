@@ -30,10 +30,18 @@
             </div>
             <div class="row" style="padding-bottom: 10px;">
               <div class="col-md-12">
-                <div id="player">
+                <div id="player"
+                     tal:condition="stream_type.startswith('audio/')">
                   <div id="karaoke-display">
                   ${structure:karaoke_cards}
                   </div>
+                </div>
+                <div tal:condition="not stream_type.startswith('audio/')">
+                  <video id="lyricsvideo" width="640" height="480"
+                         preload="auto">
+                    <source id="lyricsvidsrc" src="${stream_url}"
+                            type="${stream_type}"/>
+                  </video>
                 </div>
                 <div id="status">0:00</div>
                 <div class="audiocontrol"
@@ -72,7 +80,7 @@
     <script type="text/javascript">
      liker();
      // karaoke is exported by yssrecorder
-     kar = karaoke("${stream_url}");
+     kar = karaoke("${stream_url}", "${stream_type}");
      $('#play-me')[0].onclick = kar.playtoggle;
     </script>
   </div>

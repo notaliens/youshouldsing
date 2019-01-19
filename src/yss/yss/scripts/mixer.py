@@ -17,7 +17,7 @@ from yss.interfaces import UnrecoverableError
 from yss.utils import get_redis
 from yss.recordings.mixer import FFMpegMixer
 
-logger = logging.getLogger('postproc')
+logger = logging.getLogger('mixer')
 
 def main(argv=sys.argv):
     def usage(msg):

@@ -30,10 +30,18 @@
 
             <div class="row" style="padding-bottom: 10px;">
               <div class="col-md-12">
-                <div id="player">
+                <div id="player"
+                     tal:condition="stream_type.startswith('audio/')">
                   <div id="karaoke-display">
                   ${structure:karaoke_cards}
                   </div>
+                </div>
+                <div tal:condition="not stream_type.startswith('audio/')">
+                  <video id="lyricsvideo" width="640" height="480"
+                         preload="auto">
+                    <source id="lyricsvidsrc" src="${stream_url}"
+                            type="${stream_type}"/>
+                  </video>
                 </div>
                 <div id="status">0:00</div>
                 <div class="audiocontrol"
@@ -106,7 +114,7 @@
               <input id="voladjust" type="range" min="-1" max="1" value="0"
                      step="0.01"/>
               <label class="form-check-label" for="voladjust">
-                  Relative Volume (up for louder vocals, down for louder backng track)
+                  Relative Volume (up for louder vocals, down for louder backing track)
               </label>
             </div>
           </div>
@@ -122,7 +130,7 @@
               <select id="videoSource"></select>
             </div>
             <div style="padding-top: 5px;">
-              <video class="embed-responsive-item" muted="true"
+              <video class="embed-responsive-item" muted="true" id="camvideo"
                      autoplay>Your browser doesn't support video.</video>
             </div>
           </div>
@@ -159,7 +167,7 @@
     <script type="text/javascript" src="${layout.static('yss.songs:static/yssrecorder.js')}"></script>
     <script type="text/javascript">
      // karaoke and rtc_recorder are exported by yssrecorder
-     kar = karaoke("${stream_url}");
+     kar = karaoke("${stream_url}", "${stream_type}");
      rtc_recorder(window, kar, ${max_framerate});
     </script>
   </div>

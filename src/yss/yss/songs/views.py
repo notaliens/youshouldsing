@@ -378,7 +378,10 @@ class SongView(object):
         song = self.context
         song = self.context
         root = find_root(song)
-        words = list(krl_iterator(json.loads(song.timings)))
+        if song.timings:
+            words = list(krl_iterator(json.loads(song.timings)))
+        else:
+            words = []
         bw = mtbw(words)
         cards = carder(words, bw*2)
         divs = divver(cards)
@@ -391,6 +394,7 @@ class SongView(object):
             'can_record':self.has_record_permission,
             'can_retime':self.has_edit_permission,
             "stream_url": self.request.resource_url(song, '@@stream'),
+            "stream_type":song.mimetype,
             "timings": song.timings,
             "max_framerate": root.max_framerate,
             'karaoke_cards':divs,
@@ -439,16 +443,16 @@ class SongView(object):
     )
     def retime(self):
         song = self.context
-        words = list(krl_iterator(json.loads(song.timings)))
-        bw = mtbw(words)
-        cards = carder(words, bw*2)
-        divs = divver(cards)
         alt_timings = getattr(song, 'alt_timings', '').strip()
         timings = alt_timings.strip()
         if not timings:
             timings = song.timings.strip()
         if not timings:
             timings = '[]'
+        words = list(krl_iterator(json.loads(song.timings)))
+        bw = mtbw(words)
+        cards = carder(words, bw*2)
+        divs = divver(cards)
         formatted_timings = format_timings(timings)
         if song.retiming:
             processed = 0
@@ -456,6 +460,7 @@ class SongView(object):
             processed = 1
         return {
             "stream_url": self.request.resource_url(song, '@@stream'),
+            "stream_type":song.mimetype,
             "timings": timings,
             "formatted_timings":formatted_timings,
             'processed':processed,
@@ -562,12 +567,16 @@ class SongView(object):
     def record(self):
         song = self.context
         root = find_root(song)
-        words = list(krl_iterator(json.loads(song.timings)))
+        if song.timings:
+            words = list(krl_iterator(json.loads(song.timings)))
+        else:
+            words = []
         bw = mtbw(words)
         cards = carder(words, bw*2)
         divs = divver(cards)
         return {
             "stream_url": self.request.resource_url(song, '@@stream'),
+            "stream_type":song.mimetype,
             "timings": song.timings,
             "max_framerate": root.max_framerate,
             'page_title': f'Recording {self.page_title}',
@@ -592,7 +601,7 @@ class SongView(object):
         # disallow /, .., etc
         sane_name = ''.join(c for c in performer.__name__ if c.isalnum())
         tmpdir_name = f'{sane_name}-{recording_id}'
-        tmpdir = get_recording_tempdir(request, tmpdir_name)
+        tmpdir = get_mix_tempdir(request, tmpdir_name)
         recording = request.registry.content.create('Recording', tmpdir)
         latency = request.cookies.get('latency', 0)
         try:
@@ -816,9 +825,9 @@ class AddSongView(FormView):
         self.context[name] = song
         return HTTPFound(self.request.sdiapi.mgmt_path(self.context))
 
-def get_recording_tempdir(request, recording_id):
-    postproc_dir = request.registry.settings['yss.postproc_dir']
-    return os.path.abspath(os.path.join(postproc_dir, recording_id))
+def get_mix_tempdir(request, recording_id):
+    mix_dir = request.registry.settings['yss.mix_dir']
+    return os.path.abspath(os.path.join(mix_dir, recording_id))
 
 def get_retime_tempdir(request, song_id):
     retime_dir = request.registry.settings['yss.retime_dir']
@@ -891,7 +900,9 @@ def mtbw(iterable): # median time between words
         else:
             times.append(start - laststart)
             laststart = start
-    return statistics.median(times)
+    if times:
+        return statistics.median(times)
+    return 0
 
 max_words_per_card = 20
 

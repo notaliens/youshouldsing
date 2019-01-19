@@ -1,11 +1,18 @@
-var karaoke = (function(stream_url) {
+var karaoke = (function(stream_url, stream_type) {
     var numDisplayLines = 4; // Number of lines to do the karaoke with
     var paused = true;
-    var show = null;
-    var player = new Audio();
+    var player;
     // cachebust
     rand = Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 5);
-    player.setAttribute('src', stream_url + '?x=' + rand);
+    if (stream_type.startsWith('audio/') ) {
+        player = new Audio();
+        player.setAttribute('src', stream_url + '?x=' + rand);
+    }
+    else {
+        player = $('#lyricsvideo')[0];
+        var source = $('#lyricsvidsrc')[0];
+        source.setAttribute('src', stream_url + '?x=' + rand);
+    }
     var lastPosition = 0;
 
     function getTimeString(t) {
@@ -57,6 +64,7 @@ var karaoke = (function(stream_url) {
     }
 
     function renderlyrics(when) {
+        if (!stream_type.startsWith('audio/')) { return; }
         var st = 0;
         var et = 0;
         $('.yss-karaoke-card').each(function(idx) {
@@ -157,7 +165,7 @@ var rtc_recorder = (function(exports, karaoke, max_framerate, upload_handler) {
     window.AudioContext = window.AudioContext || window.webkitAudioContext;
     window.URL = window.URL || window.webkitURL;
 
-    var video = $('video')[0];
+    var video = $('#camvideo')[0];
     if (video) {
         video.width = 320;
         video.height = 240;

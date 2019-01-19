@@ -55,8 +55,9 @@ setup(name='yss',
       [paste.app_factory]
       main = yss:main
       [console_scripts]
-      import_songs = yss.scripts.import_songs:main
-      postproc = yss.scripts.postproc:main
+      import_midi = yss.scripts.import_midi:main
+      import_video = yss.scripts.import_video:main
+      mixer = yss.scripts.mixer:main
       retimer = yss.scripts.retime:main
       """,
       )

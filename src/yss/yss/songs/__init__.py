@@ -34,6 +34,7 @@ class SongSchema(FilePropertiesSchema):
     genre = colander.SchemaNode(
         colander.String(),
         widget=deform.widget.Select2Widget(values=genre_choices),
+        missing='Unknown',
     )
     duration = colander.SchemaNode(
         colander.Int(),
@@ -44,10 +45,12 @@ class SongSchema(FilePropertiesSchema):
     lyrics = colander.SchemaNode(
         colander.String(),
         widget=deform.widget.TextAreaWidget(style="height: 200px;"),
+        missing='',
         )
     timings = colander.SchemaNode(
         colander.String(),
         widget=deform.widget.TextAreaWidget(style="height: 200px;"),
+        missing='',
         )
     alt_timings = colander.SchemaNode(
         colander.String(),
@@ -57,10 +60,12 @@ class SongSchema(FilePropertiesSchema):
     language = colander.SchemaNode(
         colander.String(),
         widget=deform.widget.Select2Widget(values=language_choices),
+        missing='en-US',
     )
     year = colander.SchemaNode(
         colander.Int(),
         validator=colander.Range(0, 3000),
+        missing=colander.null,
         )
 
 
@@ -105,9 +110,9 @@ class Song(File):
     retiming = False
     year = colander.null
 
-    def __init__(self, title, artist, lyrics, timings, audio_stream,
-                 audio_mimetype='audio/mpeg', language='en-US'):
-        File.__init__(self, audio_stream, audio_mimetype, title)
+    def __init__(self, title, artist, lyrics, timings, stream,
+                 mimetype='audio/mpeg', language='en-US'):
+        File.__init__(self, stream, mimetype, title)
         self.artist = artist
         self.lyrics = lyrics
         self.timings = timings
@@ -123,7 +128,8 @@ class Song(File):
 
     def upload(self, stream, mimetype_hint=None):
         result = File.upload(self, stream, mimetype_hint)
-        duration = audioread.audio_open(self.blob._p_blob_uncommitted).duration
+        duration = audioread.audio_open(
+            self.blob._p_blob_uncommitted).duration
         self.duration = duration
         return result
 
