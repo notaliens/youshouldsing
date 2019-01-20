@@ -185,6 +185,7 @@ class FFMpegMixer(object):
                 ])
         else:
             ffmix.extend([
+                "-c:v", "vp8",
                 '-map', '[vout]', # show waveform
                 '-map', '[aout]',
             ])
