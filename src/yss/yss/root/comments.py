@@ -42,7 +42,7 @@ def email_new_comment(thread, data):
     recording = find_resource(request.virtual_root, path)
     performer = recording.performer
     message = Message(
-        subject = 'New comment from {request.performer.__name__}',
+        subject = f'New comment from {request.performer.__name__}',
         recipients = [performer.email],
         body = render('emails/new_comment.pt',
                       dict(recording=recording, request=request))
