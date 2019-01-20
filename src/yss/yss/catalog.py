@@ -22,6 +22,7 @@ class Indexes(object):
     title = Field()
     artist = Field()
     num_likes = Field()
+    num_views = Field()
     num_recordings = Field()
     performer_id = Field()
     created = Field()

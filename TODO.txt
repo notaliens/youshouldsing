@@ -33,7 +33,6 @@
   - "Original song" song
   - zeopack.
   - http://lrcgenerator.com/
-  - mass-load songs***
   
 - Docs Videos
 
@@ -123,6 +122,7 @@ Songs
   - Songs uploaded is not correct for RBF (no table).
   - "Change password" shows up inappropriately when admin on accounts
     that are not internal accounts.
+  - notification controls
 
 - Profile Recordings
 
@@ -152,7 +152,6 @@ Songs
   - Link username to profile page
   - Show profile image next to username
   - Get replies working
-  - Get notifications working
   - Cheat sheet
   - "comments on my recordings"***
   - embed youtube / yss links
@@ -170,13 +169,13 @@ Songs
   - Allow/disallow comments***
   - Description should allow links and embedded videos
   - When acl is empty, dont set it, when setting visibility, delete it instead.
+  - Close remix period.***
 
 - Record:
 
   - Safari (mobile or desktop) doesn't support MediaRecorder.
     https://www.gmass.co/blog/record-audio-mobile-web-page-ios-android/
-    (detect and warn).
-  - Mic volume slider has no effect.
+    (detect and warn).***
   - Unhelpful errors when camera is already used (e.g. by OBS).
   - Handle conflict errors in postprocessing.
   - Maybe instead of time-aligning source audio and mic audio using an input

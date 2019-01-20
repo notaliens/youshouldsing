@@ -3,6 +3,8 @@ import persistent
 import shutil
 import time
 
+
+from BTrees.Length import Length
 from zope.interface import implementer
 from ZODB.blob import Blob
 
@@ -71,9 +73,12 @@ class Recording(persistent.Persistent):
     remixing_blob = None
     mixed_blob = None
     enqueued = False
+    numviews = 0
+    _num_views = None
 
     def __init__(self, tmpfolder):
         self.tmpfolder = tmpfolder
+        self._num_views = Length()
 
     @property
     def title(self):
@@ -86,6 +91,12 @@ class Recording(persistent.Persistent):
     @property
     def num_likes(self):
         return len(self.liked_by_ids)
+
+    @property
+    def num_views(self):
+        if self._num_views is None:
+            self._num_views = Length()
+        return self._num_views
 
     @property
     def mixed(self):

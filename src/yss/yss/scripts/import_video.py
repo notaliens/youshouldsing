@@ -13,8 +13,10 @@ from pyramid.paster import (
     setup_logging,
     bootstrap,
     )
+from pyramid.security import Allow, Deny
 
 from substanced.event import ObjectModified
+from substanced.util import set_acl
 
 logger = logging.getLogger('yss')
 
@@ -66,6 +68,13 @@ def main(argv=sys.argv):
     if restricted is None:
         restricted = registry.content.create('Folder')
         songs['restricted'] = restricted
+        set_acl(
+            restricted,
+            [(Allow, 'system.Authenticated', ['view']),
+             (Allow, 'system.Authenticated', ['yss.indexed']),
+             (Deny, 'system.Everyone', ['view']),
+             (Deny, 'system.Everyone', ['yss.indexed'])]
+        )
 
     try:
         for input_filename in args[1:]:

@@ -12,7 +12,7 @@ from pyramid.httpexceptions import (
     )
 
 from substanced.event import ObjectModified
-from substanced.interfaces import IRoot
+from substanced.interfaces import IRoot, MODE_DEFERRED
 
 from substanced.util import (
     find_index,
@@ -70,10 +70,15 @@ class RecordingView(object):
     def view(self):
         recording = self.context
         request = self.request
+        if request.performer is not recording.performer:
+            recording.num_views.change(1)
+            idx = find_index(recording, 'yss', 'num_views')
+            idx.reindex_resource(recording, action_mode=MODE_DEFERRED)
         return {
             'title':recording.title,
             'performer':recording.performer,
             'num_likes':recording.num_likes,
+            'num_views':recording.num_views(),
             'liked_by': recording.liked_by,
             'stream_url': request.resource_url(recording, '@@movie'),
             'mixed': recording.mixed,
