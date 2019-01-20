@@ -11,7 +11,7 @@
           <div class="panel-heading">
             <div class="row">
               <div class="col-md-9">
-                <a href="${request.resource_url(context.song)}">${title}</a> by                 <a href="${request.resource_url(performer)"><img src="${layout.performer_thumb_url(performer)}" alt=""/> ${performer.__name__}</a>
+                <a href="${request.resource_url(context.song)}" tal:omit-tag="not request.has_permission('view', context.song)">${title}</a> by                 <a href="${request.resource_url(performer)"><img src="${layout.performer_thumb_url(performer)}" alt=""/> ${performer.__name__}</a>
 
               </div>
               <div class="col-md-3">

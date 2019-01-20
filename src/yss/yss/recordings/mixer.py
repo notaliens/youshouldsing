@@ -122,8 +122,8 @@ class FFMpegMixer(object):
         effects = self.recording.effects
 
         if 'effect-reverb' in effects:
-            # probably too hall-y but #7 is verb type and #27 is "large room"
-            auxsends.append('ladspa=file=tap_reverb:tap_reverb:c=c7=27')
+            auxsends.append(
+               'ladspa=file=zita-reverbs:zita-reverb:c=c2=1.20|c3=1.20|c4=1500')
         if 'effect-chorus' in effects:
             # XXX mess around with nondefault
             auxsends.append('ladspa=file=tap_chorusflanger:tap_chorusflanger')

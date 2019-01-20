@@ -62,6 +62,10 @@ def main(argv=sys.argv):
     root = env['root']
     registry = env['registry']
     songs = root['songs']
+    restricted = songs.get('restricted')
+    if restricted is None:
+        restricted = registry.content.create('Folder')
+        songs['restricted'] = restricted
 
     try:
         for input_filename in args[1:]:
@@ -98,18 +102,18 @@ def main(argv=sys.argv):
             title=md['title']
             artist=md['artist']
             name = '%s-%s' % (name, hexdigest)
-            if name in songs and not (overwrite or av_only):
+            if name in restricted and not (overwrite or av_only):
                 logging.info('Not overwriting %s' % name)
                 continue
             stream = open(input_filename, 'rb')
-            if name in songs and av_only:
+            if name in restricted and av_only:
                 logger.info('replacing video for %s' % title)
-                song = songs[name]
+                song = restricted[name]
                 song.upload(stream)
                 song.mimetype = 'video/webm'
             else:
                 try:
-                    del songs[name]
+                    del restricted[name]
                 except KeyError:
                     pass
                 song = registry.content.create(
@@ -121,7 +125,7 @@ def main(argv=sys.argv):
                     stream=stream,
                     mimetype='video/webm',
                     )
-                songs[name] = song
+                restricted[name] = song
             blameme = root['performers']['blameme']
             song.uploader = blameme
             event = ObjectModified(song)
