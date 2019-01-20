@@ -16,6 +16,8 @@ from substanced.event import subscribe_root_added
 
 from substanced.util import set_acl
 
+from . import comments
+
 class RootSchema(Schema):
     """ The schema representing site properties. """
     max_framerate = colander.SchemaNode(
@@ -83,4 +85,6 @@ def performer(request):
 def includeme(config):
     config.add_propertysheet('YSS', RootPropertySheet, IRoot)
     config.add_request_method(performer, reify=True)
+    config.include(comments)
+    
     

@@ -45,7 +45,6 @@ def main(global_config, **settings):
     config.include('.catalog')
     config.include('.songs')
     config.include('.recordings')
-    config.include('.comments')
     config.add_twitter_login(
         consumer_key=os.environ['YSS_TWITTER_LOGIN_CONSUMER_KEY'],
         consumer_secret=os.environ['YSS_TWITTER_LOGIN_CONSUMER_SECRET'],
