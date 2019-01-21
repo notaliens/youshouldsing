@@ -67,6 +67,9 @@ class IndexViews(object):
     def num_likes(self, default):
         return getattr(self.resource, 'num_likes', default)
 
+    def num_views(self, default):
+        return getattr(self.resource, 'num_views', default)
+
     def num_recordings(self, default):
         return getattr(self.resource, 'num_recordings', default)
 
@@ -191,6 +194,13 @@ def includeme(config):  # pragma: no cover
         catalog_name='yss',
         index_name='visibility_state',
         attr='visibility_state',
+        context = IRecording,
+        )
+    config.add_indexview(
+        IndexViews,
+        catalog_name='yss',
+        index_name='num_views',
+        attr='num_views',
         context = IRecording,
         )
     config.add_indexview(
