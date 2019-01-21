@@ -10,6 +10,9 @@ from yss.utils import authentication_type
 
 from pyramid_redis_sessions import session_factory_from_settings
 
+import sentry_sdk
+from sentry_sdk.integrations.pyramid import PyramidIntegration
+
 random.seed()
 
 def main(global_config, **settings):
@@ -28,6 +31,9 @@ def main(global_config, **settings):
     mimetypes.add_type('application/font-woff', '.woff')
     secret = settings['substanced.secret']
     authn_policy = YSSAuthenticationPolicy(secret)
+    sentry_dsn = os.environ.get('YSS_SENTRY_DSN')
+    if sentry_dsn:
+        sentry_sdk.init(dsn=sentry_dsn, integrations=[PyramidIntegration()])
     config = Configurator(
         settings=settings,
         root_factory=root_factory,

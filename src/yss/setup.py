@@ -29,6 +29,7 @@ requires = [
     'pillow',
     'ffmpeg-python',
     'isso',
+    'sentry-sdk',
     ]
 
 setup(name='yss',

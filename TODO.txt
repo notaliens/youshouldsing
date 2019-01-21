@@ -19,14 +19,12 @@
   - Cookie policy
   - Factor out "sort_tag", it should be boilerplate.
   - Send enqueue-to-done data to datadog.
-  - Set up something to notify of tracebacks.*** (sentry?)
   - De-cripple sdi views for custom content types.
   - Consumer forums.*** (discourse?, misago? https://meta.discourse.org/c/dev/sso, https://meta.discourse.org/t/sso-example-for-django/14258)
   - Private messages.
   - Allow screen name change.  Performer __name__ should probably not be in URL
     in case they need to change it.
-
-- Block user. (set a Deny ACE on the performer folder)***
+  - Block user. (set a Deny ACE on the performer folder)***
   - Report inappropriate behavior.***
   - "Original song" song
   - zeopack.
