@@ -96,6 +96,8 @@ def tzname_widget(node, kw): #pragma NO COVER
 @colander.deferred
 def photo_validator(node, kw):
     def _photo_validator(node, value):
+        if value is None or value['mimetype'] is None:
+            return
         if not value['mimetype'].startswith('image/'):
             raise colander.Invalid(node, 'Photo must be an image')
         value['fp'].seek(0)
