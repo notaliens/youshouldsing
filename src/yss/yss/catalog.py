@@ -68,7 +68,10 @@ class IndexViews(object):
         return getattr(self.resource, 'num_likes', default)
 
     def num_views(self, default):
-        return getattr(self.resource, 'num_views', default)
+        num_views = getattr(self.resource, 'num_views', None)
+        if num_views is None:
+            return default
+        return num_views()
 
     def num_recordings(self, default):
         return getattr(self.resource, 'num_recordings', default)
