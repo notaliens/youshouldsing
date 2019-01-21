@@ -137,6 +137,7 @@ class PerformerProfileSchema(Schema):
     photo = FileNode(
         title='Photo',
         validator=photo_validator,
+        missing=colander.null,
     )
     birthdate = colander.SchemaNode(
         colander.Date(),
