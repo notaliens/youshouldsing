@@ -30,6 +30,8 @@
   - zeopack.
   - http://lrcgenerator.com/
   - Direct messages.
+  - Javascript sentry
+  - Mixer/retimer/indexer sentry.
   
 - Docs Videos
 
@@ -47,7 +49,6 @@
 
 - Login:
 
-  - Non-oauth signups.***
   - Facebook login.
   - How do we deal with someone forgetting which service he used to
     login with?  How do we deal with it if a user wants to log in

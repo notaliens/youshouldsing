@@ -42,7 +42,9 @@ def profilename_validator(node, kw):
         root = find_root(context)
         performers = root['performers']
         if value in performers:
-            raise colander.Invalid(node, 'Username already taken %s' % value)
+            raise colander.Invalid(node, f'Username "{value}" already taken')
+        if value in root['principals']['users']:
+            raise colander.Invalid(node, f'Username "{value}" already taken')
     return _profilename_validator
 
 @colander.deferred
@@ -141,7 +143,7 @@ def create_profile(context, request):
             principals = find_service(context, 'principals')
             root = find_root(context)
             username = appstruct['username']
-            userid = request.session['userid']
+            userid = request.session.get('userid', username) # socmed signups
             user = principals.add_user(userid, registry=registry)
             performer = registry.content.create('Performer')
             root['performers'][username] = performer
@@ -188,11 +190,12 @@ def create_profile(context, request):
                 ).replace(tzinfo=pytz.UTC)
             set_acl(performer, [(Allow, user.__oid__, ['yss.edit'])])
             headers = remember(request, get_oid(user))
+            request.session.flash('Your account is created. Welcome!', 'info')
             return HTTPFound(request.resource_url(performer), headers=headers)
     else:
         appstruct = {
             'csrf_token': request.session.get_csrf_token(),
-            'username': request.session.get('profilename'),
+            'username': request.session.get('profilename', ''),
             'title': request.session.get('realname', ''),
             'email': '',
             'photo':colander.null,
