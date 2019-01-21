@@ -228,8 +228,8 @@ def change_acl_callback(content, workflow, transition, request):
         if transition['name'].startswith('Make authenticated-only'):
             new_acl.extend([
                 (Allow, admins_id, ALL_PERMISSIONS),
-                (Allow, 'system.Identified', ('view',)),
-                (Allow, 'system.Identified', ('yss.indexed',)),
+                (Allow, 'system.Authenticated', ('view',)),
+                (Allow, 'system.Authenticated', ('yss.indexed',)),
                 (Allow, owner_id, ('yss.edit',)),
                 DENY_ALL,
             ])

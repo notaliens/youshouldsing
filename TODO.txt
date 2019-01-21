@@ -1,6 +1,5 @@
 - General
 
-  - csrf
   - configure auditing
   - should probably use browser timezone instead of user-specified SDI timezone
   - Relstorage
@@ -14,25 +13,25 @@
   - Profile/songs export
   - DMCA claim handler.***
   - Show account activity.
-  - Allow screen name change.
   - Marketing/about page.
   - Docs page.
-  - Replace all manual form renderings with a RetailForm class.
-  - What is system.Identified?
+  - Replace all manual form renderings with a RetailForm class (csrf).
   - Cookie policy
   - Factor out "sort_tag", it should be boilerplate.
   - Send enqueue-to-done data to datadog.
-  - Set up something to notify of tracebacks.***
+  - Set up something to notify of tracebacks.*** (sentry?)
   - De-cripple sdi views for custom content types.
-  - Consumer issue tracker.***
+  - Consumer forums.*** (discourse?, misago? https://meta.discourse.org/c/dev/sso, https://meta.discourse.org/t/sso-example-for-django/14258)
   - Private messages.
-  - Performer __name__ should probably not be in URL in case they need to
-    change it.
-  - Block user. (set a Deny ACE on the performer folder)
-  - Report inappropriate behavior.
+  - Allow screen name change.  Performer __name__ should probably not be in URL
+    in case they need to change it.
+
+- Block user. (set a Deny ACE on the performer folder)***
+  - Report inappropriate behavior.***
   - "Original song" song
   - zeopack.
   - http://lrcgenerator.com/
+  - Direct messages.
   
 - Docs Videos
 
@@ -143,8 +142,7 @@ Songs
   - "Likes disabled" instead of "0 performers have liked this recording"
     when like permission is not available.
   - "Other recordings you might like if you like this one"
-  - Share links.
-  - Show number of views.
+  - Social media share links.
   - Flag recording as offensive.
 
 - Commenting
